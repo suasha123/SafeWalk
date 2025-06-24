@@ -1,0 +1,10 @@
+# Ignore environment config
+.env
+Backend/.env
+
+# Ignore node_modules (if you're using Node.js)
+node_modules/
+
+# Ignore build folders
+dist/
+build/

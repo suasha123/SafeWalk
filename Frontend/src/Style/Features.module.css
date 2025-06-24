@@ -1,0 +1,106 @@
+.maindiv{
+    background-color: #141122;
+    width: 100%;
+    height: max-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+.headingg{
+    font-family: Inter;
+    font-size: 3rem;
+    color: #9d4bce;
+    margin-bottom: 2rem;
+}
+.secondcontainer{
+    width: 90%;
+    height: max-content;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.innercontainer{
+    width: 40%;
+    min-width:230px;
+    height: 200px;
+    margin: 9px;
+    background-color: #23232f;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    border-radius: 10px;
+    border: 1px solid  #bd62c8;
+}
+.icons{
+    fill: #d54379;
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 8px #d54379);
+}
+.iconcontainer{
+    background-color: #14141b;
+    padding: 8px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.secondc{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 8px;
+}
+  
+.heading{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+}
+
+.p{
+    font-family: Inter;
+    font-size: 13px;
+    color: #9ca3af;
+    word-wrap: break-word;
+}
+/* Pulse animation */
+@keyframes heartbeat {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1); /* Grow to 120% size */
+    }
+    100% {
+      transform: scale(1); /* Return to original size */
+    }
+  }
+  
+  /* Apply the heartbeat effect to the icons */
+  .heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+  
+@media(max-width :768px){
+    .secondcontainer{
+        width: 100%;
+    }
+    .innercontainer{
+        width: 90%;
+    }
+    
+}

@@ -1,0 +1,186 @@
+.maindiv{
+    background-color: #1c1c26;
+    height: 450px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    position: relative;
+  
+}
+
+.slogan{
+    font-family: Inter;
+    font-size: 48px;
+    height: 4rem;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    left: 4px;
+}
+.info{
+    font-family: Inter;
+    font-size: 18px;
+    color: rgb(151, 145, 145);
+    line-height: 1.5;
+}
+.divone{
+    width: 40%;
+    height: max-content;
+    min-width: 432px;
+    z-index: 100;
+}
+.innerdiv{
+   background-color: #23232f;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   z-index: 100;
+   border-radius: 14px;
+}
+
+.bubbleeffect {
+  position: absolute;
+  width: 100%;
+  height: 100%!important;
+  left: 0;
+  top: 0;
+  overflow: hidden; 
+  z-index: 0; 
+}
+#tsparticles canvas {
+  width: 100% !important;
+  height: 400px!important;
+}
+.divtwo {
+  padding: 2px; 
+  background: linear-gradient(270deg, #6e74ff, #f65aaa, #6e74ff);
+  background-size: 600% 600%;
+  animation: borderAnimation 6s ease infinite;
+   width: 30%;
+   height: 60%;
+   min-width: 360px;
+   border-radius: 15px;
+}
+@keyframes borderAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+.pulsedot {
+    width: 90px;
+    height: 90px;
+    background-color: #ec4899; 
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7);
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(236, 72, 153, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(236, 72, 153, 0);
+    }
+  }
+ .buttondiv{
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 10px;
+ } 
+.buttons{
+  border: none;
+  outline: none;
+  background-color: #9958f5;
+  font-family: Inter;
+  font-size: 16px;
+  border-radius: 5px;
+  padding: 0.5rem;
+  color: white;
+  height: 40px;
+  cursor: pointer;
+  transition:  all 0.4s ease;
+}
+.buttons:hover{
+  background-color: #bb53e0;
+}
+.buttontwo{
+  font-family: Inter;
+  font-size: 16px;
+  border-radius: 5px;
+  height: 40px;
+  padding: 0.5rem;
+  color: white;
+  background-color:  #14141c;
+  border: 1px solid rgb(122, 114, 114);
+  transition: all 0.4s ease;
+}
+ .buttontwo:hover{
+  background-color: #2b2b36;
+ } 
+ 
+@media (max-width: 1300px) {
+  .maindiv {
+    justify-content:space-around;
+    padding: 1.8rem;
+    gap: 10px;
+  }
+  .slogan{
+    font-size: 40px;
+    height: 48px;
+  }
+  .info{
+    font-size: 16px;
+  }
+}
+@media (max-width: 860px) {
+  .divtwo {
+    width: 70%;  
+  }
+  .divone {
+    width: 100%; 
+    
+  }
+  .maindiv{
+    display: flex;
+    gap: 30px;
+    padding-bottom: 3rem;
+    height: 480px;
+  }
+}
+@media (max-width: 500px) {
+  .divtwo {
+   min-width: 95%; 
+  height: 218px; 
+  }
+  .divone {
+    min-width: 100%; 
+  }
+  .slogan{
+    font-size: 24px;
+    min-height: 3rem;
+  }
+  .info{
+    font-size: 12px;
+  }
+  .maindiv{
+    padding: 1rem;
+    height: max-content;
+  }
+}
