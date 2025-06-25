@@ -2,16 +2,40 @@ import styles from "../Style/Signin.module.css";
 import { FcGoogle } from "react-icons/fc";
 import styless from "../Style/Navbar.module.css";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 export const SignIn = () => {
-  const [userdeatils, setDetails] = useState({ email: "", password: "" });
+  const navigate =  useNavigate();
+  const { setLoggedIn, setuser , userdeatils, setDetails } = useAuth();
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/auth/google";
   };
-
-  function displaydetails() {
-    console.log(userdeatils);
-  }
+  const handlelogin = async () => {
+    try {
+      const response = await fetch("/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email: userdeatils.email,
+          password: userdeatils.password,
+        }),
+      });
+      setDetails({email : "" , password : ""});
+      const res = await response.json();
+      if (response.ok) {
+        setuser(res.useremail);
+        setLoggedIn(true);
+        navigate('/');
+      } else {
+        setLoggedIn(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className={styles.maindiv}>
       <div className={styles.secondiv}>
@@ -51,7 +75,7 @@ export const SignIn = () => {
               setDetails({ ...userdeatils, password: e.target.value })
             }
           />
-          <button className={styles.button} onClick={() => displaydetails()}>
+          <button className={styles.button} onClick={() => handlelogin()}>
             Sumbit
           </button>
         </div>

@@ -4,8 +4,9 @@ import { FaUserGroup } from "react-icons/fa6";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import Profilepic from "../assets/ss.jpg";
 import { Link } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 export const NavBar = () => {
-  const [isLoggedIn, setLoggedIn] = useState(false);
+  const {isLoggedIn, setLoggedIn , user, setuser}  = useAuth();
   return (
     <div className={styles.maindiv}>
       <a href="#" className={styles.logo}>
