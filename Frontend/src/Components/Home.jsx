@@ -3,13 +3,22 @@ import { Features } from "./FeaturesSection";
 import { NavBar } from "./Navbar";
 import { Footer } from "./Footers";
 import { Fragment } from "react";
-export const Home = ()=>{
-    return (
-        <Fragment>
-        <NavBar />
-        <HeroSection />
-        <Features />
-        <Footer />   
-        </Fragment>
-    )
-}
+import { useAuth } from "./AuthContext";
+import { SplashScreen } from "./SplashScreen";
+export const Home = () => {
+  const { loading } = useAuth();
+  return (
+    <Fragment>
+      {loading ? (
+        <SplashScreen />
+      ) : (
+        <>
+          <NavBar />
+          <HeroSection />
+          <Features />
+          <Footer />
+        </>
+      )}
+    </Fragment>
+  );
+};

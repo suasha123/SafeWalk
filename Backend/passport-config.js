@@ -1,11 +1,12 @@
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const argon2 = require('argon2');
+const mongoose = require('mongoose')
+const argon2 = require("argon2");
 const User = require("./database/model/usermodel");
+const { Session } = require("express-session");
 require("dotenv").config();
-module.exports = function (passport) {
+module.exports = async function (passport) {
   passport.serializeUser((user, done) => {
-    // console.log("use hai -> " + user.id);
     done(null, user.id);
   });
   passport.deserializeUser(async (id, done) => {
@@ -25,11 +26,13 @@ module.exports = function (passport) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await User.findOne({ googleId: profile.id});
+          let user = await User.findOne({ googleId: profile.id });
           if (!user) {
-            const findemailuser = await User.findOne({email : profile.emails[0].value});
-            if(findemailuser){
-              return done(null , false , {msg : "Log in with another method"});
+            const findemailuser = await User.findOne({
+              email: profile.emails[0].value,
+            });
+            if (findemailuser) {
+              return done(null, false, { msg: "Log in with another method" });
             }
             await User.create({
               googleId: profile.id,
@@ -37,6 +40,9 @@ module.exports = function (passport) {
               email: profile.emails[0].value,
             });
           }
+           await mongoose.connection.db.collection("sessions").deleteMany({
+            "session.passport.user": user._id.toString()
+          });
           return done(null, user, { msg: "LoggedIn" });
         } catch (err) {
           return done(err);
@@ -50,24 +56,25 @@ module.exports = function (passport) {
         usernameField: "email",
       },
       async (email, password, done) => {
-        try{
-          let user = await User.findOne({email});
-          if(!user){
-            return done(null , false , {msg : "User Not found"});
+        try {
+          let user = await User.findOne({ email });
+          if (!user) {
+            return done(null, false, { msg: "User Not found" });
           }
-          if(user && user.password==null){
-            return done(null , false , {msg : "Login Via Google"});
+          if (user && user.password == null) {
+            return done(null, false, { msg: "Login Via Google" });
           }
-          const iscorrect = await argon2.verify(password , user.password);
-          if(!iscorrect){
-            return done(null , false , {msg  : "Wrong password"});
+          const iscorrect = await argon2.verify(user.password, password);
+          if (!iscorrect) {
+            return done(null, false, { msg: "Wrong password" });
           }
-          return done(null , user);
-        }
-        catch(err){
+           await mongoose.connection.db.collection("sessions").deleteMany({
+            "session.passport.user": user._id.toString()
+          });
+          return done(null, user);
+        } catch (err) {
           return done(err);
         }
-
       }
     )
   );

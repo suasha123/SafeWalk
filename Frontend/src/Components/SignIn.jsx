@@ -4,12 +4,27 @@ import styless from "../Style/Navbar.module.css";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { enqueueSnackbar } from "notistack";
+import { useEffect } from "react";
 export const SignIn = () => {
-  const navigate =  useNavigate();
-  const { setLoggedIn, setuser , userdeatils, setDetails } = useAuth();
+  const navigate = useNavigate();
+  const { setLoggedIn, isLoggedIn, setuser, userdeatils, setDetails, msg } =
+    useAuth();
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/");
+    }
+  }, [isLoggedIn, navigate]);
   const handleGoogleLogin = () => {
+    localStorage.setItem("attemptedGoogleLogIn", "true");
     window.location.href = "http://localhost:3000/auth/google";
   };
+  useEffect(() => {
+    if (localStorage.getItem("attemptedGoogleLogIn") && msg) {
+      enqueueSnackbar(msg, { variant: "warning" });
+      localStorage.removeItem("attemptedGoogleLogIn");
+    }
+  }, [msg]);
   const handlelogin = async () => {
     try {
       const response = await fetch("/auth/login", {
@@ -23,17 +38,20 @@ export const SignIn = () => {
           password: userdeatils.password,
         }),
       });
-      setDetails({email : "" , password : ""});
+      setDetails({ email: "", password: "" });
       const res = await response.json();
       if (response.ok) {
         setuser(res.useremail);
         setLoggedIn(true);
-        navigate('/');
+        navigate("/");
       } else {
         setLoggedIn(false);
+        enqueueSnackbar(res.info ? res.info.msg : res.msg, {
+          variant: "warning",
+        });
       }
     } catch (error) {
-      console.log(error);
+      enqueueSnackbar("Error occured", { variant: "error" });
     }
   };
   return (
@@ -75,7 +93,7 @@ export const SignIn = () => {
               setDetails({ ...userdeatils, password: e.target.value })
             }
           />
-          <button className={styles.button} onClick={() => handlelogin()}>
+          <button className={styles.button} onClick={handlelogin}>
             Sumbit
           </button>
         </div>

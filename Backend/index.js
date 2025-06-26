@@ -5,6 +5,7 @@ const session = require("express-session");
 const passport = require("passport");
 const connectdb = require("./database/config");
 const path = require("path");
+const MongoStore = require("connect-mongo");
 require("dotenv").config();
 app.use(
   cors({
@@ -18,6 +19,11 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store : MongoStore.create({
+     mongoUrl : process.env.uri,
+     stringify: false ,
+     ttl: 24 * 60 * 60,
+    }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
     },

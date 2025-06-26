@@ -52,9 +52,10 @@ router.post("/verifyuser", async (req, res) => {
       return res.status(403).json({ msg: "Invalid OTP" });
     }
     await otpmodel.deleteOne({ email });
+    const hashedpassword = await argon2.hash(password);
     const newuser = await usermodel.create({
       email,
-      password
+      password : hashedpassword
     })
     req.logIn(newuser, (err) => {
       if (err) {
@@ -70,12 +71,16 @@ router.post("/verifyuser", async (req, res) => {
 });
 
 router.post("/login", (req, res, next) => {
+  const {email,password} = req.body;
+  if(!email || !password){
+    return res.status(401).json({msg : "Missing credentials"})
+  }
   passport.authenticate("local", (err, user, info) => {
     if (err) {
-      return res.status(500).json({ msg: info });
+      return res.status(500).json({ info });
     }
     if (!user) {
-      return res.status(401).json({ msg: info });
+      return res.status(401).json({ info });
     }
     req.logIn(user, (err) => {
       if (err) {

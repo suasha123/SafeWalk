@@ -4,10 +4,24 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { enqueueSnackbar } from "notistack";
 export const Otp = () => {
   const navigate = useNavigate();
-  const { userdeatils, setLoggedIn, setuser } = useAuth();
+  const { userdeatils, visitedsignup, setLoggedIn, setuser, isLoggedIn } =
+    useAuth();
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/");
+    }
+    if (!visitedsignup) {
+      navigate("/signup");
+    }
+  }, [isLoggedIn, visitedsignup, navigate]);
   const [otpnumber, setotp] = useState("");
+  useEffect(() => {
+    enqueueSnackbar("OTP send successfully", { variant: "success" });
+  }, []);
   const verifyotp = async () => {
     try {
       const response = await fetch("/auth/verifyuser", {
@@ -24,7 +38,7 @@ export const Otp = () => {
       if (response.ok) {
         setuser(res.useremail);
         setLoggedIn(true);
-        navigate('/');
+        navigate("/");
       } else {
         setLoggedIn(false);
       }

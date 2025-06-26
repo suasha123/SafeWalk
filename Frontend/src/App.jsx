@@ -5,8 +5,6 @@ import { SignIn } from './Components/SignIn';
 import { SignUp } from './Components/signup';
 import { Otp } from './Components/otp';
 function App() {
- 
-
   return (
     <Router>
     <Routes>
