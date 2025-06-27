@@ -8,6 +8,15 @@ const sendmail = require("../utils/mail");
 const otpmodel = require("../database/model/otpmodel");
 const usermodel = require("../database/model/usermodel");
 require("dotenv").config();
+router.get("/signout", (req, res) => {
+  req.logout((err) => {
+    if (err) return res.status(500).json({ msg: "Logout error" });
+    req.session.destroy(() => {
+      res.clearCookie("connect.sid");
+      res.status(200).json({ msg: "Logged out" });
+    });
+  });
+});
 router.post("/otp", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -55,14 +64,14 @@ router.post("/verifyuser", async (req, res) => {
     const hashedpassword = await argon2.hash(password);
     const newuser = await usermodel.create({
       email,
-      password : hashedpassword
-    })
+      password: hashedpassword,
+    });
     req.logIn(newuser, (err) => {
       if (err) {
         return res.status(500).json({ msg: "Registration failed" });
       }
-      const {email} = req.user
-      return res.status(200).json({ useremail : email , msg: "User Registered" });
+      const { email } = req.user;
+      return res.status(200).json({ useremail: email, msg: "User Registered" });
     });
   } catch (err) {
     console.error(err);
@@ -71,9 +80,9 @@ router.post("/verifyuser", async (req, res) => {
 });
 
 router.post("/login", (req, res, next) => {
-  const {email,password} = req.body;
-  if(!email || !password){
-    return res.status(401).json({msg : "Missing credentials"})
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(401).json({ msg: "Missing credentials" });
   }
   passport.authenticate("local", (err, user, info) => {
     if (err) {
@@ -86,17 +95,19 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return res.status(500).json({ msg: "Login failed" });
       }
-      const {email} = req.user
-      return res.status(200).json({ useremail: email, msg: "User LoggedIn" });
+      const { email, profile, name } = req.user;
+      return res
+        .status(200)
+        .json({ useremail: email, profile, name, msg: "User LoggedIn" });
     });
   })(req, res, next);
 });
 router.get("/check", (req, res) => {
   if (req.isAuthenticated()) {
-    const {email} = req.user;
-    return res.status(200).json({ useremail : email});
+    const { email, profile, name } = req.user;
+    return res.status(200).json({ useremail: email, name, profile });
   } else {
-    return res.status(404).json({ msg: "Not loggedIn"});
+    return res.status(404).json({ msg: "Not loggedIn" });
   }
 });
 router.get(

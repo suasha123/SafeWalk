@@ -6,13 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
 import { useEffect } from "react";
+import { Backgroundcover } from "./bgcover";
 export const SignUp = () => {
   const handleGoogleLogin = () => {
     localStorage.setItem("attemptedGoogleLogIn", "true");
     window.location.href = "http://localhost:3000/auth/google";
   };
   const navigate = useNavigate();
-  const { userdeatils, isLoggedIn, setDetails, msg, setvisited } = useAuth();
+  const { userdeatils, isLoggedIn, setDetails, msg, setvisited, loading } =
+    useAuth();
   useEffect(() => {
     if (isLoggedIn) {
       navigate("/");
@@ -51,7 +53,9 @@ export const SignUp = () => {
       enqueueSnackbar("Error occured", { variant: "error" });
     }
   };
-  return (
+  return loading && isLoggedIn ? (
+    <Backgroundcover />
+  ) : (
     <div className={styles.maindiv}>
       <div className={styles.secondiv}>
         <div style={{ textAlign: "center" }} className={styless.logo}>

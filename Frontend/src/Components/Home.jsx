@@ -5,8 +5,9 @@ import { Footer } from "./Footers";
 import { Fragment } from "react";
 import { useAuth } from "./AuthContext";
 import { SplashScreen } from "./SplashScreen";
+import AccountOverlay from "./Accountinfo";
 export const Home = () => {
-  const { loading } = useAuth();
+  const { loading  , showOverlay , setShowOverlay} = useAuth();
   return (
     <Fragment>
       {loading ? (
@@ -17,6 +18,9 @@ export const Home = () => {
           <HeroSection />
           <Features />
           <Footer />
+          {showOverlay && (
+            <AccountOverlay onClose={() => setShowOverlay(false)} />
+          )}
         </>
       )}
     </Fragment>

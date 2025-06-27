@@ -18,38 +18,55 @@ module.exports = async function (passport) {
     }
   });
   passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_ClientId,
-        clientSecret: process.env.GOOGLE_ClientSecetKey,
-        callbackURL: "/auth/google/callback",
-      },
-      async (accessToken, refreshToken, profile, done) => {
-        try {
-          let user = await User.findOne({ googleId: profile.id });
-          if (!user) {
-            const findemailuser = await User.findOne({
-              email: profile.emails[0].value,
-            });
-            if (findemailuser) {
-              return done(null, false, { msg: "Log in with another method" });
-            }
-            await User.create({
-              googleId: profile.id,
-              name: profile.displayName,
-              email: profile.emails[0].value,
-            });
-          }
-           await mongoose.connection.db.collection("sessions").deleteMany({
-            "session.passport.user": user._id.toString()
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_ClientId,
+      clientSecret: process.env.GOOGLE_ClientSecetKey,
+      callbackURL: "/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        let user = await User.findOne({ googleId: profile.id });
+
+        // If user not found by googleId
+        if (!user) {
+          // Check if another account exists with the same email
+          const findemailuser = await User.findOne({
+            email: profile.emails[0].value,
           });
-          return done(null, user, { msg: "LoggedIn" });
-        } catch (err) {
-          return done(err);
+
+          if (findemailuser) {
+            return done(null, false, { msg: "Log in with another method" });
+          }
+
+          // Create new user
+          user = await User.create({
+            googleId: profile.id,
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            profile: profile.photos[0]?.value || null,
+          });
+        } else {
+          // Update profile photo if it wasn't stored before
+          if (!user.profile && profile.photos?.[0]?.value) {
+            user.profile = profile.photos[0].value;
+            await user.save();
+          }
         }
+
+        // Optional: clear existing session for the same user
+        await mongoose.connection.db.collection("sessions").deleteMany({
+          "session.passport.user": user._id.toString(),
+        });
+
+        return done(null, user, { msg: "LoggedIn" });
+      } catch (err) {
+        return done(err);
       }
-    )
-  );
+    }
+  )
+);
+
   passport.use(
     new LocalStrategy(
       {

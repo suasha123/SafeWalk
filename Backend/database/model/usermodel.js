@@ -12,6 +12,9 @@ const userSchema = new mongooose.Schema({
    },
    googleId : {
     type : String
+   },
+   profile :{
+      type : String
    }
 })
 module.exports = mongooose.model ('User' , userSchema);

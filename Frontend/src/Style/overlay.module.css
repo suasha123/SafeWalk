@@ -1,0 +1,72 @@
+.cardContainer {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 280px;
+  background-color: #1e1e2f;
+  border: 1px solid #2e2e48;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  z-index: 2000;
+  color: white;
+  font-family: sans-serif;
+}
+
+.profileSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(to right, #6e74ff, #f65aaa);
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.name {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.email {
+  font-size: 13px;
+  color: #bbbbbb;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  text-align: left;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.actionBtn:hover {
+  background-color: #2a2a40;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 11px;
+  color: #888;
+}

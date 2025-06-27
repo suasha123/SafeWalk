@@ -6,10 +6,17 @@ import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { enqueueSnackbar } from "notistack";
+import { Backgroundcover } from "./bgcover";
 export const Otp = () => {
   const navigate = useNavigate();
-  const { userdeatils, visitedsignup, setLoggedIn, setuser, isLoggedIn } =
-    useAuth();
+  const {
+    userdeatils,
+    visitedsignup,
+    setLoggedIn,
+    setuser,
+    isLoggedIn,
+    loading,
+  } = useAuth();
   useEffect(() => {
     if (isLoggedIn) {
       navigate("/");
@@ -20,7 +27,9 @@ export const Otp = () => {
   }, [isLoggedIn, visitedsignup, navigate]);
   const [otpnumber, setotp] = useState("");
   useEffect(() => {
-    enqueueSnackbar("OTP send successfully", { variant: "success" });
+    if (!isLoggedIn) {
+      enqueueSnackbar("OTP send successfully", { variant: "success" });
+    }
   }, []);
   const verifyotp = async () => {
     try {
@@ -36,7 +45,7 @@ export const Otp = () => {
       setotp("");
       const res = await response.json();
       if (response.ok) {
-        setuser(res.useremail);
+        setuser(res);
         setLoggedIn(true);
         navigate("/");
       } else {
@@ -46,7 +55,9 @@ export const Otp = () => {
       console.log(err);
     }
   };
-  return (
+  return loading ? (
+    <Backgroundcover />
+  ) : (
     <div className={styles.maindiv}>
       <div className={styles.secondivv}>
         <div style={{ textAlign: "center" }} className={styless.logo}>
