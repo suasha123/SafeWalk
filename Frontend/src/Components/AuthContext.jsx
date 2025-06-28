@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }) => {
         if (response.ok) {
           setLoggedIn(true);
           setuser(data);
-          console.log(data);
           if (localStorage.getItem("attemptedGoogleLogIn") != null) {
             localStorage.removeItem("attemptedGoogleLogIn");
           }

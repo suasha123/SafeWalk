@@ -27,6 +27,7 @@ createRoot(document.getElementById("root")).render(
             vertical: 'top',
             horizontal: 'center',
           }}
+           style={{ zIndex: 3000 }}
           action={(key) => (
             <IconButton onClick={onClickDismiss(key)} sx={{ color: '#fff' }}>
               <CloseIcon />

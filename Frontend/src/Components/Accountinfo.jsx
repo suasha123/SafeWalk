@@ -1,15 +1,63 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "../Style/Accountoverlay.module.css";
 import { useAuth } from "./AuthContext";
+import { enqueueSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 const AccountOverlay = ({ onClose }) => {
-  const { user, setprofilecard } = useAuth();
+  const navigate = useNavigate();
+  const { user, setprofilecard, setuser } = useAuth();
   const [name, setName] = useState(user.name || "");
   const [previewImage, setPreviewImage] = useState(null);
+  const [changename, setchanename] = useState(false);
+  const [image, setimage] = useState(null);
+  const [updating, setUpdating] = useState(false); // 👈 new state
   const fileInputRef = useRef(null);
+
   useEffect(() => {
     setprofilecard(false);
   }, []);
+
+  const handlechange = async () => {
+    if (!changename && !image) {
+      enqueueSnackbar("Input required", { variant: "warning" });
+      return;
+    }
+
+    setUpdating(true); // start loading
+
+    try {
+      const formdata = new FormData();
+      if (image) formdata.append("image", image);
+      if (name) formdata.append("name", name);
+
+      const res = await fetch("/upload/profile", {
+        method: "POST",
+        body: formdata,
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setuser(prev => ({
+          ...prev,
+          name: updated.name || prev.name,
+          profile: updated.profile || prev.profile,
+        }));
+        setPreviewImage(null);
+        setimage(null);
+        setName(updated.name || user.name);
+        onClose();
+      } else {
+        enqueueSnackbar("Cannot Update Profile", { variant: "warning" });
+      }
+    } catch (err) {
+      enqueueSnackbar("Cannot Update Profile", { variant: "error" });
+    } finally {
+      setUpdating(false); // stop loading
+    }
+  };
+
   const getAvatarLetter = () => {
     if (user.name && user.name.length > 0) {
       return user.name.charAt(0).toUpperCase();
@@ -22,9 +70,9 @@ const AccountOverlay = ({ onClose }) => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setimage(file);
       const imageUrl = URL.createObjectURL(file);
       setPreviewImage(imageUrl);
-      console.log("Selected file:", file);
     }
   };
 
@@ -65,7 +113,6 @@ const AccountOverlay = ({ onClose }) => {
           </div>
         </section>
 
-        {/* Edit Profile Section (Now moved here) */}
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Edit Profile</h3>
 
@@ -74,7 +121,10 @@ const AccountOverlay = ({ onClose }) => {
             type="text"
             placeholder="Enter new name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setchanename(true);
+            }}
           />
 
           <div
@@ -101,18 +151,24 @@ const AccountOverlay = ({ onClose }) => {
             </div>
           )}
 
-          <div className={styles.updateBtnRow}>
-            <button className={styles.updateBtn}>Update</button>
+          <div onClick={!updating ? handlechange : undefined} className={styles.updateBtnRow}>
+            <button className={styles.updateBtn} disabled={updating}>
+              {updating ? (
+                <>
+                  <span className={styles.spinner}></span> Updating...
+                </>
+              ) : (
+                "Update"
+              )}
+            </button>
           </div>
         </section>
 
-        {/* Security Section */}
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Security</h3>
           <p className={styles.link}>+ Set password</p>
         </section>
 
-        {/* Danger Section */}
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Danger</h3>
           <div className={styles.dangerRow}>

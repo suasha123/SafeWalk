@@ -32,6 +32,7 @@ app.use(
 require("./passport-config")(passport);
 app.use(passport.initialize());
 app.use(passport.session());
+app.use("/upload" , require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
 app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.get("/*splat", (req, res) => {

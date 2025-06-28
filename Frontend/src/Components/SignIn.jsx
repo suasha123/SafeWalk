@@ -9,13 +9,20 @@ import { useEffect } from "react";
 import { Backgroundcover } from "./bgcover";
 export const SignIn = () => {
   const navigate = useNavigate();
-  const { setLoggedIn, isLoggedIn, setuser, userdeatils, setDetails, msg , loading} =
-    useAuth();
+  const {
+    setLoggedIn,
+    isLoggedIn,
+    setuser,
+    userdeatils,
+    setDetails,
+    msg,
+    loading,
+  } = useAuth();
   useEffect(() => {
-    if (isLoggedIn) {
+    if (!loading && isLoggedIn) {
       navigate("/");
     }
-  }, [isLoggedIn, navigate]);
+  }, [loading, isLoggedIn, navigate]);
   const handleGoogleLogin = () => {
     localStorage.setItem("attemptedGoogleLogIn", "true");
     window.location.href = "http://localhost:3000/auth/google";
@@ -55,59 +62,58 @@ export const SignIn = () => {
       enqueueSnackbar("Error occured", { variant: "error" });
     }
   };
- return loading && isLoggedIn ? (
-  <Backgroundcover />
-) : (
-  <div className={styles.maindiv}>
-    <div className={styles.secondiv}>
-      <div style={{ textAlign: "center" }} className={styless.logo}>
-        safeWalk
-      </div>
-      <h1 className={styles.h1}>Log In to continue</h1>
-      <div className={styles.login}>
-        <button onClick={handleGoogleLogin} className={styles.googlebutton}>
-          <FcGoogle style={{ fontSize: "18px" }} />
-          Continue with Google
-        </button>
-        <div className={styles.line}>or</div>
-        <label className={styles.label} htmlFor="email">
-          Email address :
-        </label>
-        <input
-          className={styles.input}
-          value={userdeatils.email}
-          type="email"
-          id="email"
-          placeholder="Enter your email"
-          onChange={(e) =>
-            setDetails({ ...userdeatils, email: e.target.value })
-          }
-        />
-        <label className={styles.label} htmlFor="password">
-          Enter password :
-        </label>
-        <input
-          className={styles.input}
-          value={userdeatils.password}
-          type="password"
-          id="password"
-          placeholder="Enter your password"
-          onChange={(e) =>
-            setDetails({ ...userdeatils, password: e.target.value })
-          }
-        />
-        <button className={styles.button} onClick={handlelogin}>
-          Submit
-        </button>
-      </div>
-      <div style={{ marginTop: "35px", fontSize: "14px" }}>
-        Don't have account?{" "}
-        <Link style={{ textDecoration: "none", color: "blue" }} to="/signup">
-          SignUp
-        </Link>
+  return loading || isLoggedIn ? (
+    <Backgroundcover />
+  ) : (
+    <div className={styles.maindiv}>
+      <div className={styles.secondiv}>
+        <div style={{ textAlign: "center" }} className={styless.logo}>
+          safeWalk
+        </div>
+        <h1 className={styles.h1}>Log In to continue</h1>
+        <div className={styles.login}>
+          <button onClick={handleGoogleLogin} className={styles.googlebutton}>
+            <FcGoogle style={{ fontSize: "18px" }} />
+            Continue with Google
+          </button>
+          <div className={styles.line}>or</div>
+          <label className={styles.label} htmlFor="email">
+            Email address :
+          </label>
+          <input
+            className={styles.input}
+            value={userdeatils.email}
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            onChange={(e) =>
+              setDetails({ ...userdeatils, email: e.target.value })
+            }
+          />
+          <label className={styles.label} htmlFor="password">
+            Enter password :
+          </label>
+          <input
+            className={styles.input}
+            value={userdeatils.password}
+            type="password"
+            id="password"
+            placeholder="Enter your password"
+            onChange={(e) =>
+              setDetails({ ...userdeatils, password: e.target.value })
+            }
+          />
+          <button className={styles.button} onClick={handlelogin}>
+            Submit
+          </button>
+        </div>
+        <div style={{ marginTop: "35px", fontSize: "14px" }}>
+          Don't have account?{" "}
+          <Link style={{ textDecoration: "none", color: "blue" }} to="/signup">
+            SignUp
+          </Link>
+        </div>
       </div>
     </div>
-  </div>
-);
-
+  );
 };

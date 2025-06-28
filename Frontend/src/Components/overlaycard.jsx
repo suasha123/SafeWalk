@@ -3,9 +3,13 @@ import styles from "../Style/overlay.module.css";
 import styless from "../Style/Navbar.module.css";
 import { useNavigate } from "react-router-dom";
 import { enqueueSnackbar } from "notistack";
+import { CiSettings } from "react-icons/ci";
+import { GoSignOut } from "react-icons/go";
+
 const OverlayCard = () => {
   const navigate = useNavigate();
   const { profile, user, setShowOverlay, setuser, setLoggedIn } = useAuth();
+
   const signout = async () => {
     try {
       const response = await fetch("/auth/signout", {
@@ -22,6 +26,7 @@ const OverlayCard = () => {
       enqueueSnackbar("Cannot Signout", { variant: "warning" });
     }
   };
+
   return (
     profile && (
       <div className={styles.cardContainer}>
@@ -30,7 +35,7 @@ const OverlayCard = () => {
             <img className={styless.profile} src={user.profile} />
           ) : (
             <div className={styles.avatar}>
-              {user.name || user.useremail.charAt(0).toUpperCase()}
+              {user.name.charAt(0).toUpperCase() || user.useremail.charAt(0).toUpperCase()}
             </div>
           )}
           <div>
@@ -48,9 +53,11 @@ const OverlayCard = () => {
             }}
             className={styles.actionBtn}
           >
+            <CiSettings className={styles.icon} />
             Manage account
           </button>
           <button onClick={signout} className={styles.actionBtn}>
+            <GoSignOut className={styles.icon} />
             Sign out
           </button>
         </div>

@@ -58,10 +58,17 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
+  display: flex;
+  align-items: center;
 }
 
 .actionBtn:hover {
   background-color: #2a2a40;
+}
+
+.icon {
+  font-size: 18px;
+  margin-right: 8px;
 }
 
 .footer {

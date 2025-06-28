@@ -17,20 +17,22 @@ export const Otp = () => {
     isLoggedIn,
     loading,
   } = useAuth();
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/");
-    }
-    if (!visitedsignup) {
-      navigate("/signup");
-    }
-  }, [isLoggedIn, visitedsignup, navigate]);
+
   const [otpnumber, setotp] = useState("");
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!visitedsignup) {
+      navigate("/signup");
+      return ;
+    }
+    if (!isLoggedIn || !loading) {
       enqueueSnackbar("OTP send successfully", { variant: "success" });
     }
   }, []);
+    useEffect(() => {
+    if (!loading && isLoggedIn) {
+      navigate("/");
+    }
+  }, [loading, isLoggedIn, navigate]);
   const verifyotp = async () => {
     try {
       const response = await fetch("/auth/verifyuser", {
@@ -55,7 +57,7 @@ export const Otp = () => {
       console.log(err);
     }
   };
-  return loading ? (
+  return  loading || isLoggedIn ? (
     <Backgroundcover />
   ) : (
     <div className={styles.maindiv}>

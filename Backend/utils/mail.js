@@ -1,4 +1,4 @@
-const transporter = require('../config.js/nodemailerconfig');
+const transporter = require('../config/nodemailerconfig');
 async function sendmail(email , otp) {
     const mailOptions = {
     from: '"SafeWalk OTP" <suryaprataps471@gmail.com>',
