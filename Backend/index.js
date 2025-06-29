@@ -1,12 +1,36 @@
 const express = require("express");
 const app = express();
+const http = require("http");
 const cors = require("cors");
 const session = require("express-session");
 const passport = require("passport");
 const connectdb = require("./database/config");
 const path = require("path");
 const MongoStore = require("connect-mongo");
+const { Server } = require("socket.io");
+const sharedSession = require("express-socket.io-session");
 require("dotenv").config();
+
+//DEFINE sessionMiddleware FIRST
+const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.uri,
+    stringify: false,
+    ttl: 24 * 60 * 60,
+  }),
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000,
+    sameSite: "lax", 
+  },
+});
+
+//Then use it with express
+app.use(sessionMiddleware);
+
+//Then set up CORS and body parser
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -14,31 +38,52 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store : MongoStore.create({
-     mongoUrl : process.env.uri,
-     stringify: false ,
-     ttl: 24 * 60 * 60,
-    }),
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000,
-    },
-  })
-);
+
 require("./passport-config")(passport);
 app.use(passport.initialize());
 app.use(passport.session());
-app.use("/upload" , require("./Routes/upload"));
+
+// Create HTTP server and set up socket.io
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// Attach session to socket
+io.use(
+  sharedSession(sessionMiddleware, {
+    autoSave: true,
+  })
+);
+
+//Socket logic
+io.on("connection", (socket) => {
+  const userId = socket.handshake.session?.passport?.user;
+  console.log("User ID from session:", userId);
+  socket.join(userId);
+  socket.on("sendmsg" , (msgObj)=>{
+    const {user , message , to} = msgObj;
+   io.to(to).emit("receivemsg" , message);
+  })
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+//Routes
+app.use("/upload", require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
 app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
 });
-app.listen(3000, () => {
+
+//Start server
+server.listen(3000, () => {
   connectdb();
   console.log("Server started on http://localhost:3000");
 });

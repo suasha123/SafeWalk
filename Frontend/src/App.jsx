@@ -4,6 +4,7 @@ import './Style/App.css';
 import { SignIn } from './Components/SignIn';
 import { SignUp } from './Components/signup';
 import { Otp } from './Components/otp';
+import ChatLayout from './Components/ChatLayout';
 function App() {
   return (
     <Router>
@@ -12,6 +13,7 @@ function App() {
     <Route path='/signin' element = {<SignIn />} />
     <Route path='/signup' element = {<SignUp />} />
     <Route path='/otp-verify' element = {<Otp />} />
+    <Route path="/chat" element = {<ChatLayout />} />
     </Routes>
     </Router>
   )

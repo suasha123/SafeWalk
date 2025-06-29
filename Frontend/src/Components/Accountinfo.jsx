@@ -11,7 +11,7 @@ const AccountOverlay = ({ onClose }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [changename, setchanename] = useState(false);
   const [image, setimage] = useState(null);
-  const [updating, setUpdating] = useState(false); // 👈 new state
+  const [updating, setUpdating] = useState(false); 
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const AccountOverlay = ({ onClose }) => {
       return;
     }
 
-    setUpdating(true); // start loading
+    setUpdating(true); 
 
     try {
       const formdata = new FormData();
@@ -54,7 +54,7 @@ const AccountOverlay = ({ onClose }) => {
     } catch (err) {
       enqueueSnackbar("Cannot Update Profile", { variant: "error" });
     } finally {
-      setUpdating(false); // stop loading
+      setUpdating(false);
     }
   };
 
@@ -106,7 +106,7 @@ const AccountOverlay = ({ onClose }) => {
               <p className={styles.email}>
                 {user.useremail}
                 <span className={styles.badge} style={{ marginLeft: "8px" }}>
-                  Primary
+                  {user.isgoogleid=="yes" ? "Google verified" : "Email verified"}
                 </span>
               </p>
             </div>

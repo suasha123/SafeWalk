@@ -62,7 +62,7 @@ const OverlayCard = () => {
           </button>
         </div>
 
-        <p className={styles.footer}>Secured by Clerk</p>
+        <p className={styles.footer}>{user.isgoogleid=== "yes" ? "Verified by Google" : "Verified by email"}</p>
       </div>
     )
   );

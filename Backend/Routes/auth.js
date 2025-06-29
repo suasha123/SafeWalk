@@ -105,7 +105,7 @@ router.post("/login", (req, res, next) => {
 router.get("/check", (req, res) => {
   if (req.isAuthenticated()) {
     const { email, profile, name } = req.user;
-    return res.status(200).json({ useremail: email, name, profile });
+    return res.status(200).json({ useremail: email, name, profile , isgoogleid  : req.user.googleId ? "yes" : "no" });
   } else {
     return res.status(404).json({ msg: "Not loggedIn" });
   }
