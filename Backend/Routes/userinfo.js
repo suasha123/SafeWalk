@@ -1,0 +1,67 @@
+const express = require("express");
+const router = express.Router();
+const usermodel = require("../database/model/usermodel");
+const chatAddModel = require("../database/model/addtochatmodel");
+router.get("/getaddedchat", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(404).json({ msg: "Cannot process" });
+    }
+    const userId = req.session?.passport?.user;
+    const addedlist = await chatAddModel
+      .findOne({ addedby: userId })
+      .populate("added", "name email _id profile");
+    return res.status(200).json({ msg: "ok", userslist: addedlist.added });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ msg: "Cannot process" });
+  }
+});
+router.post("/addchat", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ msg: "Not authenticated" });
+  }
+  const { addeduser } = req.body;
+  const userId = req.session?.passport?.user;
+  if (!addeduser) {
+    return res.status(400).json({ msg: "No user provided to add" });
+  }
+  try {
+    let existing = await chatAddModel.findOne({ addedby: userId });
+    if (!existing) {
+      existing = new chatAddModel({
+        addedby: userId,
+        added: [addeduser],
+      });
+    } else {
+      if (!existing.added.includes(addeduser)) {
+        existing.added.push(addeduser);
+      } else {
+        return res.status(409).json({ msg: "User already added" });
+      }
+    }
+    await existing.save();
+    res.status(200).json({ msg: "User added successfully" });
+  } catch (err) {
+    console.error("Error adding chat user:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+router.post("/getusers", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(404).json({ msg: "Cannot process" });
+  }
+  const { userid } = req.body;
+  console.log(userid);
+  const user = await usermodel.findById(userid);
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+  return res.status(200).json({
+    profile: user.profile,
+    name: user.name,
+    email: user.email,
+    id: user.id,
+  });
+});
+module.exports = router;

@@ -66,8 +66,9 @@ io.on("connection", (socket) => {
   console.log("User ID from session:", userId);
   socket.join(userId);
   socket.on("sendmsg" , (msgObj)=>{
-    const {user , message , to} = msgObj;
-   io.to(to).emit("receivemsg" , message);
+    const {message , to , from} = msgObj;
+    console.log(msgObj)
+   io.to(to).emit("receivemsg" , msgObj);
   })
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
@@ -78,10 +79,10 @@ io.on("connection", (socket) => {
 app.use("/upload", require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
 app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+app.use("/api", require("./Routes/userinfo"))
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
 });
-
 //Start server
 server.listen(3000, () => {
   connectdb();

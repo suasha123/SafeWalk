@@ -5,25 +5,31 @@ import { NavBar } from "./Navbar";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import { SplashScreen } from "./SplashScreen";
-const chatContacts = [
-  { id: 1, name: "Nina", initial: "N" },
-  { id: 2, name: "Alex", initial: "A" },
-];
+import { AddToChatButton } from "./AddtoChatButton";
 
 const groupChats = [{ id: 99, name: "React Buddies", initial: "R" }];
 
 const ChatLayout = () => {
   const { isLoggedIn, loading } = useAuth();
   const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("chats");
   const [activeChat, setActiveChat] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
-  const currentList = activeTab === "chats" ? chatContacts : groupChats;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState(null);
+  const [chatContacts, setChatContacts] = useState([]); 
+
+  const showSearchResults = searchResults !== null;
+
+  const currentList = showSearchResults
+    ? searchResults
+    : activeTab === "chats"
+    ? chatContacts
+    : groupChats;
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -33,20 +39,62 @@ const ChatLayout = () => {
     if (!loading && !isLoggedIn) {
       navigate("/");
     }
+
+    const findaddedChats = async () => {
+      try {
+        const response = await fetch(`/api/getaddedchat`, {
+          credentials: "include",
+        });
+        if (response.ok) {
+          const body = await response.json();
+          setChatContacts(body.userslist); 
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (!loading && isLoggedIn) {
+      findaddedChats();
+    }
   }, [loading, isLoggedIn]);
 
   const handleContactClick = (contact) => {
     setActiveChat(contact);
   };
 
+  const handleNewChat = async () => {
+    try {
+      const res = await fetch("api/getusers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ userid: searchTerm }),
+      });
+
+      if (res.ok) {
+        const user = await res.json(); 
+        setSearchResults([user]);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (err) {
+      console.log(err);
+      setSearchResults([]);
+    }
+  };
+
   const handleBack = () => {
     setActiveChat(null);
   };
-if(loading){
-    return(
-        <SplashScreen />
-    )
-}
+
+  const handleClearSearch = () => {
+    setSearchResults(null);
+    setSearchTerm("");
+  };
+
+  if (loading) return <SplashScreen />;
+
   return (
     <>
       <NavBar />
@@ -60,33 +108,106 @@ if(loading){
             <div className="sidebar-header">
               <button
                 className={`tab-btn ${activeTab === "chats" ? "active" : ""}`}
-                onClick={() => setActiveTab("chats")}
+                onClick={() => {
+                  setActiveTab("chats");
+                  handleClearSearch();
+                }}
               >
                 Chats
               </button>
               <button
                 className={`tab-btn ${activeTab === "groups" ? "active" : ""}`}
-                onClick={() => setActiveTab("groups")}
+                onClick={() => {
+                  setActiveTab("groups");
+                  handleClearSearch();
+                }}
               >
                 Groups
               </button>
             </div>
+
+            <div className="new-chat-container">
+              <div className="search-wrapper">
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  className="new-chat-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button
+                    className="clear-search-btn"
+                    onClick={handleClearSearch}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <button className="new-chat-btn" onClick={handleNewChat}>
+                Search
+              </button>
+            </div>
+
             <h2 className="sidebar-title">
-              {activeTab === "chats" ? "Your Chats" : "Your Groups"}
+              {showSearchResults
+                ? "Search Results"
+                : activeTab === "chats"
+                ? "Your Chats"
+                : "Your Groups"}
             </h2>
+
             <div className="sidebar-scroll">
-              {currentList.map((contact) => (
-                <div
-                  key={contact.id}
-                  className={`contact ${
-                    activeChat?.id === contact.id ? "active" : ""
-                  }`}
-                  onClick={() => handleContactClick(contact)}
-                >
-                  <div className="avatar">{contact.initial}</div>
-                  <div className="contact-name">{contact.name}</div>
-                </div>
-              ))}
+              {currentList.length === 0 ? (
+                <p style={{ color: "#aaa", padding: "10px" }}>
+                  {showSearchResults ? "No user found." : "No contacts."}
+                </p>
+              ) : (
+                currentList.map((contact) => {
+                  const isAlreadyAdded = chatContacts.some(
+                    (c) => c._id === contact._id || c._id === contact.id
+                  );
+
+                  return (
+                    <div
+                      key={contact._id || contact.id}
+                      className={`contact ${
+                        activeChat?._id === contact._id ||
+                        activeChat?.id === contact.id
+                          ? "active"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        !showSearchResults && handleContactClick(contact)
+                      }
+                    >
+                      <div className="avatar">
+                        {contact.profile ? (
+                          <img
+                            src={contact.profile}
+                            className="avatar-img"
+                            alt="profile"
+                          />
+                        ) : (
+                          <div className="avatar-fallback">
+                            {(
+                              contact.name?.charAt(0) ||
+                              contact.email?.charAt(0) ||
+                              "?"
+                            ).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="contact-info-wrapper">
+                        <div className="contact-name">{contact.name}</div>
+                        {showSearchResults && !isAlreadyAdded && (
+                          <AddToChatButton contact={contact} />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createContext, useContext } from "react";
 import { useState } from "react";
+import { io } from "socket.io-client";
 const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setLoggedIn] = useState(false);
@@ -11,7 +12,13 @@ export const AuthProvider = ({ children }) => {
   const [visitedsignup, setvisited] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const [userdeatils, setDetails] = useState({ email: "", password: "" });
+  const [socket, setSocket] = useState(null);
+
   useEffect(() => {
+    const newsocket = io("http://localhost:3000", {
+      withCredentials: true,
+    });
+    setSocket(newsocket);
     const checklogin = async () => {
       try {
         const response = await fetch("/auth/check", {
@@ -40,6 +47,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
     checklogin();
+    return () => newsocket.disconnect();
   }, []);
   return (
     <AuthContext.Provider
@@ -58,7 +66,8 @@ export const AuthProvider = ({ children }) => {
         setprofilecard,
         profile,
         showOverlay,
-        setShowOverlay
+        setShowOverlay,
+        socket
       }}
     >
       {children}
