@@ -61,6 +61,7 @@ module.exports = async function (passport) {
 
         return done(null, user, { msg: "LoggedIn" });
       } catch (err) {
+        console.log(err);
         return done(err);
       }
     }
