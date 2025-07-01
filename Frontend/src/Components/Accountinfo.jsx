@@ -31,7 +31,7 @@ const AccountOverlay = ({ onClose }) => {
       if (image) formdata.append("image", image);
       if (name) formdata.append("name", name);
 
-      const res = await fetch("/upload/profile", {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/upload/profile", {
         method: "POST",
         body: formdata,
         credentials: "include",

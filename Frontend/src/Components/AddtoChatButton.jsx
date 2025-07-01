@@ -6,7 +6,7 @@ export const AddToChatButton = ({ contact }) => {
   const handleAdd = async () => {
     setStatus("loading");
     try {
-      const res = await fetch("/api/addchat", {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/addchat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -42,7 +42,7 @@ const ChatLayout = () => {
 
     const findaddedChats = async () => {
       try {
-        const response = await fetch(`/api/getaddedchat`, {
+        const response = await fetch(`https://safewalk-xbkj.onrender.com/api/getaddedchat`, {
           credentials: "include",
         });
         if (response.ok) {
@@ -65,7 +65,7 @@ const ChatLayout = () => {
 
   const handleNewChat = async () => {
     try {
-      const res = await fetch("api/getusers", {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

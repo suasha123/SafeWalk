@@ -15,13 +15,13 @@ export const AuthProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newsocket = io("http://localhost:3000", {
+    const newsocket = io("https://safewalk-xbkj.onrender.com", {
       withCredentials: true,
     });
     setSocket(newsocket);
     const checklogin = async () => {
       try {
-        const response = await fetch("/auth/check", {
+        const response = await fetch("https://safewalk-xbkj.onrender.com/auth/check", {
           credentials: "include",
         });
         if (response) {

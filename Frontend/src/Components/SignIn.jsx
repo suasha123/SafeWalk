@@ -25,7 +25,7 @@ export const SignIn = () => {
   }, [loading, isLoggedIn, navigate]);
   const handleGoogleLogin = () => {
     localStorage.setItem("attemptedGoogleLogIn", "true");
-    window.location.href = "http://localhost:3000/auth/google";
+    window.location.href = "https://safewalk-xbkj.onrender.com/auth/google";
   };
   useEffect(() => {
     if (localStorage.getItem("attemptedGoogleLogIn") && msg) {
@@ -35,7 +35,7 @@ export const SignIn = () => {
   }, [msg]);
   const handlelogin = async () => {
     try {
-      const response = await fetch("/auth/login", {
+      const response = await fetch("https://safewalk-xbkj.onrender.com/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

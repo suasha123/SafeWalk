@@ -26,7 +26,7 @@ export const SignUp = () => {
 
   const handleGoogleLogin = () => {
     localStorage.setItem("attemptedGoogleLogIn", "true");
-    window.location.href = "http://localhost:3000/auth/google";
+    window.location.href = "https://safewalk-xbkj.onrender.com/auth/google";
   };
 
   const sendotp = async () => {
@@ -36,7 +36,7 @@ export const SignUp = () => {
       return;
     }
     try {
-      const res = await fetch("/auth/otp", {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/auth/otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

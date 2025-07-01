@@ -12,7 +12,7 @@ const OverlayCard = () => {
 
   const signout = async () => {
     try {
-      const response = await fetch("/auth/signout", {
+      const response = await fetch("https://safewalk-xbkj.onrender.com/auth/signout", {
         method: "GET",
         credentials: "include",
       });

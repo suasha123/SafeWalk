@@ -35,7 +35,7 @@ export const Otp = () => {
   }, [loading, isLoggedIn, navigate]);
   const verifyotp = async () => {
     try {
-      const response = await fetch("/auth/verifyuser", {
+      const response = await fetch("https://safewalk-xbkj.onrender.com/auth/verifyuser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

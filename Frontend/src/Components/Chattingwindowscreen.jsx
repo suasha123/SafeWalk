@@ -49,7 +49,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/messages/${selectedUser._id}`, {
+        const res = await fetch(`https://safewalk-xbkj.onrender.com/api/messages/${selectedUser._id}`, {
           credentials: "include",
         });
         const data = await res.json();
