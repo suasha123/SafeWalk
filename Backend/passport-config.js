@@ -58,10 +58,8 @@ module.exports = async function (passport) {
         await mongoose.connection.db.collection("sessions").deleteMany({
           "session.passport.user": user._id.toString(),
         });
-        console.log(user);
         return done(null, user, { msg: "LoggedIn" });
       } catch (err) {
-        console.log(err);
         return done(err);
       }
     }
