@@ -2,6 +2,27 @@ const express = require("express");
 const router = express.Router();
 const usermodel = require("../database/model/usermodel");
 const chatAddModel = require("../database/model/addtochatmodel");
+const chatmodel = require("../database/model/ChatModel");
+router.get("/messages/:userId", async (req, res) => {
+  try {
+    const currentuserId = req.session?.passport?.user;
+    if (!currentuserId) {
+      return res.status(404).json({ msg: "Log In again" });
+    }
+    const selectedUserId = req.params.userId;
+    const messages = await chatmodel
+      .find({
+        $or: [
+          { from: currentuserId, to: selectedUserId },
+          { from: selectedUserId, to: currentuserId },
+        ],
+      })
+      .sort({ createdAt: 1 });
+    res.json({ messages });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to fetch messages" });
+  }
+});
 router.get("/getaddedchat", async (req, res) => {
   try {
     if (!req.isAuthenticated()) {

@@ -9,6 +9,7 @@ const path = require("path");
 const MongoStore = require("connect-mongo");
 const { Server } = require("socket.io");
 const sharedSession = require("express-socket.io-session");
+const addchat = require('./Controllers/addchat');
 require("dotenv").config();
 
 //DEFINE sessionMiddleware FIRST
@@ -65,10 +66,17 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.session?.passport?.user;
   console.log("User ID from session:", userId);
   socket.join(userId);
-  socket.on("sendmsg" , (msgObj)=>{
-    const {message , to , from} = msgObj;
-    console.log(msgObj)
-   io.to(to).emit("receivemsg" , msgObj);
+  socket.on("sendmsg" , async(msgObj , ack)=>{
+    const {msg , to} = msgObj;
+    const newmsobj = {msg , to , from : userId}
+    const res = await addchat(newmsobj);
+    if(res){
+       io.to(to).emit("receivemsg" , newmsobj);
+       ack && ack({ok : true});
+    }
+    else{
+      ack && ack({ok : false});
+    }
   })
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
