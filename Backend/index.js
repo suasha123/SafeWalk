@@ -33,6 +33,7 @@ const sessionMiddleware = session({
 });
 
 //Then use it with express
+app.set("trust proxy", 1); // ✅ Required for secure cookies on Render
 app.use(sessionMiddleware);
 
 //Then set up CORS and body parser
