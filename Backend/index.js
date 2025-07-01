@@ -25,8 +25,10 @@ const sessionMiddleware = session({
     ttl: 24 * 60 * 60,
   }),
   cookie: {
+    secure: true,         
+    httpOnly: true,
+    sameSite: "None",
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: "lax", 
   },
 });
 

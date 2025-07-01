@@ -117,8 +117,8 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    successRedirect: "http://localhost:3000",
-    failureRedirect: "http://localhost:3000/signin",
+    successRedirect: "https://safee-walk.vercel.app",
+    failureRedirect: "https://safee-walk.vercel.app/signin",
   })
 );
 module.exports = router;
