@@ -18,7 +18,7 @@ const ChatLayout = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
-  const [chatContacts, setChatContacts] = useState([]); 
+  const [chatContacts, setChatContacts] = useState(null);
 
   const showSearchResults = searchResults !== null;
 
@@ -47,7 +47,7 @@ const ChatLayout = () => {
         });
         if (response.ok) {
           const body = await response.json();
-          setChatContacts(body.userslist); 
+          setChatContacts(body.userslist);
         }
       } catch (err) {
         console.log(err);
@@ -73,7 +73,7 @@ const ChatLayout = () => {
       });
 
       if (res.ok) {
-        const user = await res.json(); 
+        const user = await res.json();
         setSearchResults([user]);
       } else {
         setSearchResults([]);
@@ -158,7 +158,12 @@ const ChatLayout = () => {
             </h2>
 
             <div className="sidebar-scroll">
-              {currentList.length === 0 ? (
+              {chatContacts === null ? (
+                <div className="loading-spinner">
+                  <div className="spinner-circle"></div>
+                  <p className="loading-text">Loading Chats...</p>
+                </div>
+              ) : currentList.length === 0 ? (
                 <p style={{ color: "#aaa", padding: "10px" }}>
                   {showSearchResults ? "No user found." : "No contacts."}
                 </p>

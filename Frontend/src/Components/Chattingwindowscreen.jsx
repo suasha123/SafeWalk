@@ -1,85 +1,100 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../Style/chattingwindowscreen.css";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import { IoSend } from "react-icons/io5";
 import { useAuth } from "./AuthContext";
+import { enqueueSnackbar } from "notistack";
 
 const ChatWindow = ({ selectedUser, onBack }) => {
-  const { socket, user} = useAuth();
+  const { socket, user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
-  const [receivedmsg, setreceivedmsg] = useState([
-    {
-      id: 1,
-      user: "S",
-      name: "Sam",
-      message: "Hey, are you safe?",
-      fromSelf: true,
-    },
-    {
-      id: 2,
-      user: selectedUser.initial,
-      name: selectedUser.name,
-      message: "Yes! Just entered the safe zone 🏃‍♀️",
-      fromSelf: false,
-    },
-    {
-      id: 3,
-      user: "S",
-      name: "Sam",
-      message: "Great, keep me updated!",
-      fromSelf: true,
-    },
-  ]);
+  const [receivedmsg, setreceivedmsg] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const pendingSocketMessages = useRef([]);
 
   const handleSend = () => {
     if (newMessage.trim() === "") return;
-
+    if (!socket?.connected) {
+      enqueueSnackbar("You're offline. Message not sent.", {
+        variant: "error",
+      });
+      return;
+    }
     const msgobj = {
       msg: newMessage,
-      to: selectedUser._id, // receiver
-      from: "685c221b997c0343ce5c83a7", // hardcoded sender (your test ID)
+      to: selectedUser._id,
     };
 
     setreceivedmsg((prev) => [
       ...prev,
       {
         id: Date.now(),
-        user: "Me",
-        name: "Me",
         message: newMessage,
         fromSelf: true,
       },
     ]);
 
-    socket.emit("sendmsg", msgobj);
+    socket.emit("sendmsg", msgobj, (ack) => {
+      if (!ack.ok) {
+        enqueueSnackbar("Message not sent.", {
+          variant: "error",
+        });
+      }
+    });
     setNewMessage("");
   };
 
+  // Fetch conversation from backend
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/messages/${selectedUser._id}`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+
+        const formatted = data.messages.map((msg) => ({
+          id: msg._id,
+          message: msg.msg,
+          fromSelf: msg.from !== selectedUser._id,
+        }));
+
+        // Merge pending socket messages if any
+        const finalMessages = [...formatted, ...pendingSocketMessages.current];
+        pendingSocketMessages.current = [];
+        setreceivedmsg(finalMessages);
+      } catch (err) {
+        console.error("Failed to fetch messages", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (selectedUser?._id) fetchMessages();
+  }, [selectedUser]);
+
+  // Handle incoming live messages
   useEffect(() => {
     const handleReceive = (data) => {
-      console.log("Received message:", data.msg);
-      console.log("Comparing with:", selectedUser._id || selectedUser.id);
+      const incoming = {
+        id: Date.now(),
+        message: data.msg,
+        fromSelf: false,
+      };
 
-      // ✅ FIX: check both _id and id for selectedUser
-      if (data.from === (selectedUser._id || selectedUser.id)) {
-        setreceivedmsg((prev) => [
-          ...prev,
-          {
-            id: Date.now(),
-            user: selectedUser.initial,
-            name: selectedUser.name,
-            message: data.msg,
-            fromSelf: false,
-          },
-        ]);
+      if (loading) {
+        pendingSocketMessages.current.push(incoming);
+      } else {
+        if (data.from === (selectedUser._id || selectedUser.id)) {
+          setreceivedmsg((prev) => [...prev, incoming]);
+        }
       }
     };
 
     socket.on("receivemsg", handleReceive);
-    return () => {
-      socket.off("receivemsg", handleReceive);
-    };
-  }, [selectedUser, socket]);
+    return () => socket.off("receivemsg", handleReceive);
+  }, [loading, selectedUser, socket]);
 
   return (
     <div className="chat-box">
@@ -108,50 +123,57 @@ const ChatWindow = ({ selectedUser, onBack }) => {
       </div>
 
       <div className="chat-messages">
-        {receivedmsg.map((msg) => (
-          <div
-            key={msg.id}
-            className={`chat-message ${
-              msg.fromSelf ? "from-self" : "from-other"
-            }`}
-          >
-            {!msg.fromSelf && (
-              <div className="avatar">
-                {selectedUser.profile ? (
-                  <img
-                    src={selectedUser.profile}
-                    className="avatar-img"
-                    alt="profile"
-                  />
-                ) : (
-                  (
-                    selectedUser.name?.charAt(0) ||
-                    selectedUser.email?.charAt(0) ||
-                    "?"
-                  ).toUpperCase()
-                )}
-              </div>
-            )}
-            <div className="message-bubble">{msg.message}</div>
-            {msg.fromSelf && (
-              <div className="avatar self-avatar">
-                {user?.profile ? (
-                  <img
-                    src={user.profile}
-                    className="avatar-img"
-                    alt="profile"
-                  />
-                ) : (
-                  (
-                    user?.name?.charAt(0) ||
-                    user?.email?.charAt(0) ||
-                    "?"
-                  ).toUpperCase()
-                )}
-              </div>
-            )}
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner-circle"></div>
+            Loading messages...
           </div>
-        ))}
+        ) : (
+          receivedmsg.map((msg) => (
+            <div
+              key={msg.id}
+              className={`chat-message ${
+                msg.fromSelf ? "from-self" : "from-other"
+              }`}
+            >
+              {!msg.fromSelf && (
+                <div className="avatar">
+                  {selectedUser.profile ? (
+                    <img
+                      src={selectedUser.profile}
+                      className="avatar-img"
+                      alt="profile"
+                    />
+                  ) : (
+                    (
+                      selectedUser.name?.charAt(0) ||
+                      selectedUser.email?.charAt(0) ||
+                      "?"
+                    ).toUpperCase()
+                  )}
+                </div>
+              )}
+              <div className="message-bubble">{msg.message}</div>
+              {msg.fromSelf && (
+                <div className="avatar self-avatar">
+                  {user?.profile ? (
+                    <img
+                      src={user.profile}
+                      className="avatar-img"
+                      alt="profile"
+                    />
+                  ) : (
+                    (
+                      user?.name?.charAt(0) ||
+                      user?.email?.charAt(0) ||
+                      "?"
+                    ).toUpperCase()
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       <div className="chat-input-box">

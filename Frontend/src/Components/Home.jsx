@@ -7,7 +7,7 @@ import { useAuth } from "./AuthContext";
 import { SplashScreen } from "./SplashScreen";
 import AccountOverlay from "./Accountinfo";
 export const Home = () => {
-  const { loading  , showOverlay , setShowOverlay} = useAuth();
+  const { loading} = useAuth();
   return (
     <Fragment>
       {loading ? (
@@ -18,9 +18,6 @@ export const Home = () => {
           <HeroSection />
           <Features />
           <Footer />
-          {showOverlay && (
-            <AccountOverlay onClose={() => setShowOverlay(false)} />
-          )}
         </>
       )}
     </Fragment>
