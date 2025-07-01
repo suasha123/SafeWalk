@@ -22,7 +22,7 @@ module.exports = async function (passport) {
     {
       clientID: process.env.GOOGLE_ClientId,
       clientSecret: process.env.GOOGLE_ClientSecetKey,
-      callbackURL: "/auth/google/callback",
+      callbackURL: "https://safewalk-xbkj.onrender.com/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
