@@ -4,7 +4,7 @@ import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
 
 const AccountOverlay = ({ onClose }) => {
-  const { user, setprofilecard, setuser } = useAuth();
+  const { user, setprofilecard, setuser ,   isLoggedIn } = useAuth();
   const [name, setName] = useState(user.username || "");
   const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
@@ -17,6 +17,9 @@ const AccountOverlay = ({ onClose }) => {
 
   useEffect(() => {
     setprofilecard(false);
+    if(isLoggedIn && !user.username){
+        enqueueSnackbar("Please update your Username!", { variant: "warning" });
+    }
   }, []);
 
   useEffect(() => {

@@ -18,10 +18,9 @@ export const NavBar = () => {
     if (menuOpen) setMenuOpen(false);
     setprofilecard(!profile);
   };
-
   return (
     <div className={styles.maindiv}>
-      {showOverlay && <AccountOverlay onClose={() => setShowOverlay(false)} />}
+      {(showOverlay || (isLoggedIn && !user.username)) && <AccountOverlay onClose={() => setShowOverlay(false)} />}
       <a href="#" className={styles.logo}>
         safeWalk
       </a>
