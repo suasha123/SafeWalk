@@ -220,7 +220,7 @@ const ChatLayout = () => {
                           ? "active"
                           : ""
                       }`}
-                      onClick={() => !isSearching && handleClickItem(item)}
+                      onClick={() =>handleClickItem(item)}
                     >
                       <div className="avatar">
                         {item.profile ? (
