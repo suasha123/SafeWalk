@@ -46,6 +46,7 @@
   display: flex;
   justify-content: center;
   margin-top: 12px;
+  background-color: #1e1e2f;
 }
 
 .group-preview-img {
@@ -83,6 +84,8 @@
   border-radius: 10px;
   border: none;
   background-color: #2f2c45;
+  outline: none;
+  border: 1px solid #7e4fff;
   color: white;
   font-size: 1rem;
 }
@@ -97,11 +100,11 @@
   font-family: 'Inter';
   border-radius: 10px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: filter 0.3s ease;
   margin-top: 10px;
 }
 
 .action-btn:hover {
-    background: linear-gradient(to right, #9296ff, #ff8dc8);
+  filter: brightness(1.1);
 }
 
