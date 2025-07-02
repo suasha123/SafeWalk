@@ -1,108 +1,109 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import ChatWindow from "./Chattingwindowscreen";
 import "../Style/chattingwindowscreen.css";
 import { NavBar } from "./Navbar";
 import { useAuth } from "./AuthContext";
-import { useNavigate } from "react-router-dom";
 import { SplashScreen } from "./SplashScreen";
 import { AddToChatButton } from "./AddtoChatButton";
 
-const groupChats = [{ id: 99, name: "React Buddies", initial: "R" }];
+const groupChats = [{ id: "99", name: "React Buddies", initial: "R" }];
 
 const ChatLayout = () => {
   const { isLoggedIn, loading } = useAuth();
   const navigate = useNavigate();
+  const { tab = "chats", entityId } = useParams();
 
-  const [activeTab, setActiveTab] = useState("chats");
-  const [activeChat, setActiveChat] = useState(null);
+  const [selectedTab, setSelectedTab] = useState(tab);
+  const [currentChat, setCurrentChat] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
-  const [chatContacts, setChatContacts] = useState(null);
+  const [contacts, setContacts] = useState(null);
   const [searching, setSearching] = useState(false);
 
-  const showSearchResults = searchResults !== null;
+  const isSearching = searchResults !== null;
+  const displayList = isSearching ? searchResults : selectedTab === "chats" ? contacts : groupChats;
 
-  const currentList = showSearchResults
-    ? searchResults
-    : activeTab === "chats"
-    ? chatContacts
-    : groupChats;
-
+  // Window size check
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const resize = () => setIsMobile(window.innerWidth <= 768);
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
   }, []);
 
-  const refreshChatContacts = async () => {
+  // Load contacts
+  const loadContacts = async () => {
     try {
-      const response = await fetch(
-        `https://safewalk-xbkj.onrender.com/api/getaddedchat`,
-        {
-          credentials: "include",
-        }
-      );
-      if (response.ok) {
-        const body = await response.json();
-        setChatContacts(body.userslist);
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getaddedchat", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setContacts(data.userslist);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   useEffect(() => {
-    if (!loading && !isLoggedIn) {
-      navigate("/");
-    }
-
-    if (!loading && isLoggedIn) {
-      refreshChatContacts();
-    }
+    if (!loading && !isLoggedIn) navigate("/");
+    if (!loading && isLoggedIn) loadContacts();
   }, [loading, isLoggedIn]);
 
-  const handleContactClick = (contact) => {
-    setActiveChat(contact);
+  // Handle tab navigation + user selection from URL
+  useEffect(() => {
+    setSelectedTab(tab);
+    if (entityId) {
+      if (tab === "chats" && contacts) {
+        const found = contacts.find((c) => c._id === entityId);
+        if (found) setCurrentChat(found);
+      } else if (tab === "groups") {
+        const found = groupChats.find((g) => g.id === entityId);
+        if (found) setCurrentChat(found);
+      }
+    } else {
+      setCurrentChat(null);
+    }
+  }, [tab, entityId, contacts]);
+
+  // Handle click on chat/group
+  const handleClickItem = (item) => {
+    setCurrentChat(item);
+    navigate(`/chat/${selectedTab}/${item._id || item.id}`);
   };
 
-  const handleNewChat = async () => {
+  const handleNewSearch = async () => {
     if (!searchTerm.trim()) return;
     setSearching(true);
     setSearchResults(null);
     try {
-      const res = await fetch(
-        "https://safewalk-xbkj.onrender.com/api/getusers",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ username: searchTerm }),
-        }
-      );
-
-      if (res.ok) {
-        const user = await res.json();
-        setSearchResults([user]);
-      } else {
-        setSearchResults([]);
-      }
-    } catch (err) {
-      console.log(err);
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username: searchTerm }),
+      });
+      const result = await res.json();
+      if (res.ok) setSearchResults([result]);
+      else setSearchResults([]);
+    } catch {
       setSearchResults([]);
     } finally {
       setSearching(false);
     }
   };
 
-  const handleBack = () => {
-    setActiveChat(null);
-  };
-
-  const handleClearSearch = () => {
+  const clearSearch = () => {
     setSearchTerm("");
     setSearchResults(null);
+  };
+
+  const goBack = () => {
+    setCurrentChat(null);
+    navigate(`/chat/${selectedTab}`);
   };
 
   if (loading) return <SplashScreen />;
@@ -112,26 +113,24 @@ const ChatLayout = () => {
       <NavBar />
       <div className="full-center-wrapper">
         <div className="main-chat-layout">
-          <div
-            className={`sidebar ${
-              isMobile && activeChat ? "hidden-on-mobile" : ""
-            }`}
-          >
+          <div className={`sidebar ${isMobile && currentChat ? "hidden-on-mobile" : ""}`}>
             <div className="sidebar-header">
               <button
-                className={`tab-btn ${activeTab === "chats" ? "active" : ""}`}
+                className={`tab-btn ${selectedTab === "chats" ? "active" : ""}`}
                 onClick={() => {
-                  setActiveTab("chats");
-                  handleClearSearch();
+                  setSelectedTab("chats");
+                  clearSearch();
+                  navigate("/chat/chats");
                 }}
               >
                 Chats
               </button>
               <button
-                className={`tab-btn ${activeTab === "groups" ? "active" : ""}`}
+                className={`tab-btn ${selectedTab === "groups" ? "active" : ""}`}
                 onClick={() => {
-                  setActiveTab("groups");
-                  handleClearSearch();
+                  setSelectedTab("groups");
+                  clearSearch();
+                  navigate("/chat/groups");
                 }}
               >
                 Groups
@@ -148,17 +147,14 @@ const ChatLayout = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {searchTerm && (
-                  <button
-                    className="clear-search-btn"
-                    onClick={handleClearSearch}
-                  >
+                  <button className="clear-search-btn" onClick={clearSearch}>
                     ✕
                   </button>
                 )}
               </div>
               <button
                 className="new-chat-btn"
-                onClick={handleNewChat}
+                onClick={handleNewSearch}
                 disabled={searching}
                 style={{
                   backgroundColor: searching ? "#4c3ba3" : "#7e4fff",
@@ -171,72 +167,44 @@ const ChatLayout = () => {
 
             {!searching && (
               <h2 className="sidebar-title">
-                {showSearchResults
-                  ? "Search Results"
-                  : activeTab === "chats"
-                  ? "Your Chats"
-                  : "Your Groups"}
+                {isSearching ? "Search Results" : selectedTab === "chats" ? "Your Chats" : "Your Groups"}
               </h2>
             )}
 
             <div className="sidebar-scroll">
               {searching ? (
-                <div className="loading-spinner">
-                  <div className="spinner-circle"></div>
-                  <p className="loading-text">Searching...</p>
-                </div>
-              ) : chatContacts === null ? (
-                <div className="loading-spinner">
-                  <div className="spinner-circle"></div>
-                  <p className="loading-text">Loading Chats...</p>
-                </div>
-              ) : currentList.length === 0 ? (
+                <div className="loading-spinner"><div className="spinner-circle"></div><p>Searching...</p></div>
+              ) : contacts === null && selectedTab === "chats" ? (
+                <div className="loading-spinner"><div className="spinner-circle"></div><p>Loading Chats...</p></div>
+              ) : displayList.length === 0 ? (
                 <p style={{ color: "#aaa", padding: "10px" }}>
-                  {showSearchResults ? "No user found." : "No contacts."}
+                  {isSearching ? "No user found." : "No contacts."}
                 </p>
               ) : (
-                currentList.map((contact) => {
-                  const isAlreadyAdded = chatContacts.some(
-                    (c) => c._id === contact._id || c._id === contact.id
+                displayList.map((item) => {
+                  const isAdded = contacts?.some(
+                    (c) => c._id === item._id || c._id === item.id
                   );
 
                   return (
                     <div
-                      key={contact._id || contact.id}
-                      className={`contact ${
-                        activeChat?._id === contact._id ||
-                        activeChat?.id === contact.id
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        !showSearchResults && handleContactClick(contact)
-                      }
+                      key={item._id || item.id}
+                      className={`contact ${currentChat?._id === item._id || currentChat?.id === item.id ? "active" : ""}`}
+                      onClick={() => !isSearching && handleClickItem(item)}
                     >
                       <div className="avatar">
-                        {contact.profile ? (
-                          <img
-                            src={contact.profile}
-                            className="avatar-img"
-                            alt="profile"
-                          />
+                        {item.profile ? (
+                          <img src={item.profile} className="avatar-img" alt="profile" />
                         ) : (
                           <div className="avatar-fallback">
-                            {(
-                              contact.name?.charAt(0) ||
-                              contact.email?.charAt(0) ||
-                              "?"
-                            ).toUpperCase()}
+                            {(item.name?.charAt(0) || item.email?.charAt(0) || "?").toUpperCase()}
                           </div>
                         )}
                       </div>
                       <div className="contact-info-wrapper">
-                        <div className="contact-name">{contact.name}</div>
-                        {showSearchResults && !isAlreadyAdded && (
-                          <AddToChatButton
-                            contact={contact}
-                            onAdded={refreshChatContacts}
-                          />
+                        <div className="contact-name">{item.name}</div>
+                        {isSearching && !isAdded && (
+                          <AddToChatButton contact={item} onAdded={loadContacts} />
                         )}
                       </div>
                     </div>
@@ -246,21 +214,12 @@ const ChatLayout = () => {
             </div>
           </div>
 
-          <div
-            className={`chat-area ${
-              isMobile && !activeChat ? "hidden-on-mobile" : ""
-            }`}
-          >
-            {activeChat ? (
-              <ChatWindow
-                selectedUser={activeChat}
-                onBack={isMobile ? handleBack : null}
-              />
+          <div className={`chat-area ${isMobile && !currentChat ? "hidden-on-mobile" : ""}`}>
+            {currentChat ? (
+              <ChatWindow selectedUser={currentChat} onBack={isMobile ? goBack : null} />
             ) : (
               <div className="placeholder">
-                <p className="placeholder-text">
-                  Select a chat to start messaging
-                </p>
+                <p className="placeholder-text">Select a chat to start messaging</p>
               </div>
             )}
           </div>
