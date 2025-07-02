@@ -85,11 +85,13 @@ export const GroupOverlayModal = ({ onClose }) => {
             </label>
 
             {previewUrl && (
-              <img
-                src={previewUrl}
-                alt="Group preview"
-                className="group-preview-img"
-              />
+              <div className="preview-container">
+                <img
+                  src={previewUrl}
+                  alt="Group preview"
+                  className="group-preview-img"
+                />
+              </div>
             )}
 
             <button className="action-btn" onClick={handleCreateGroup}>
