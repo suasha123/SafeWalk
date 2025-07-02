@@ -145,7 +145,7 @@ body {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    background-color: #7e4fff;
+    background-color: #e55aac;
     color: white;
     border: none;
     border-radius: 50%;
@@ -162,7 +162,7 @@ body {
 }
 
 .create-group-fab:hover {
-    background-color: #9a6dff;
+    background-color: #ff8ace;
 }
 
 .contact:hover,
@@ -366,11 +366,11 @@ body {
 }
 
 .add-chat-btn:hover {
-    background-color: #ff85cc;
+    background-color: #9a6dff;
 }
 
 .add-chat-btn.loading {
-    background-color: #e55aac;
+    background-color: #4c3ba3;
     cursor: wait;
 }
 
