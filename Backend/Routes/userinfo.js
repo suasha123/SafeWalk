@@ -32,7 +32,7 @@ router.get("/getaddedchat", async (req, res) => {
     const addedlist = await chatAddModel
       .findOne({ addedby: userId })
       .populate("added", "name email _id profile");
-    return res.status(200).json({ msg: "ok", userslist: addedlist.added });
+    return res.status(200).json({ msg: "ok", userslist: addedlist?addedlist.added  : []});
   } catch (err) {
     console.log(err);
     return res.status(404).json({ msg: "Cannot process" });
