@@ -38,9 +38,12 @@ const ChatLayout = () => {
 
   const refreshChatContacts = async () => {
     try {
-      const response = await fetch(`https://safewalk-xbkj.onrender.com/api/getaddedchat`, {
-        credentials: "include",
-      });
+      const response = await fetch(
+        `https://safewalk-xbkj.onrender.com/api/getaddedchat`,
+        {
+          credentials: "include",
+        }
+      );
       if (response.ok) {
         const body = await response.json();
         setChatContacts(body.userslist);
@@ -69,12 +72,15 @@ const ChatLayout = () => {
     setSearching(true);
     setSearchResults(null);
     try {
-      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username: searchTerm }),
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/getusers",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username: searchTerm }),
+        }
+      );
 
       if (res.ok) {
         const user = await res.json();
@@ -107,7 +113,9 @@ const ChatLayout = () => {
       <div className="full-center-wrapper">
         <div className="main-chat-layout">
           <div
-            className={`sidebar ${isMobile && activeChat ? "hidden-on-mobile" : ""}`}
+            className={`sidebar ${
+              isMobile && activeChat ? "hidden-on-mobile" : ""
+            }`}
           >
             <div className="sidebar-header">
               <button
@@ -161,13 +169,15 @@ const ChatLayout = () => {
               </button>
             </div>
 
-            <h2 className="sidebar-title">
-              {showSearchResults
-                ? "Search Results"
-                : activeTab === "chats"
-                ? "Your Chats"
-                : "Your Groups"}
-            </h2>
+            {!searching && (
+              <h2 className="sidebar-title">
+                {showSearchResults
+                  ? "Search Results"
+                  : activeTab === "chats"
+                  ? "Your Chats"
+                  : "Your Groups"}
+              </h2>
+            )}
 
             <div className="sidebar-scroll">
               {searching ? (
@@ -212,7 +222,11 @@ const ChatLayout = () => {
                           />
                         ) : (
                           <div className="avatar-fallback">
-                            {(contact.name?.charAt(0) || contact.email?.charAt(0) || "?").toUpperCase()}
+                            {(
+                              contact.name?.charAt(0) ||
+                              contact.email?.charAt(0) ||
+                              "?"
+                            ).toUpperCase()}
                           </div>
                         )}
                       </div>
@@ -233,7 +247,9 @@ const ChatLayout = () => {
           </div>
 
           <div
-            className={`chat-area ${isMobile && !activeChat ? "hidden-on-mobile" : ""}`}
+            className={`chat-area ${
+              isMobile && !activeChat ? "hidden-on-mobile" : ""
+            }`}
           >
             {activeChat ? (
               <ChatWindow
