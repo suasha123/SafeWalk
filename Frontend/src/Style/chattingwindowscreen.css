@@ -354,7 +354,7 @@ body {
 }
 
 .add-chat-btn {
-    background-color: #ea5aae;
+    background-color: #7e4fff;
     border: none;
     color: white;
     padding: 6px 12px;
@@ -366,11 +366,11 @@ body {
 }
 
 .add-chat-btn:hover {
-    background-color: #9a6dff;
+    background-color: #ff85cc;
 }
 
 .add-chat-btn.loading {
-    background-color: #4c3ba3;
+    background-color: #e55aac;
     cursor: wait;
 }
 
@@ -382,10 +382,9 @@ body {
 /* Mobile responsive */
 @media screen and (max-width: 768px) {
     .create-group-fab {
-        bottom: 16px;
-        right: 16px;
-    }
-
+    bottom: 16px;
+    right: 16px;
+  }
     .main-chat-layout {
         display: block;
         width: 100vw;
