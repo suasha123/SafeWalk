@@ -73,7 +73,7 @@ router.post("/getusers", async (req, res) => {
     return res.status(404).json({ msg: "Cannot process" });
   }
   const { username } = req.body;
-  const user = await usermodel.findBy({username});
+  const user = await usermodel.find({username});
   if (!user) {
     return res.status(404).json({ msg: "User not found" });
   }
