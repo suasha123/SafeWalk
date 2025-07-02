@@ -6,7 +6,7 @@ import { NavBar } from "./Navbar";
 import { useAuth } from "./AuthContext";
 import { SplashScreen } from "./SplashScreen";
 import { AddToChatButton } from "./AddtoChatButton";
-
+import { FaPlus } from "react-icons/fa";
 const groupChats = [{ id: "99", name: "React Buddies", initial: "R" }];
 
 const ChatLayout = () => {
@@ -23,7 +23,11 @@ const ChatLayout = () => {
   const [searching, setSearching] = useState(false);
 
   const isSearching = searchResults !== null;
-  const displayList = isSearching ? searchResults : selectedTab === "chats" ? contacts : groupChats;
+  const displayList = isSearching
+    ? searchResults
+    : selectedTab === "chats"
+    ? contacts
+    : groupChats;
 
   // Window size check
   useEffect(() => {
@@ -36,9 +40,12 @@ const ChatLayout = () => {
   // Load contacts
   const loadContacts = async () => {
     try {
-      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getaddedchat", {
-        credentials: "include",
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/getaddedchat",
+        {
+          credentials: "include",
+        }
+      );
       if (res.ok) {
         const data = await res.json();
         setContacts(data.userslist);
@@ -80,12 +87,15 @@ const ChatLayout = () => {
     setSearching(true);
     setSearchResults(null);
     try {
-      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username: searchTerm }),
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/getusers",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username: searchTerm }),
+        }
+      );
       const result = await res.json();
       if (res.ok) setSearchResults([result]);
       else setSearchResults([]);
@@ -113,7 +123,11 @@ const ChatLayout = () => {
       <NavBar />
       <div className="full-center-wrapper">
         <div className="main-chat-layout">
-          <div className={`sidebar ${isMobile && currentChat ? "hidden-on-mobile" : ""}`}>
+          <div
+            className={`sidebar ${
+              isMobile && currentChat ? "hidden-on-mobile" : ""
+            }`}
+          >
             <div className="sidebar-header">
               <button
                 className={`tab-btn ${selectedTab === "chats" ? "active" : ""}`}
@@ -126,7 +140,9 @@ const ChatLayout = () => {
                 Chats
               </button>
               <button
-                className={`tab-btn ${selectedTab === "groups" ? "active" : ""}`}
+                className={`tab-btn ${
+                  selectedTab === "groups" ? "active" : ""
+                }`}
                 onClick={() => {
                   setSelectedTab("groups");
                   clearSearch();
@@ -167,15 +183,25 @@ const ChatLayout = () => {
 
             {!searching && (
               <h2 className="sidebar-title">
-                {isSearching ? "Search Results" : selectedTab === "chats" ? "Your Chats" : "Your Groups"}
+                {isSearching
+                  ? "Search Results"
+                  : selectedTab === "chats"
+                  ? "Your Chats"
+                  : "Your Groups"}
               </h2>
             )}
 
             <div className="sidebar-scroll">
               {searching ? (
-                <div className="loading-spinner"><div className="spinner-circle"></div><p>Searching...</p></div>
+                <div className="loading-spinner">
+                  <div className="spinner-circle"></div>
+                  <p>Searching...</p>
+                </div>
               ) : contacts === null && selectedTab === "chats" ? (
-                <div className="loading-spinner"><div className="spinner-circle"></div><p>Loading Chats...</p></div>
+                <div className="loading-spinner">
+                  <div className="spinner-circle"></div>
+                  <p>Loading Chats...</p>
+                </div>
               ) : displayList.length === 0 ? (
                 <p style={{ color: "#aaa", padding: "10px" }}>
                   {isSearching ? "No user found." : "No contacts."}
@@ -189,22 +215,38 @@ const ChatLayout = () => {
                   return (
                     <div
                       key={item._id || item.id}
-                      className={`contact ${currentChat?._id === item._id || currentChat?.id === item.id ? "active" : ""}`}
+                      className={`contact ${
+                        currentChat?._id === item._id ||
+                        currentChat?.id === item.id
+                          ? "active"
+                          : ""
+                      }`}
                       onClick={() => !isSearching && handleClickItem(item)}
                     >
                       <div className="avatar">
                         {item.profile ? (
-                          <img src={item.profile} className="avatar-img" alt="profile" />
+                          <img
+                            src={item.profile}
+                            className="avatar-img"
+                            alt="profile"
+                          />
                         ) : (
                           <div className="avatar-fallback">
-                            {(item.name?.charAt(0) || item.email?.charAt(0) || "?").toUpperCase()}
+                            {(
+                              item.name?.charAt(0) ||
+                              item.email?.charAt(0) ||
+                              "?"
+                            ).toUpperCase()}
                           </div>
                         )}
                       </div>
                       <div className="contact-info-wrapper">
                         <div className="contact-name">{item.name}</div>
                         {isSearching && !isAdded && (
-                          <AddToChatButton contact={item} onAdded={loadContacts} />
+                          <AddToChatButton
+                            contact={item}
+                            onAdded={loadContacts}
+                          />
                         )}
                       </div>
                     </div>
@@ -212,14 +254,31 @@ const ChatLayout = () => {
                 })
               )}
             </div>
+            {selectedTab === "groups" && (
+              <button
+                className="create-group-fab"
+                onClick={() => alert("Create a new group")}
+              >
+                <FaPlus />
+              </button>
+            )}
           </div>
 
-          <div className={`chat-area ${isMobile && !currentChat ? "hidden-on-mobile" : ""}`}>
+          <div
+            className={`chat-area ${
+              isMobile && !currentChat ? "hidden-on-mobile" : ""
+            }`}
+          >
             {currentChat ? (
-              <ChatWindow selectedUser={currentChat} onBack={isMobile ? goBack : null} />
+              <ChatWindow
+                selectedUser={currentChat}
+                onBack={isMobile ? goBack : null}
+              />
             ) : (
               <div className="placeholder">
-                <p className="placeholder-text">Select a chat to start messaging</p>
+                <p className="placeholder-text">
+                  Select a chat to start messaging
+                </p>
               </div>
             )}
           </div>

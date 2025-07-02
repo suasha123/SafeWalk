@@ -91,6 +91,7 @@ body {
 
 
 .sidebar {
+    position: relative;
     width: 360px;
     background-color: #1f1d33;
     padding: 20px;
@@ -138,6 +139,30 @@ body {
     cursor: pointer;
     transition: 0.3s;
     color: #e0e0e0;
+}
+
+.create-group-fab {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color: #7e4fff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: background 0.3s ease;
+    z-index: 2;
+}
+
+.create-group-fab:hover {
+    background-color: #9a6dff;
 }
 
 .contact:hover,
@@ -356,6 +381,11 @@ body {
 
 /* Mobile responsive */
 @media screen and (max-width: 768px) {
+    .create-group-fab {
+        bottom: 16px;
+        right: 16px;
+    }
+
     .main-chat-layout {
         display: block;
         width: 100vw;
