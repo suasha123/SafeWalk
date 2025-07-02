@@ -20,13 +20,13 @@ const AccountOverlay = ({ onClose }) => {
   }, []);
 
   useEffect(() => {
-    if (name && name.length > 2) {
+    if (name !== user.username && name.length > 2) {
       clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => checkUsername(name), 600);
     } else {
       setUsernameAvailable(null);
     }
-  }, [name]);
+  }, [name, user.username]);
 
   const checkUsername = async (value) => {
     setCheckingUsername(true);
