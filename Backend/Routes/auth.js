@@ -8,6 +8,23 @@ const sendmail = require("../utils/mail");
 const otpmodel = require("../database/model/otpmodel");
 const usermodel = require("../database/model/usermodel");
 require("dotenv").config();
+router.get("/check-username", async (req, res) => {
+   console.log(req);
+   console.log(req.query.username)
+  try {
+    const username = req.query.username;
+    const user = await usermodel.findOne({ username });
+    console.log(user);
+    if(!user){
+     return res.status(200).json({ available: true });
+    }
+    else{
+     return res.status(200).json({ available: false });
+    }
+  } catch (err) {
+   return res.status(500).json({msg : "Server error"})
+  }
+});
 router.get("/signout", (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).json({ msg: "Logout error" });
@@ -105,7 +122,12 @@ router.post("/login", (req, res, next) => {
 router.get("/check", (req, res) => {
   if (req.isAuthenticated()) {
     const { email, profile, name } = req.user;
-    return res.status(200).json({ useremail: email, name, profile , isgoogleid  : req.user.googleId ? "yes" : "no" });
+    return res.status(200).json({
+      useremail: email,
+      name,
+      profile,
+      isgoogleid: req.user.googleId ? "yes" : "no",
+    });
   } else {
     return res.status(404).json({ msg: "Not loggedIn" });
   }

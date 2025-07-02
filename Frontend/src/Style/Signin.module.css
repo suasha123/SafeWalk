@@ -1,86 +1,116 @@
-.maindiv{
+.maindiv {
     background-color: #141122;
-    min-height:  100vh;
+    min-height: 100vh;
     width: 100vw;
     min-width: 319px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
-.secondiv{
+
+.secondiv {
     padding: 3rem;
     background-color: white;
-    height: 520px;
-    width:  500px;
+    height: 620px;
+    width: 500px;
     border-radius: 25px;
     font-family: Inter;
 }
-.secondivv{
+
+.secondivv {
     padding: 3rem;
     background-color: white;
     height: 350px;
-    width:  500px;
+    width: 500px;
     border-radius: 25px;
     font-family: Inter;
 }
-.h1{
+
+.h1 {
     margin-top: 14px;
     font-size: 23px;
     position: relative;
     left: 5px;
-     color : #000000A6;
-     text-align: center;
+    color: #000000a6;
+    text-align: center;
 }
-.googlebutton{
-  color: black;
-  background-color: white;
-  outline: none;
-  border: 2px solid #e7e9ed;
-  height: 38px;
-  width: 89%;
-  align-self: center;
-  border-radius: 10px;
-  font-family: 'Inter';
-  font-size: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color ease 0.4s;
-  &:hover {
+
+.googlebutton {
+    color: black;
+    background-color: white;
+    outline: none;
+    border: 2px solid #e7e9ed;
+    height: 38px;
+    width: 89%;
+    align-self: center;
+    border-radius: 8px;
+    font-family: 'Inter';
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background-color ease 0.4s;
+    margin-bottom: 20px;
+}
+
+.googlebutton:hover {
     background-color: rgb(236, 234, 234);
-  }
-   margin-bottom: 20px;
 }
-.login{
+
+.login {
     display: flex;
     flex-direction: column;
     margin-top: 20px;
     width: 100%;
     height: max-content;
-    display: flex;
     justify-content: center;
 }
-.label{
+
+.label {
     font-size: 15px;
     margin-bottom: 5px;
 }
-.input{
+
+.inputWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input {
     border-radius: 5px;
     height: 39px;
-    padding: 5px;
+    padding: 5px 35px 5px 5px;
+    /* padding right added for spinner */
     outline: none;
     border: 2px solid #e7e9ed;
     margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
-.line{
-      text-align: center;
-      margin-bottom: 2px;
-    
+
+.spinner {
+    position: absolute;
+    right: 10px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-top: 2px solid black;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
-.button{
+
+
+.line {
+    text-align: center;
+    margin-bottom: 2px;
+}
+
+.button {
     margin-top: 18px;
     width: 78%;
     background: linear-gradient(to right, #6e74ff, #f65aaa);
@@ -91,4 +121,14 @@
     font-family: 'Inter';
     border-radius: 5px;
     cursor: pointer;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
