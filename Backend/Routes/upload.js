@@ -24,7 +24,7 @@ router.post("/profile", parser.single("image"), async (req, res) => {
     );
     res.status(200).json({
       msg: "Profile updated successfully",
-      name : updatedUser.username,
+      username : updatedUser.username,
       profile : updatedUser.profile
     });
   } catch (err) {

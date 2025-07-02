@@ -2,77 +2,97 @@ import { useState, useRef, useEffect } from "react";
 import styles from "../Style/Accountoverlay.module.css";
 import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
-import { useNavigate } from "react-router-dom";
 
 const AccountOverlay = ({ onClose }) => {
-  const navigate = useNavigate();
   const { user, setprofilecard, setuser } = useAuth();
-  const [name, setName] = useState(user.username);
+  const [name, setName] = useState(user.username || "");
+  const [usernameAvailable, setUsernameAvailable] = useState(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
-  const [changename, setchanename] = useState(false);
-  const [image, setimage] = useState(null);
-  const [updating, setUpdating] = useState(false); 
+  const [image, setImage] = useState(null);
+  const [updating, setUpdating] = useState(false);
+
   const fileInputRef = useRef(null);
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     setprofilecard(false);
   }, []);
 
-  const handlechange = async () => {
-    if (!changename && !image) {
-      enqueueSnackbar("Input required", { variant: "warning" });
+  useEffect(() => {
+    if (name && name.length > 2) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => checkUsername(name), 600);
+    } else {
+      setUsernameAvailable(null);
+    }
+  }, [name]);
+
+  const checkUsername = async (value) => {
+    setCheckingUsername(true);
+    try {
+      const res = await fetch(
+        `https://safewalk-xbkj.onrender.com/auth/check-username?username=${value}`
+      );
+      const data = await res.json();
+      setUsernameAvailable(data.available);
+    } catch {
+      setUsernameAvailable(false);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if ((!image && name === user.username) || usernameAvailable === false) {
+      enqueueSnackbar("Please make valid changes", { variant: "warning" });
       return;
     }
 
-    setUpdating(true); 
-
+    setUpdating(true);
     try {
-      const formdata = new FormData();
-      if (image) formdata.append("image", image);
-      if (name) formdata.append("username", name);
+      const formData = new FormData();
+      if (image) formData.append("image", image);
+      if (name && name !== user.username) formData.append("username", name);
 
-      const res = await fetch("https://safewalk-xbkj.onrender.com/upload/profile", {
-        method: "POST",
-        body: formdata,
-        credentials: "include",
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/upload/profile",
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       if (res.ok) {
         const updated = await res.json();
-        setuser(prev => ({
+        setuser((prev) => ({
           ...prev,
           username: updated.username || prev.username,
           profile: updated.profile || prev.profile,
         }));
         setPreviewImage(null);
-        setimage(null);
+        setImage(null);
         setName(updated.username || user.username);
         onClose();
       } else {
-        enqueueSnackbar("Cannot Update Profile", { variant: "warning" });
+        enqueueSnackbar("Cannot update profile", { variant: "warning" });
       }
-    } catch (err) {
-      enqueueSnackbar("Cannot Update Profile", { variant: "error" });
+    } catch {
+      enqueueSnackbar("Server error", { variant: "error" });
     } finally {
       setUpdating(false);
     }
   };
 
-  const getAvatarLetter = () => {
-    if (user.name && user.name.length > 0) {
-      return user.name.charAt(0).toUpperCase();
-    } else if (user.useremail) {
-      return user.useremail.charAt(0).toUpperCase();
-    }
-    return "?";
-  };
+  const getAvatarLetter = () =>
+    user.name?.[0]?.toUpperCase() || user.useremail?.[0]?.toUpperCase() || "?";
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setimage(file);
-      const imageUrl = URL.createObjectURL(file);
-      setPreviewImage(imageUrl);
+      setImage(file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -90,12 +110,7 @@ const AccountOverlay = ({ onClose }) => {
           <h3 className={styles.sectionTitle}>Profile</h3>
           <div className={styles.profileRow}>
             {user.profile ? (
-              <img
-                src={user.profile}
-                alt="Profile"
-                className={styles.avatar}
-                style={{ objectFit: "cover", borderRadius: "50%" }}
-              />
+              <img src={user.profile} alt="Profile" className={styles.avatar} />
             ) : (
               <div className={styles.avatar}>{getAvatarLetter()}</div>
             )}
@@ -106,7 +121,9 @@ const AccountOverlay = ({ onClose }) => {
               <p className={styles.email}>
                 {user.useremail}
                 <span className={styles.badge} style={{ marginLeft: "8px" }}>
-                  {user.isgoogleid=="yes" ? "Google verified" : "Email verified"}
+                  {user.isgoogleid === "yes"
+                    ? "Google verified"
+                    : "Email verified"}
                 </span>
               </p>
             </div>
@@ -115,17 +132,34 @@ const AccountOverlay = ({ onClose }) => {
 
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Edit Profile</h3>
-
-          <input
-            className={styles.nameInput}
-            type="text"
-            placeholder="Enter new username"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setchanename(true);
-            }}
-          />
+          <div style={{ position: "relative", maxWidth: "250px" }}>
+            <input
+              className={styles.nameInput}
+              style={{
+                borderColor:
+                  usernameAvailable === null
+                    ? "#444"
+                    : usernameAvailable
+                    ? "green"
+                    : "red",
+              }}
+              type="text"
+              placeholder="Enter new username"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            {checkingUsername && (
+              <span
+                className={styles.spinner}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                }}
+              ></span>
+            )}
+          </div>
 
           <div
             className={styles.link}
@@ -151,8 +185,14 @@ const AccountOverlay = ({ onClose }) => {
             </div>
           )}
 
-          <div onClick={!updating ? handlechange : undefined} className={styles.updateBtnRow}>
-            <button className={styles.updateBtn} disabled={updating}>
+          <div className={styles.updateBtnRow}>
+            <button
+              className={styles.updateBtn}
+              disabled={
+                updating || (name !== user.username && !usernameAvailable)
+              }
+              onClick={handleUpdate}
+            >
               {updating ? (
                 <>
                   <span className={styles.spinner}></span> Updating...
