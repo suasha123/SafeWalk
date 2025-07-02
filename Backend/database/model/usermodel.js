@@ -7,6 +7,10 @@ const userSchema = new mongooose.Schema({
     type : String,
     required : true
    },
+   username : {
+     type : String,
+     unique: true,
+   },
    password : {
     type : String
    },

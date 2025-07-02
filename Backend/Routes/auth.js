@@ -62,7 +62,7 @@ router.post("/otp", async (req, res) => {
 
 router.post("/verifyuser", async (req, res) => {
   try {
-    const { otpcode, email, password } = req.body;
+    const { otpcode, email, password , username } = req.body;
     const storedotp = await otpmodel.findOne({ email });
     if (!storedotp) {
       return res.status(404).json({ msg: "OTP not found" });
@@ -82,13 +82,14 @@ router.post("/verifyuser", async (req, res) => {
     const newuser = await usermodel.create({
       email,
       password: hashedpassword,
+      username : username || ""
     });
     req.logIn(newuser, (err) => {
       if (err) {
         return res.status(500).json({ msg: "Registration failed" });
       }
       const { email } = req.user;
-      return res.status(200).json({ useremail: email, msg: "User Registered" });
+      return res.status(200).json({ useremail: email, msg: "User Registered" , username });
     });
   } catch (err) {
     console.error(err);
@@ -112,20 +113,21 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return res.status(500).json({ msg: "Login failed" });
       }
-      const { email, profile, name } = req.user;
+      const { email, profile, name, username} = req.user;
       return res
         .status(200)
-        .json({ useremail: email, profile, name, msg: "User LoggedIn" });
+        .json({ useremail: email, profile, name,username, msg: "User LoggedIn" });
     });
   })(req, res, next);
 });
 router.get("/check", (req, res) => {
   if (req.isAuthenticated()) {
-    const { email, profile, name } = req.user;
+    const { email, profile, name , username} = req.user;
     return res.status(200).json({
       useremail: email,
       name,
       profile,
+      username,
       isgoogleid: req.user.googleId ? "yes" : "no",
     });
   } else {

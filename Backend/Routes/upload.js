@@ -9,13 +9,13 @@ router.post("/profile", parser.single("image"), async (req, res) => {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
-  const { name } = req.body;
+  const { username } = req.body;
   const image = req.file;
   const userId = req.user._id; 
 
   try {
     const updateFields = {};
-    if (name) updateFields.name = name;
+    if (username) updateFields.username = username;
     if (image) updateFields.profile = image.path; 
     const updatedUser = await usermodel.findByIdAndUpdate(
       userId,
@@ -24,7 +24,7 @@ router.post("/profile", parser.single("image"), async (req, res) => {
     );
     res.status(200).json({
       msg: "Profile updated successfully",
-      name : updatedUser.name,
+      name : updatedUser.username,
       profile : updatedUser.profile
     });
   } catch (err) {

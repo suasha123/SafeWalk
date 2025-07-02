@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const AccountOverlay = ({ onClose }) => {
   const navigate = useNavigate();
   const { user, setprofilecard, setuser } = useAuth();
-  const [name, setName] = useState(user.name || "");
+  const [name, setName] = useState(user.username);
   const [previewImage, setPreviewImage] = useState(null);
   const [changename, setchanename] = useState(false);
   const [image, setimage] = useState(null);
@@ -29,7 +29,7 @@ const AccountOverlay = ({ onClose }) => {
     try {
       const formdata = new FormData();
       if (image) formdata.append("image", image);
-      if (name) formdata.append("name", name);
+      if (name) formdata.append("username", name);
 
       const res = await fetch("https://safewalk-xbkj.onrender.com/upload/profile", {
         method: "POST",
@@ -41,12 +41,12 @@ const AccountOverlay = ({ onClose }) => {
         const updated = await res.json();
         setuser(prev => ({
           ...prev,
-          name: updated.name || prev.name,
+          username: updated.username || prev.username,
           profile: updated.profile || prev.profile,
         }));
         setPreviewImage(null);
         setimage(null);
-        setName(updated.name || user.name);
+        setName(updated.username || user.username);
         onClose();
       } else {
         enqueueSnackbar("Cannot Update Profile", { variant: "warning" });
@@ -119,7 +119,7 @@ const AccountOverlay = ({ onClose }) => {
           <input
             className={styles.nameInput}
             type="text"
-            placeholder="Enter new name"
+            placeholder="Enter new username"
             value={name}
             onChange={(e) => {
               setName(e.target.value);
