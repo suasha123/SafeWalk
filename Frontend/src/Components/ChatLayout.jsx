@@ -9,12 +9,11 @@ import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
 import { GroupOverlayModal } from "./Addgroupoverlay";
 const groupChats = [{ id: "99", name: "React Buddies", initial: "R" }];
-const [showGroupModal, setShowGroupModal] = useState(false);
 const ChatLayout = () => {
   const { isLoggedIn, loading } = useAuth();
   const navigate = useNavigate();
   const { tab = "chats", entityId } = useParams();
-
+  const [showGroupModal, setShowGroupModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState(tab);
   const [currentChat, setCurrentChat] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -22,7 +21,6 @@ const ChatLayout = () => {
   const [searchResults, setSearchResults] = useState(null);
   const [contacts, setContacts] = useState(null);
   const [searching, setSearching] = useState(false);
-
   const isSearching = searchResults !== null;
   const displayList = isSearching
     ? searchResults
