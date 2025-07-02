@@ -19,6 +19,7 @@ const ChatLayout = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [chatContacts, setChatContacts] = useState(null);
+  const [searching, setSearching] = useState(false);
 
   const showSearchResults = searchResults !== null;
 
@@ -35,27 +36,27 @@ const ChatLayout = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const refreshChatContacts = async () => {
+    try {
+      const response = await fetch(`https://safewalk-xbkj.onrender.com/api/getaddedchat`, {
+        credentials: "include",
+      });
+      if (response.ok) {
+        const body = await response.json();
+        setChatContacts(body.userslist);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
     if (!loading && !isLoggedIn) {
       navigate("/");
     }
 
-    const findaddedChats = async () => {
-      try {
-        const response = await fetch(`https://safewalk-xbkj.onrender.com/api/getaddedchat`, {
-          credentials: "include",
-        });
-        if (response.ok) {
-          const body = await response.json();
-          setChatContacts(body.userslist);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
     if (!loading && isLoggedIn) {
-      findaddedChats();
+      refreshChatContacts();
     }
   }, [loading, isLoggedIn]);
 
@@ -64,6 +65,9 @@ const ChatLayout = () => {
   };
 
   const handleNewChat = async () => {
+    if (!searchTerm.trim()) return;
+    setSearching(true);
+    setSearchResults(null);
     try {
       const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
         method: "POST",
@@ -81,6 +85,8 @@ const ChatLayout = () => {
     } catch (err) {
       console.log(err);
       setSearchResults([]);
+    } finally {
+      setSearching(false);
     }
   };
 
@@ -89,8 +95,8 @@ const ChatLayout = () => {
   };
 
   const handleClearSearch = () => {
-    setSearchResults(null);
     setSearchTerm("");
+    setSearchResults(null);
   };
 
   if (loading) return <SplashScreen />;
@@ -101,9 +107,7 @@ const ChatLayout = () => {
       <div className="full-center-wrapper">
         <div className="main-chat-layout">
           <div
-            className={`sidebar ${
-              isMobile && activeChat ? "hidden-on-mobile" : ""
-            }`}
+            className={`sidebar ${isMobile && activeChat ? "hidden-on-mobile" : ""}`}
           >
             <div className="sidebar-header">
               <button
@@ -130,7 +134,7 @@ const ChatLayout = () => {
               <div className="search-wrapper">
                 <input
                   type="text"
-                  placeholder="Search users..."
+                  placeholder="Search username..."
                   className="new-chat-input"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -144,8 +148,16 @@ const ChatLayout = () => {
                   </button>
                 )}
               </div>
-              <button className="new-chat-btn" onClick={handleNewChat}>
-                Search
+              <button
+                className="new-chat-btn"
+                onClick={handleNewChat}
+                disabled={searching}
+                style={{
+                  backgroundColor: searching ? "#4c3ba3" : "#7e4fff",
+                  cursor: searching ? "not-allowed" : "pointer",
+                }}
+              >
+                {searching ? "Searching..." : "Search"}
               </button>
             </div>
 
@@ -158,7 +170,12 @@ const ChatLayout = () => {
             </h2>
 
             <div className="sidebar-scroll">
-              {chatContacts === null ? (
+              {searching ? (
+                <div className="loading-spinner">
+                  <div className="spinner-circle"></div>
+                  <p className="loading-text">Searching...</p>
+                </div>
+              ) : chatContacts === null ? (
                 <div className="loading-spinner">
                   <div className="spinner-circle"></div>
                   <p className="loading-text">Loading Chats...</p>
@@ -195,18 +212,17 @@ const ChatLayout = () => {
                           />
                         ) : (
                           <div className="avatar-fallback">
-                            {(
-                              contact.name?.charAt(0) ||
-                              contact.email?.charAt(0) ||
-                              "?"
-                            ).toUpperCase()}
+                            {(contact.name?.charAt(0) || contact.email?.charAt(0) || "?").toUpperCase()}
                           </div>
                         )}
                       </div>
                       <div className="contact-info-wrapper">
                         <div className="contact-name">{contact.name}</div>
                         {showSearchResults && !isAlreadyAdded && (
-                          <AddToChatButton contact={contact} />
+                          <AddToChatButton
+                            contact={contact}
+                            onAdded={refreshChatContacts}
+                          />
                         )}
                       </div>
                     </div>
@@ -217,9 +233,7 @@ const ChatLayout = () => {
           </div>
 
           <div
-            className={`chat-area ${
-              isMobile && !activeChat ? "hidden-on-mobile" : ""
-            }`}
+            className={`chat-area ${isMobile && !activeChat ? "hidden-on-mobile" : ""}`}
           >
             {activeChat ? (
               <ChatWindow

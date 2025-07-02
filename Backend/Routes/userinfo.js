@@ -74,7 +74,6 @@ router.post("/getusers", async (req, res) => {
   }
   const { username } = req.body;
   const user = await usermodel.findOne({username});
-  console.log(user)
   if (!user) {
     return res.status(404).json({ msg: "User not found" });
   }
