@@ -7,8 +7,9 @@ import { useAuth } from "./AuthContext";
 import { SplashScreen } from "./SplashScreen";
 import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
+import { GroupOverlayModal } from "./Addgroupoverlay";
 const groupChats = [{ id: "99", name: "React Buddies", initial: "R" }];
-
+const [showGroupModal, setShowGroupModal] = useState(false);
 const ChatLayout = () => {
   const { isLoggedIn, loading } = useAuth();
   const navigate = useNavigate();
@@ -257,11 +258,11 @@ const ChatLayout = () => {
             {selectedTab === "groups" && (
               <button
                 className="create-group-fab"
-                onClick={() => alert("Create a new group")}
+                onClick={() => setShowGroupModal(true)}
               >
                 <FaPlus />
               </button>
-            )}
+            )}5
           </div>
 
           <div
@@ -284,6 +285,7 @@ const ChatLayout = () => {
           </div>
         </div>
       </div>
+      {showGroupModal && <GroupOverlayModal onClose={() => setShowGroupModal(false)} />}
     </>
   );
 };
