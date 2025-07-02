@@ -74,10 +74,24 @@ export const GroupOverlayModal = ({ onClose }) => {
               onChange={(e) => setGroupName(e.target.value)}
               className="group-input"
             />
-            <input type="file" accept="image/*" onChange={handleImageChange} />
+            <label className="file-upload-link">
+              Change group picture
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{ display: "none" }}
+              />
+            </label>
+
             {previewUrl && (
-              <img src={previewUrl} alt="preview" className="preview-img" />
+              <img
+                src={previewUrl}
+                alt="Group preview"
+                className="group-preview-img"
+              />
             )}
+
             <button className="action-btn" onClick={handleCreateGroup}>
               Create Group
             </button>

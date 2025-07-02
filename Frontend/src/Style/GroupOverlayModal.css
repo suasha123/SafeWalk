@@ -33,6 +33,24 @@
   cursor: pointer;
 }
 
+.file-upload-link {
+  color: #7e4fff;
+  cursor: pointer;
+  margin-bottom: 10px;
+  display: inline-block;
+  font-size: 0.95rem;
+  text-decoration: underline;
+}
+
+.group-preview-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-top: 12px;
+  display: block;
+}
+
 .tab-switcher {
   display: flex;
   justify-content: space-around;
