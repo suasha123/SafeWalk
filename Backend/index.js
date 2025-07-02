@@ -91,8 +91,8 @@ io.on("connection", (socket) => {
 //Routes
 app.use("/upload", require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
-app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.use("/api", require("./Routes/userinfo"))
+app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
 });
