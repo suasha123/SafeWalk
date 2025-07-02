@@ -69,7 +69,7 @@ const ChatLayout = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ userid: searchTerm }),
+        body: JSON.stringify({ username: searchTerm }),
       });
 
       if (res.ok) {

@@ -72,9 +72,8 @@ router.post("/getusers", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(404).json({ msg: "Cannot process" });
   }
-  const { userid } = req.body;
-  console.log(userid);
-  const user = await usermodel.findById(userid);
+  const { username } = req.body;
+  const user = await usermodel.findBy({username});
   if (!user) {
     return res.status(404).json({ msg: "User not found" });
   }
@@ -83,6 +82,7 @@ router.post("/getusers", async (req, res) => {
     name: user.name,
     email: user.email,
     id: user.id,
+    username : user.username
   });
 });
 module.exports = router;
