@@ -260,7 +260,7 @@ const ChatLayout = () => {
               >
                 <FaPlus />
               </button>
-            )}5
+            )}
           </div>
 
           <div
