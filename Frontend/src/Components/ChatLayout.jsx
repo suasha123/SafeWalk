@@ -54,10 +54,15 @@ const ChatLayout = () => {
     }
   };
   useEffect(() => {
-    if (chatref.current) {
-      chatref.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
+    const timeout = setTimeout(() => {
+      if (chatref.current) {
+        chatref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 0); 
+
+    return () => clearTimeout(timeout);
+  }, [contacts, groupChats]);
+
   const loadGroups = async () => {
     try {
       const res = await fetch(
