@@ -8,7 +8,7 @@ import { SplashScreen } from "./SplashScreen";
 import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
 import { GroupOverlayModal } from "./Addgroupoverlay";
-
+import { useRef } from "react";
 const ChatLayout = () => {
   const { isLoggedIn, loading } = useAuth();
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const ChatLayout = () => {
   const [contacts, setContacts] = useState(null);
   const [groupChats, setGroupChats] = useState([]);
   const [searching, setSearching] = useState(false);
-
+  const chatref = useRef(null);
   const isSearching = searchResults !== null;
   const displayList = isSearching
     ? searchResults
@@ -39,9 +39,12 @@ const ChatLayout = () => {
 
   const loadContacts = async () => {
     try {
-      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getaddedchat", {
-        credentials: "include",
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/getaddedchat",
+        {
+          credentials: "include",
+        }
+      );
       if (res.ok) {
         const data = await res.json();
         setContacts(data.userslist);
@@ -50,12 +53,23 @@ const ChatLayout = () => {
       console.error(err);
     }
   };
+  useEffect(() => {
+    if (chatref.current) {
+      chatref.current.scrollIntoView({ behavior: "smooth" });
+    }
+    return () => {
+    chatref.current = null;
+  };
+  }, [currentChat]);
 
   const loadGroups = async () => {
     try {
-      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getgroups", {
-        credentials: "include",
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/getgroups",
+        {
+          credentials: "include",
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         setGroupChats(data.groups);
@@ -98,12 +112,15 @@ const ChatLayout = () => {
     setSearching(true);
     setSearchResults(null);
     try {
-      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username: searchTerm }),
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/getusers",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username: searchTerm }),
+        }
+      );
       const result = await res.json();
       if (res.ok) setSearchResults([result]);
       else setSearchResults([]);
@@ -131,7 +148,12 @@ const ChatLayout = () => {
       <NavBar />
       <div className="full-center-wrapper">
         <div className="main-chat-layout">
-          <div className={`sidebar ${isMobile && currentChat ? "hidden-on-mobile" : ""}`}>
+          <div
+            ref={chatref}
+            className={`sidebar ${
+              isMobile && currentChat ? "hidden-on-mobile" : ""
+            }`}
+          >
             <div className="sidebar-header">
               <button
                 className={`tab-btn ${selectedTab === "chats" ? "active" : ""}`}
@@ -144,7 +166,9 @@ const ChatLayout = () => {
                 Chats
               </button>
               <button
-                className={`tab-btn ${selectedTab === "groups" ? "active" : ""}`}
+                className={`tab-btn ${
+                  selectedTab === "groups" ? "active" : ""
+                }`}
                 onClick={() => {
                   setSelectedTab("groups");
                   clearSearch();
@@ -218,7 +242,8 @@ const ChatLayout = () => {
                     <div
                       key={item._id || item.id}
                       className={`contact ${
-                        currentChat?._id === item._id || currentChat?.id === item.id
+                        currentChat?._id === item._id ||
+                        currentChat?.id === item.id
                           ? "active"
                           : ""
                       }`}
@@ -265,7 +290,11 @@ const ChatLayout = () => {
             )}
           </div>
 
-          <div className={`chat-area ${isMobile && !currentChat ? "hidden-on-mobile" : ""}`}>
+          <div
+            className={`chat-area ${
+              isMobile && !currentChat ? "hidden-on-mobile" : ""
+            }`}
+          >
             {currentChat ? (
               <ChatWindow
                 selectedUser={currentChat}
@@ -281,7 +310,9 @@ const ChatLayout = () => {
           </div>
         </div>
       </div>
-      {showGroupModal && <GroupOverlayModal onClose={() => setShowGroupModal(false)} />}
+      {showGroupModal && (
+        <GroupOverlayModal onClose={() => setShowGroupModal(false)} />
+      )}
     </>
   );
 };
