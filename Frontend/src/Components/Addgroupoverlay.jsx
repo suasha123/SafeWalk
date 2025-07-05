@@ -43,6 +43,8 @@ export const GroupOverlayModal = ({ onClose }) => {
       );
       if (res.ok) {
         console.log(res);
+        enqueueSnackbar("Group Created Succesfully" , {variant : "success"});
+        onClose();
       }
     } catch (err) {
       console.log(err);
