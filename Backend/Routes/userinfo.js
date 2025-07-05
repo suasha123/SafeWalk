@@ -18,7 +18,7 @@ router.post("/joingrp", async (req, res) => {
     const userId = req.user._id;
     const { inviteCode } = req.body;
 
-    const grp = await GroupModal.findOne({ invitecode: inviteCode }); // ✅ use findOne
+    const grp = await GroupModal.findOne({ invitecode: inviteCode });
 
     if (!grp) {
       return res.status(403).json({ msg: "No Group exists" });

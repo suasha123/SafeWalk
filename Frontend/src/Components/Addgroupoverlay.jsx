@@ -21,7 +21,7 @@ export const GroupOverlayModal = ({ onClose }) => {
 
   const handleJoinGroup = async () => {
     try {
-      const res = await fetch("/api/joingrp", {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/joingrp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
