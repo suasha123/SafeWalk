@@ -36,22 +36,20 @@ const ChatWindow = ({ selectedUser, onBack }) => {
 
     socket.emit("sendmsg", msgobj, (ack) => {
       if (!ack.ok) {
-        enqueueSnackbar("Message not sent.", {
-          variant: "error",
-        });
+        enqueueSnackbar("Message not sent.", { variant: "error" });
       }
     });
     setNewMessage("");
   };
 
-  // Fetch conversation from backend
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`https://safewalk-xbkj.onrender.com/api/messages/${selectedUser._id}`, {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `https://safewalk-xbkj.onrender.com/api/messages/${selectedUser._id}`,
+          { credentials: "include" }
+        );
         const data = await res.json();
 
         const formatted = data.messages.map((msg) => ({
@@ -60,7 +58,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
           fromSelf: msg.from !== selectedUser._id,
         }));
 
-        // Merge pending socket messages if any
         const finalMessages = [...formatted, ...pendingSocketMessages.current];
         pendingSocketMessages.current = [];
         setreceivedmsg(finalMessages);
@@ -74,7 +71,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     if (selectedUser?._id) fetchMessages();
   }, [selectedUser]);
 
-  // Handle incoming live messages
   useEffect(() => {
     const handleReceive = (data) => {
       const incoming = {
@@ -96,6 +92,14 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     return () => socket.off("receivemsg", handleReceive);
   }, [loading, selectedUser, socket]);
 
+  const renderAvatar = (source, fallbackChar) => {
+    return source ? (
+      <img src={source} className="avatar-img" alt="profile" />
+    ) : (
+      fallbackChar.toUpperCase()
+    );
+  };
+
   return (
     <div className="chat-box">
       <div className="chat-header">
@@ -105,18 +109,9 @@ const ChatWindow = ({ selectedUser, onBack }) => {
           </button>
         )}
         <div className="avatar">
-          {selectedUser.profile ? (
-            <img
-              src={selectedUser.profile}
-              className="avatar-img"
-              alt="profile"
-            />
-          ) : (
-            (
-              selectedUser.name?.charAt(0) ||
-              selectedUser.email?.charAt(0) ||
-              "?"
-            ).toUpperCase()
+          {renderAvatar(
+            selectedUser.profile || selectedUser.groupimg,
+            selectedUser.name?.charAt(0) || selectedUser.email?.charAt(0) || "?"
           )}
         </div>
         <div className="chat-title">{selectedUser.name}</div>
@@ -138,36 +133,20 @@ const ChatWindow = ({ selectedUser, onBack }) => {
             >
               {!msg.fromSelf && (
                 <div className="avatar">
-                  {selectedUser.profile ? (
-                    <img
-                      src={selectedUser.profile}
-                      className="avatar-img"
-                      alt="profile"
-                    />
-                  ) : (
-                    (
-                      selectedUser.name?.charAt(0) ||
+                  {renderAvatar(
+                    selectedUser.profile || selectedUser.groupimg,
+                    selectedUser.name?.charAt(0) ||
                       selectedUser.email?.charAt(0) ||
                       "?"
-                    ).toUpperCase()
                   )}
                 </div>
               )}
               <div className="message-bubble">{msg.message}</div>
               {msg.fromSelf && (
                 <div className="avatar self-avatar">
-                  {user?.profile ? (
-                    <img
-                      src={user.profile}
-                      className="avatar-img"
-                      alt="profile"
-                    />
-                  ) : (
-                    (
-                      user?.name?.charAt(0) ||
-                      user?.email?.charAt(0) ||
-                      "?"
-                    ).toUpperCase()
+                  {renderAvatar(
+                    user?.profile,
+                    user?.name?.charAt(0) || user?.email?.charAt(0) || "?"
                   )}
                 </div>
               )}

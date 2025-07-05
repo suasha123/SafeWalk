@@ -30,6 +30,22 @@ router.post("/addgroup", parser.single("groupimg"), async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 });
+router.get("/getgroups", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
+
+    const userId = req.session.passport.user;
+
+    const groups = await GroupModal.find({ member: userId });
+
+    res.status(200).json({ groups });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server Error" });
+  }
+});
 router.get("/messages/:userId", async (req, res) => {
   try {
     const currentuserId = req.session?.passport?.user;
