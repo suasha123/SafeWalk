@@ -19,8 +19,14 @@ export const GroupOverlayModal = ({ onClose }) => {
     }
   };
 
-  const handleJoinGroup = () => {
+  const handleJoinGroup = async() => {
+    try{
+    const res = await fetch('/api/joingrp' , )
     alert(`Joining group with code: ${inviteCode}`);
+    }
+    catch(err){
+
+    }
     // Add API call
   };
 

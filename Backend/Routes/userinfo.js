@@ -57,6 +57,15 @@ router.get("/groupmsg/:groupId", async (req, res) => {
 
     const groupId = req.params.groupId;
 
+    const isUserInGroup = await GroupModal.findOne({
+      _id: groupId,
+      member: currentuserId
+    });
+
+    if (!isUserInGroup) {
+      return res.status(403).json({ msg: "Unauthorized" });
+    }
+
     const messages = await GroupChatModel.find({ group: groupId })
       .populate("from", "name profile")
       .sort({ createdAt: 1 });
@@ -75,6 +84,7 @@ router.get("/groupmsg/:groupId", async (req, res) => {
     res.status(500).json({ msg: "Failed to fetch messages" });
   }
 });
+
 router.get("/messages/:userId", async (req, res) => {
   try {
     const currentuserId = req.session?.passport?.user;
