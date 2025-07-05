@@ -19,13 +19,17 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   const handleSend = () => {
     if (newMessage.trim() === "") return;
     if (!socket?.connected) {
-      enqueueSnackbar("You're offline. Message not sent.", { variant: "error" });
+      enqueueSnackbar("You're offline. Message not sent.", {
+        variant: "error",
+      });
       return;
     }
 
     const msgobj = {
       msg: newMessage,
-      ...(isGroupChat ? { groupId: selectedUser._id } : { to: selectedUser._id }),
+      ...(isGroupChat
+        ? { groupId: selectedUser._id }
+        : { to: selectedUser._id }),
     };
 
     setreceivedmsg((prev) => [
@@ -78,14 +82,15 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     const formatted = rawMessages.map((msg) => {
       //const fromId = typeof msg.from === "object" ? msg.from?._id : msg.from;
       const isSelf = msg.from === user.id;
-      
+
       return {
         id: msg._id,
         message: msg.msg,
         fromSelf: isSelf,
         profile: isGroupChat
           ? msg.profile
-          :  isSelf ?  user.profile
+          : isSelf
+          ? user.profile
           : selectedUser.profile,
       };
     });
@@ -158,6 +163,20 @@ const ChatWindow = ({ selectedUser, onBack }) => {
           )}
         </div>
         <div className="chat-title">{selectedUser.name}</div>
+        {isGroupChat && selectedUser.member?.length > 0 && (
+          <div className="group-members-line">
+            {selectedUser.member.slice(0, Math.min(selectedUser.member?.length , 5)).map((m) => (
+              <span key={m._id} className="group-member-name">
+                @{m.username}
+              </span>
+            ))}
+            {selectedUser.member.length > 5 && (
+              <span className="group-member-more">
+                +{selectedUser.member.length - 5} more
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="chat-messages">
@@ -170,7 +189,9 @@ const ChatWindow = ({ selectedUser, onBack }) => {
           receivedmsg.map((msg) => (
             <div
               key={msg.id}
-              className={`chat-message ${msg.fromSelf ? "from-self" : "from-other"}`}
+              className={`chat-message ${
+                msg.fromSelf ? "from-self" : "from-other"
+              }`}
             >
               {!msg.fromSelf && (
                 <div className="avatar">
@@ -180,9 +201,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
                   )}
                 </div>
               )}
-              <div className="message-bubble">
-                {msg.message}
-              </div>
+              <div className="message-bubble">{msg.message}</div>
               {msg.fromSelf && (
                 <div className="avatar self-avatar">
                   {renderAvatar(

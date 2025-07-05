@@ -526,3 +526,30 @@ body {
     }
 
 }
+
+.group-members-line {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: #ccc;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-left: 48px; /* aligns under avatar */
+}
+
+.group-member-name {
+    background-color: #2f2c45;
+    color: #aaa;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+    font-size: 0.75rem;
+}
+
+.group-member-more {
+    color: #888;
+    font-style: italic;
+    font-size: 0.75rem;
+    padding-left: 4px;
+    align-self: center;
+}
