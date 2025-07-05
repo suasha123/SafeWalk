@@ -191,7 +191,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
       <div className="chat-input-box">
         <input
           type="text"
-          placeholder="Type your message..."
+          placeholder="Type your message.."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
