@@ -93,7 +93,7 @@ router.get("/groupmsg/:groupId", async (req, res) => {
     }
 
     const messages = await GroupChatModel.find({ group: groupId })
-      .populate("from", "name")
+      .populate("from", "name profile")
       .sort({ createdAt: 1 });
 
     const formatted = messages.map((msg) => ({
