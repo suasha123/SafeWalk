@@ -57,8 +57,7 @@ const ChatLayout = () => {
     if (chatref.current) {
       chatref.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [currentChat]);
-
+  }, []);
   const loadGroups = async () => {
     try {
       const res = await fetch(
@@ -144,9 +143,8 @@ const ChatLayout = () => {
     <>
       <NavBar />
       <div className="full-center-wrapper">
-        <div className="main-chat-layout">
+        <div ref={chatref} className="main-chat-layout">
           <div
-            ref={chatref}
             className={`sidebar ${
               isMobile && currentChat ? "hidden-on-mobile" : ""
             }`}
