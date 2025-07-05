@@ -13,7 +13,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   const [loading, setLoading] = useState(true);
   const pendingSocketMessages = useRef([]);
   const joinedGroups = useRef(new Set());
-
+  const messagesEndRef = useRef(null);
   const isGroupChat = !!selectedUser.groupimg;
 
   const handleSend = () => {
@@ -140,6 +140,12 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     return () => socket.off("receivemsg", handleReceive);
   }, [loading, selectedUser, socket, isGroupChat, user]);
 
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [receivedmsg]);
+
   const renderAvatar = (source, fallbackChar) => {
     return source && source.trim() !== "" ? (
       <img src={source} className="avatar-img" alt="profile" />
@@ -192,32 +198,35 @@ const ChatWindow = ({ selectedUser, onBack }) => {
             Loading messages...
           </div>
         ) : (
-          receivedmsg.map((msg) => (
-            <div
-              key={msg.id}
-              className={`chat-message ${
-                msg.fromSelf ? "from-self" : "from-other"
-              }`}
-            >
-              {!msg.fromSelf && (
-                <div className="avatar">
-                  {renderAvatar(
-                    isGroupChat ? msg.profile : selectedUser.profile,
-                    msg.name?.charAt(0) || "?"
-                  )}
-                </div>
-              )}
-              <div className="message-bubble">{msg.message}</div>
-              {msg.fromSelf && (
-                <div className="avatar self-avatar">
-                  {renderAvatar(
-                    user?.profile,
-                    user?.name?.charAt(0) || user?.email?.charAt(0) || "?"
-                  )}
-                </div>
-              )}
-            </div>
-          ))
+          <>
+            {receivedmsg.map((msg) => (
+              <div
+                key={msg.id}
+                className={`chat-message ${
+                  msg.fromSelf ? "from-self" : "from-other"
+                }`}
+              >
+                {!msg.fromSelf && (
+                  <div className="avatar">
+                    {renderAvatar(
+                      isGroupChat ? msg.profile : selectedUser.profile,
+                      msg.name?.charAt(0) || "?"
+                    )}
+                  </div>
+                )}
+                <div className="message-bubble">{msg.message}</div>
+                {msg.fromSelf && (
+                  <div className="avatar self-avatar">
+                    {renderAvatar(
+                      user?.profile,
+                      user?.name?.charAt(0) || user?.email?.charAt(0) || "?"
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
 
