@@ -6,6 +6,7 @@ const usermodel = require("../database/model/usermodel");
 const chatAddModel = require("../database/model/addtochatmodel");
 const chatmodel = require("../database/model/ChatModel");
 const GroupModal = require("../database/model/groupmodel");
+const {nanoid} = require("nanoid");
 const parser = multer({ storage });
 router.post("/addgroup", parser.single("groupimg"), async (req, res) => {
   try {
@@ -14,10 +15,12 @@ router.post("/addgroup", parser.single("groupimg"), async (req, res) => {
     }
     const { groupname } = req.body;
     const groupurl = req.file.path;
+    const invitecode = "SW" + nanoid(6) + Date.now().toString().slice(-4);
     const newgroup = await GroupModal.create({
       name: groupname,
       groupimg: groupurl,
       member: [req.session.passport.user],
+      invitecode,
     });
     if (newgroup) {
       res.status(200).json({ newgroup, msg: "Group Created succesufully" });
