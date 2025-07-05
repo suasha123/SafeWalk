@@ -1,222 +1,289 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import ChatWindow from "./Chattingwindowscreen";
 import "../Style/chattingwindowscreen.css";
-import { HiArrowNarrowLeft } from "react-icons/hi";
-import { IoSend } from "react-icons/io5";
+import { NavBar } from "./Navbar";
 import { useAuth } from "./AuthContext";
-import { enqueueSnackbar } from "notistack";
+import { SplashScreen } from "./SplashScreen";
+import { AddToChatButton } from "./AddtoChatButton";
+import { FaPlus } from "react-icons/fa";
+import { GroupOverlayModal } from "./Addgroupoverlay";
 
-const ChatWindow = ({ selectedUser, onBack }) => {
-  const { socket, user } = useAuth();
-  const [newMessage, setNewMessage] = useState("");
-  const [rawMessages, setRawMessages] = useState([]);
-  const [receivedmsg, setreceivedmsg] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const pendingSocketMessages = useRef([]);
-  const joinedGroups = useRef(new Set());
+const ChatLayout = () => {
+  const { isLoggedIn, loading } = useAuth();
+  const navigate = useNavigate();
+  const { tab = "chats", entityId } = useParams();
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(tab);
+  const [currentChat, setCurrentChat] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState(null);
+  const [contacts, setContacts] = useState(null);
+  const [groupChats, setGroupChats] = useState([]);
+  const [searching, setSearching] = useState(false);
 
-  const isGroupChat = !!selectedUser.groupimg;
+  const isSearching = searchResults !== null;
+  const displayList = isSearching
+    ? searchResults
+    : selectedTab === "chats"
+    ? contacts
+    : groupChats;
 
-  const handleSend = () => {
-    if (newMessage.trim() === "") return;
-    if (!socket?.connected) {
-      enqueueSnackbar("You're offline. Message not sent.", { variant: "error" });
-      return;
-    }
-
-    const msgobj = {
-      msg: newMessage,
-      ...(isGroupChat ? { groupId: selectedUser._id } : { to: selectedUser._id }),
-    };
-
-    setreceivedmsg((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        message: newMessage,
-        fromSelf: true,
-        name: user?.name || "You",
-        profile: user?.profile || "",
-      },
-    ]);
-
-    socket.emit("sendmsg", msgobj, (ack) => {
-      if (!ack.ok) {
-        enqueueSnackbar("Message not sent.", { variant: "error" });
-      }
-    });
-
-    setNewMessage("");
-  };
-
-  // ✅ First useEffect: Always fetch messages
   useEffect(() => {
-    if (!selectedUser?._id) return;
+    const resize = () => setIsMobile(window.innerWidth <= 768);
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
 
-    const fetchMessages = async () => {
-      try {
-        setLoading(true);
-        const url = isGroupChat
-          ? `https://safewalk-xbkj.onrender.com/api/groupmsg/${selectedUser._id}`
-          : `https://safewalk-xbkj.onrender.com/api/messages/${selectedUser._id}`;
-
-        const res = await fetch(url, { credentials: "include" });
+  const loadContacts = async () => {
+    try {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getaddedchat", {
+        credentials: "include",
+      });
+      if (res.ok) {
         const data = await res.json();
-        pendingSocketMessages.current = [];
-        setRawMessages(data.messages || []);
-      } catch (err) {
-        console.error("Failed to fetch messages", err);
-      } finally {
-        setLoading(false);
+        setContacts(data.userslist);
       }
-    };
-
-    fetchMessages();
-  }, [selectedUser, isGroupChat]);
-
-  // ✅ Second useEffect: Format messages after user is ready
-  useEffect(() => {
-    if (!user || rawMessages.length === 0) return;
-
-    const formatted = rawMessages.map((msg) => {
-      const isSelf = msg.from === user._id;
-
-      return {
-        id: msg._id,
-        message: msg.msg,
-        fromSelf: isSelf,
-        name: isGroupChat
-          ? msg.name
-          : isSelf
-          ? user.name
-          : selectedUser.name,
-        profile: isGroupChat
-          ? msg.profile || ""
-          : isSelf
-          ? user.profile
-          : selectedUser.profile || "",
-      };
-    });
-
-    setreceivedmsg([...formatted, ...pendingSocketMessages.current]);
-    pendingSocketMessages.current = [];
-  }, [user, rawMessages]);
-
-  useEffect(() => {
-    if (isGroupChat && socket?.connected) {
-      const groupId = selectedUser._id;
-      if (!joinedGroups.current.has(groupId)) {
-        socket.emit("joingroup", groupId);
-        joinedGroups.current.add(groupId);
-      }
+    } catch (err) {
+      console.error(err);
     }
-  }, [selectedUser, socket]);
-
-  useEffect(() => {
-    if (!user) joinedGroups.current.clear();
-  }, [user]);
-
-  useEffect(() => {
-    const handleReceive = (data) => {
-      const incoming = {
-        id: Date.now(),
-        message: data.msg,
-        fromSelf: false,
-        name: data.name || "",
-        profile: data.profile || "",
-      };
-
-      if (loading || !user) {
-        pendingSocketMessages.current.push(incoming);
-      } else {
-        const shouldRender =
-          (isGroupChat && data.groupId === selectedUser._id) ||
-          (!isGroupChat && data.from === selectedUser._id);
-
-        if (shouldRender) {
-          setreceivedmsg((prev) => [...prev, incoming]);
-        }
-      }
-    };
-
-    socket.on("receivemsg", handleReceive);
-    return () => socket.off("receivemsg", handleReceive);
-  }, [loading, selectedUser, socket, isGroupChat, user]);
-
-  const renderAvatar = (source, fallbackChar) => {
-    return source && source.trim() !== "" ? (
-      <img src={source} className="avatar-img" alt="profile" />
-    ) : (
-      <div className="avatar-fallback">{fallbackChar.toUpperCase()}</div>
-    );
   };
+
+  const loadGroups = async () => {
+    try {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getgroups", {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGroupChats(data.groups);
+      }
+    } catch (err) {
+      console.error("Failed to fetch groups", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!loading && !isLoggedIn) navigate("/");
+    if (!loading && isLoggedIn) {
+      loadContacts();
+      loadGroups();
+    }
+  }, [loading, isLoggedIn]);
+
+  useEffect(() => {
+    setSelectedTab(tab);
+    if (entityId) {
+      if (tab === "chats" && contacts) {
+        const found = contacts.find((c) => c._id === entityId);
+        if (found) setCurrentChat(found);
+      } else if (tab === "groups" && groupChats) {
+        const found = groupChats.find((g) => g._id === entityId);
+        if (found) setCurrentChat(found);
+      }
+    } else {
+      setCurrentChat(null);
+    }
+  }, [tab, entityId, contacts, groupChats]);
+
+  const handleClickItem = (item) => {
+    setCurrentChat(item);
+    navigate(`/chat/${selectedTab}/${item._id || item.id}`);
+  };
+
+  const handleNewSearch = async () => {
+    if (!searchTerm.trim()) return;
+    setSearching(true);
+    setSearchResults(null);
+    try {
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username: searchTerm }),
+      });
+      const result = await res.json();
+      if (res.ok) setSearchResults([result]);
+      else setSearchResults([]);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setSearchResults(null);
+  };
+
+  const goBack = () => {
+    setCurrentChat(null);
+    navigate(`/chat/${selectedTab}`);
+  };
+
+  if (loading) return <SplashScreen />;
 
   return (
-    <div className="chat-box">
-      <div className="chat-header">
-        {onBack && (
-          <button className="back-btn" onClick={onBack}>
-            <HiArrowNarrowLeft className="back-icon" />
-          </button>
-        )}
-        <div className="avatar">
-          {renderAvatar(
-            isGroupChat ? selectedUser.groupimg : selectedUser.profile,
-            selectedUser.name?.charAt(0) || selectedUser.email?.charAt(0) || "?"
-          )}
-        </div>
-        <div className="chat-title">{selectedUser.name}</div>
-      </div>
+    <>
+      <NavBar />
+      <div className="full-center-wrapper">
+        <div className="main-chat-layout">
+          <div className={`sidebar ${isMobile && currentChat ? "hidden-on-mobile" : ""}`}>
+            <div className="sidebar-header">
+              <button
+                className={`tab-btn ${selectedTab === "chats" ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedTab("chats");
+                  clearSearch();
+                  navigate("/chat/chats");
+                }}
+              >
+                Chats
+              </button>
+              <button
+                className={`tab-btn ${selectedTab === "groups" ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedTab("groups");
+                  clearSearch();
+                  navigate("/chat/groups");
+                }}
+              >
+                Groups
+              </button>
+            </div>
 
-      <div className="chat-messages">
-        {loading ? (
-          <div className="loading-spinner">
-            <div className="spinner-circle"></div>
-            Loading messages...
-          </div>
-        ) : (
-          receivedmsg.map((msg) => (
-            <div
-              key={msg.id}
-              className={`chat-message ${msg.fromSelf ? "from-self" : "from-other"}`}
-            >
-              {!msg.fromSelf && (
-                <div className="avatar">
-                  {renderAvatar(msg.profile, msg.name?.charAt(0) || "?")}
-                </div>
-              )}
-              <div className="message-bubble">
-                {isGroupChat && !msg.fromSelf && (
-                  <div className="group-sender-name">{msg.name}</div>
+            <div className="new-chat-container">
+              <div className="search-wrapper">
+                <input
+                  type="text"
+                  placeholder="Search username..."
+                  className="new-chat-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button className="clear-search-btn" onClick={clearSearch}>
+                    ✕
+                  </button>
                 )}
-                {msg.message}
               </div>
-              {msg.fromSelf && (
-                <div className="avatar self-avatar">
-                  {renderAvatar(
-                    user?.profile,
-                    user?.name?.charAt(0) || user?.email?.charAt(0) || "?"
-                  )}
+              <button
+                className="new-chat-btn"
+                onClick={handleNewSearch}
+                disabled={searching}
+                style={{
+                  backgroundColor: searching ? "#4c3ba3" : "#7e4fff",
+                  cursor: searching ? "not-allowed" : "pointer",
+                }}
+              >
+                {searching ? "Searching..." : "Search"}
+              </button>
+            </div>
+
+            {!searching && (
+              <h2 className="sidebar-title">
+                {isSearching
+                  ? "Search Results"
+                  : selectedTab === "chats"
+                  ? "Your Chats"
+                  : "Your Groups"}
+              </h2>
+            )}
+
+            <div className="sidebar-scroll">
+              {searching ? (
+                <div className="loading-spinner">
+                  <div className="spinner-circle"></div>
+                  <p>Searching...</p>
                 </div>
+              ) : contacts === null && selectedTab === "chats" ? (
+                <div className="loading-spinner">
+                  <div className="spinner-circle"></div>
+                  <p>Loading Chats...</p>
+                </div>
+              ) : displayList.length === 0 ? (
+                <p style={{ color: "#aaa", padding: "10px" }}>
+                  {isSearching ? "No user found." : "No contacts."}
+                </p>
+              ) : (
+                displayList.map((item) => {
+                  const isAdded = contacts?.some(
+                    (c) => c._id === item._id || c._id === item.id
+                  );
+
+                  return (
+                    <div
+                      key={item._id || item.id}
+                      className={`contact ${
+                        currentChat?._id === item._id || currentChat?.id === item.id
+                          ? "active"
+                          : ""
+                      }`}
+                      onClick={() => handleClickItem(item)}
+                    >
+                      <div className="avatar">
+                        {item.profile || item.groupimg ? (
+                          <img
+                            src={item.profile || item.groupimg}
+                            className="avatar-img"
+                            alt="profile"
+                          />
+                        ) : (
+                          <div className="avatar-fallback">
+                            {(
+                              item.name?.charAt(0) ||
+                              item.email?.charAt(0) ||
+                              "?"
+                            ).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="contact-info-wrapper">
+                        <div className="contact-name">{item.name}</div>
+                        {isSearching && !isAdded && selectedTab === "chats" && (
+                          <AddToChatButton
+                            contact={item}
+                            onAdded={loadContacts}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
-          ))
-        )}
-      </div>
+            {selectedTab === "groups" && (
+              <button
+                className="create-group-fab"
+                onClick={() => setShowGroupModal(true)}
+              >
+                <FaPlus />
+              </button>
+            )}
+          </div>
 
-      <div className="chat-input-box">
-        <input
-          type="text"
-          placeholder="Type your message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        />
-        <button className="send-btn" onClick={handleSend}>
-          <IoSend />
-        </button>
+          <div className={`chat-area ${isMobile && !currentChat ? "hidden-on-mobile" : ""}`}>
+            {currentChat ? (
+              <ChatWindow
+                selectedUser={currentChat}
+                onBack={isMobile ? goBack : null}
+              />
+            ) : (
+              <div className="placeholder">
+                <p className="placeholder-text">
+                  Select a chat to start messaging
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+      {showGroupModal && <GroupOverlayModal onClose={() => setShowGroupModal(false)} />}
+    </>
   );
 };
 
-export default ChatWindow;
+export default ChatLayout;

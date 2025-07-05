@@ -8,6 +8,7 @@ import { enqueueSnackbar } from "notistack";
 const ChatWindow = ({ selectedUser, onBack }) => {
   const { socket, user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
+  const [rawMessages, setRawMessages] = useState([]);
   const [receivedmsg, setreceivedmsg] = useState([]);
   const [loading, setLoading] = useState(true);
   const pendingSocketMessages = useRef([]);
@@ -47,8 +48,9 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     setNewMessage("");
   };
 
+  // ✅ First useEffect: Always fetch messages
   useEffect(() => {
-    if (!selectedUser?._id || !user?._id) return;
+    if (!selectedUser?._id) return;
 
     const fetchMessages = async () => {
       try {
@@ -59,24 +61,8 @@ const ChatWindow = ({ selectedUser, onBack }) => {
 
         const res = await fetch(url, { credentials: "include" });
         const data = await res.json();
-
-        const formatted = data.messages.map((msg) => {
-          const isSelf = msg.from === user._id;
-          return {
-            id: msg._id,
-            message: msg.msg,
-            fromSelf: isSelf,
-            name: msg.name || (isSelf ? user.name : selectedUser.name),
-            profile: isSelf
-              ? user.profile
-              : isGroupChat
-              ? msg.profile || ""
-              : selectedUser.profile || "",
-          };
-        });
-
-        setreceivedmsg([...formatted, ...pendingSocketMessages.current]);
         pendingSocketMessages.current = [];
+        setRawMessages(data.messages || []);
       } catch (err) {
         console.error("Failed to fetch messages", err);
       } finally {
@@ -85,7 +71,35 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     };
 
     fetchMessages();
-  }, [selectedUser, user, isGroupChat]);
+  }, [selectedUser, isGroupChat]);
+
+  // ✅ Second useEffect: Format messages after user is ready
+  useEffect(() => {
+    if (!user || rawMessages.length === 0) return;
+
+    const formatted = rawMessages.map((msg) => {
+      const isSelf = msg.from === user._id;
+
+      return {
+        id: msg._id,
+        message: msg.msg,
+        fromSelf: isSelf,
+        name: isGroupChat
+          ? msg.name
+          : isSelf
+          ? user.name
+          : selectedUser.name,
+        profile: isGroupChat
+          ? msg.profile || ""
+          : isSelf
+          ? user.profile
+          : selectedUser.profile || "",
+      };
+    });
+
+    setreceivedmsg([...formatted, ...pendingSocketMessages.current]);
+    pendingSocketMessages.current = [];
+  }, [user, rawMessages]);
 
   useEffect(() => {
     if (isGroupChat && socket?.connected) {
@@ -98,9 +112,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   }, [selectedUser, socket]);
 
   useEffect(() => {
-    if (!user) {
-      joinedGroups.current.clear();
-    }
+    if (!user) joinedGroups.current.clear();
   }, [user]);
 
   useEffect(() => {
@@ -113,7 +125,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         profile: data.profile || "",
       };
 
-      if (loading) {
+      if (loading || !user) {
         pendingSocketMessages.current.push(incoming);
       } else {
         const shouldRender =
@@ -128,7 +140,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
 
     socket.on("receivemsg", handleReceive);
     return () => socket.off("receivemsg", handleReceive);
-  }, [loading, selectedUser, socket, isGroupChat]);
+  }, [loading, selectedUser, socket, isGroupChat, user]);
 
   const renderAvatar = (source, fallbackChar) => {
     return source && source.trim() !== "" ? (
