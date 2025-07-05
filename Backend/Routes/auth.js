@@ -122,8 +122,9 @@ router.post("/login", (req, res, next) => {
 });
 router.get("/check", (req, res) => {
   if (req.isAuthenticated()) {
-    const { email, profile, name , username} = req.user;
+    const { email, profile, name , username , _id} = req.user;
     return res.status(200).json({
+      id : _id,
       useremail: email,
       name,
       profile,

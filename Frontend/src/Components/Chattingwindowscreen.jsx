@@ -76,19 +76,18 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     if (!user) return;
 
     const formatted = rawMessages.map((msg) => {
-      const fromId = typeof msg.from === "object" ? msg.from?._id : msg.from;
-      const isSelf = fromId === user._id;
-
+      //const fromId = typeof msg.from === "object" ? msg.from?._id : msg.from;
+      const isSelf = msg.from === user.id;
+      
       return {
         id: msg._id,
         message: msg.msg,
         fromSelf: isSelf,
         name: isGroupChat ? msg.name : isSelf ? user.name : selectedUser.name,
         profile: isGroupChat
-          ? msg.profile || ""
-          : isSelf
-          ? user.profile
-          : selectedUser.profile || "",
+          ? msg.profile
+          :  isSelf ?  user.profile
+          : selectedUser.profile,
       };
     });
 
