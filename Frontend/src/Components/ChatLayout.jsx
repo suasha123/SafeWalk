@@ -57,9 +57,6 @@ const ChatLayout = () => {
     if (chatref.current) {
       chatref.current.scrollIntoView({ behavior: "smooth" });
     }
-    return () => {
-    chatref.current = null;
-  };
   }, [currentChat]);
 
   const loadGroups = async () => {
