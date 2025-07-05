@@ -37,14 +37,13 @@ export const GroupOverlayModal = ({ onClose }) => {
         "https://safewalk-xbkj.onrender.com/api/addgroup",
         {
           method: "POST",
-          body: FormData,
+          body: fromdata,
           credentials: "include",
         }
       );
       if (res.ok) {
         console.log(res);
         enqueueSnackbar("Group Created Succesfully" , {variant : "success"});
-        onClose();
       }
     } catch (err) {
       console.log(err);
