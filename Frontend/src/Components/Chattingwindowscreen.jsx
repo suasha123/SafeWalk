@@ -48,7 +48,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     setNewMessage("");
   };
 
-  // ✅ First useEffect: Always fetch messages
   useEffect(() => {
     if (!selectedUser?._id) return;
 
@@ -73,7 +72,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     fetchMessages();
   }, [selectedUser, isGroupChat]);
 
-  // ✅ Second useEffect: Format messages after user is ready
   useEffect(() => {
     if (!user || rawMessages.length === 0) return;
 
@@ -181,7 +179,10 @@ const ChatWindow = ({ selectedUser, onBack }) => {
             >
               {!msg.fromSelf && (
                 <div className="avatar">
-                  {renderAvatar(msg.profile, msg.name?.charAt(0) || "?")}
+                  {renderAvatar(
+                    isGroupChat ? msg.profile : selectedUser.profile,
+                    msg.name?.charAt(0) || selectedUser.name?.charAt(0) || "?"
+                  )}
                 </div>
               )}
               <div className="message-bubble">
