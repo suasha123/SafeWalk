@@ -18,17 +18,13 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   const handleSend = () => {
     if (newMessage.trim() === "") return;
     if (!socket?.connected) {
-      enqueueSnackbar("You're offline. Message not sent.", {
-        variant: "error",
-      });
+      enqueueSnackbar("You're offline. Message not sent.", { variant: "error" });
       return;
     }
 
     const msgobj = {
       msg: newMessage,
-      ...(isGroupChat
-        ? { groupId: selectedUser._id }
-        : { to: selectedUser._id }),
+      ...(isGroupChat ? { groupId: selectedUser._id } : { to: selectedUser._id }),
     };
 
     setreceivedmsg((prev) => [
@@ -65,9 +61,14 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         const formatted = data.messages.map((msg) => ({
           id: msg._id,
           message: msg.msg,
-          fromSelf: msg.from !== selectedUser._id,
-          name: msg.name || "",
-          profile: msg.profile || "",
+          fromSelf: msg.from === user._id,
+          name: msg.name || (msg.from === user._id ? user.name : selectedUser.name),
+          profile:
+            msg.from === user._id
+              ? user.profile
+              : isGroupChat
+              ? msg.profile || ""
+              : selectedUser.profile || "",
         }));
 
         const finalMessages = [...formatted, ...pendingSocketMessages.current];
@@ -81,7 +82,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     };
 
     if (selectedUser?._id) fetchMessages();
-  }, [selectedUser]);
+  }, [selectedUser, isGroupChat, user]);
 
   useEffect(() => {
     if (isGroupChat && socket?.connected) {
@@ -124,13 +125,13 @@ const ChatWindow = ({ selectedUser, onBack }) => {
 
     socket.on("receivemsg", handleReceive);
     return () => socket.off("receivemsg", handleReceive);
-  }, [loading, selectedUser, socket]);
+  }, [loading, selectedUser, socket, isGroupChat]);
 
   const renderAvatar = (source, fallbackChar) => {
-    return source ? (
+    return source && source.trim() !== "" ? (
       <img src={source} className="avatar-img" alt="profile" />
     ) : (
-      fallbackChar.toUpperCase()
+      <div className="avatar-fallback">{fallbackChar.toUpperCase()}</div>
     );
   };
 
@@ -144,7 +145,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         )}
         <div className="avatar">
           {renderAvatar(
-            selectedUser.profile || selectedUser.groupimg,
+            isGroupChat ? selectedUser.groupimg : selectedUser.profile,
             selectedUser.name?.charAt(0) || selectedUser.email?.charAt(0) || "?"
           )}
         </div>
@@ -161,9 +162,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
           receivedmsg.map((msg) => (
             <div
               key={msg.id}
-              className={`chat-message ${
-                msg.fromSelf ? "from-self" : "from-other"
-              }`}
+              className={`chat-message ${msg.fromSelf ? "from-self" : "from-other"}`}
             >
               {!msg.fromSelf && (
                 <div className="avatar">
