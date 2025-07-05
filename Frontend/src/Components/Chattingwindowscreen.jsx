@@ -76,7 +76,9 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     if (!user || rawMessages.length === 0) return;
 
     const formatted = rawMessages.map((msg) => {
-      const isSelf = msg.from === user._id;
+      // 🔍 Handle both string and object _id cases
+      const fromId = typeof msg.from === "object" ? msg.from._id : msg.from;
+      const isSelf = fromId === user._id;
 
       return {
         id: msg._id,
