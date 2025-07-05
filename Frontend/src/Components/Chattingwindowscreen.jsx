@@ -73,22 +73,17 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   }, [selectedUser, isGroupChat]);
 
   useEffect(() => {
-    if (!user || rawMessages.length === 0) return;
+    if (!user) return;
 
     const formatted = rawMessages.map((msg) => {
-      // 🔍 Handle both string and object _id cases
-      const fromId = typeof msg.from === "object" ? msg.from._id : msg.from;
+      const fromId = typeof msg.from === "object" ? msg.from?._id : msg.from;
       const isSelf = fromId === user._id;
 
       return {
         id: msg._id,
         message: msg.msg,
         fromSelf: isSelf,
-        name: isGroupChat
-          ? msg.name
-          : isSelf
-          ? user.name
-          : selectedUser.name,
+        name: isGroupChat ? msg.name : isSelf ? user.name : selectedUser.name,
         profile: isGroupChat
           ? msg.profile || ""
           : isSelf
@@ -183,7 +178,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
                 <div className="avatar">
                   {renderAvatar(
                     isGroupChat ? msg.profile : selectedUser.profile,
-                    msg.name?.charAt(0) || selectedUser.name?.charAt(0) || "?"
+                    msg.name?.charAt(0) || "?"
                   )}
                 </div>
               )}
