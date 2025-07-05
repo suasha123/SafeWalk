@@ -13,7 +13,7 @@ const addchat = require("./Controllers/addchat");
 const addGroupChat = require("./Controllers/addGroupChat");
 const { group } = require("console");
 require("dotenv").config();
-const UserModel = require("./database/model/usermodel"); 
+const UserModel = require("./database/model/usermodel");
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [];

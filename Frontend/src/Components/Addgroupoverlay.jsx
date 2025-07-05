@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import "../Style/GroupOverlayModal.css";
+import { useNavigate } from "react-router-dom";
 import { enqueueSnackbar } from "notistack";
-
 export const GroupOverlayModal = ({ onClose }) => {
   const [mode, setMode] = useState("join"); // "join" or "create"
   const [inviteCode, setInviteCode] = useState("");
   const [groupName, setGroupName] = useState("");
   const [groupImage, setGroupImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-
+  const navigate = useNavigate();
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setGroupImage(file);
@@ -19,15 +19,27 @@ export const GroupOverlayModal = ({ onClose }) => {
     }
   };
 
-  const handleJoinGroup = async() => {
-    try{
-    const res = await fetch('/api/joingrp' , )
-    alert(`Joining group with code: ${inviteCode}`);
+  const handleJoinGroup = async () => {
+    try {
+      const res = await fetch("/api/joingrp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ inviteCode }),
+        credentials: "include",
+      });
+      if (res.ok) {
+        const body = await res.json();
+        const { grplink, msg } = body;
+            onClose();
+        navigate(`/chat/groups/${grplink}`);
+      } else {
+        enqueueSnackbar(msg, { variant: "warning" });
+      }
+    } catch (err) {
+      enqueueSnackbar("Error occured", { variant: "warning" });
     }
-    catch(err){
-
-    }
-    // Add API call
   };
 
   const handleCreateGroup = async () => {
@@ -49,7 +61,7 @@ export const GroupOverlayModal = ({ onClose }) => {
       );
       if (res.ok) {
         console.log(res);
-        enqueueSnackbar("Group Created Succesfully" , {variant : "success"});
+        enqueueSnackbar("Group Created Succesfully", { variant: "success" });
       }
     } catch (err) {
       console.log(err);
