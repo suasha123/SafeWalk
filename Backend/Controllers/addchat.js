@@ -10,6 +10,9 @@ const addchat = async (msginfo) => {
         if(newchat){
             return true;
         }
+        else{
+            return false;
+        }
     }
     catch(err){
          return false;

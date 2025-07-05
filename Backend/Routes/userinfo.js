@@ -6,7 +6,8 @@ const usermodel = require("../database/model/usermodel");
 const chatAddModel = require("../database/model/addtochatmodel");
 const chatmodel = require("../database/model/ChatModel");
 const GroupModal = require("../database/model/groupmodel");
-const {nanoid} = require("nanoid");
+const { nanoid } = require("nanoid");
+const GroupChatModel = require("../database/model/GroupChatModel");
 const parser = multer({ storage });
 router.post("/addgroup", parser.single("groupimg"), async (req, res) => {
   try {
@@ -44,6 +45,34 @@ router.get("/getgroups", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server Error" });
+  }
+});
+
+router.get("/groupmsg/:groupId", async (req, res) => {
+  try {
+    const currentuserId = req.session?.passport?.user;
+    if (!currentuserId) {
+      return res.status(401).json({ msg: "Log In again" });
+    }
+
+    const groupId = req.params.groupId;
+
+    const messages = await GroupChatModel.find({ group: groupId })
+      .populate("from", "name profile")
+      .sort({ createdAt: 1 });
+
+    const formatted = messages.map((msg) => ({
+      _id: msg._id,
+      msg: msg.msg,
+      from: msg.from._id,
+      name: msg.from.name || "",
+      profile: msg.from.profile || "",
+    }));
+
+    res.status(200).json({ messages: formatted });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Failed to fetch messages" });
   }
 });
 router.get("/messages/:userId", async (req, res) => {

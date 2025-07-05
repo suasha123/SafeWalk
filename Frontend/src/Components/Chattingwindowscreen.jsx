@@ -11,6 +11,9 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   const [receivedmsg, setreceivedmsg] = useState([]);
   const [loading, setLoading] = useState(true);
   const pendingSocketMessages = useRef([]);
+  const joinedGroups = useRef(new Set());
+
+  const isGroupChat = !!selectedUser.groupimg;
 
   const handleSend = () => {
     if (newMessage.trim() === "") return;
@@ -20,9 +23,12 @@ const ChatWindow = ({ selectedUser, onBack }) => {
       });
       return;
     }
+
     const msgobj = {
       msg: newMessage,
-      to: selectedUser._id,
+      ...(isGroupChat
+        ? { groupId: selectedUser._id }
+        : { to: selectedUser._id }),
     };
 
     setreceivedmsg((prev) => [
@@ -31,6 +37,8 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         id: Date.now(),
         message: newMessage,
         fromSelf: true,
+        name: user?.name || "You",
+        profile: user?.profile || "",
       },
     ]);
 
@@ -39,6 +47,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         enqueueSnackbar("Message not sent.", { variant: "error" });
       }
     });
+
     setNewMessage("");
   };
 
@@ -46,16 +55,19 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const res = await fetch(
-          `https://safewalk-xbkj.onrender.com/api/messages/${selectedUser._id}`,
-          { credentials: "include" }
-        );
+        const url = isGroupChat
+          ? `https://safewalk-xbkj.onrender.com/api/groupmsg/${selectedUser._id}`
+          : `https://safewalk-xbkj.onrender.com/api/messages/${selectedUser._id}`;
+
+        const res = await fetch(url, { credentials: "include" });
         const data = await res.json();
 
         const formatted = data.messages.map((msg) => ({
           id: msg._id,
           message: msg.msg,
           fromSelf: msg.from !== selectedUser._id,
+          name: msg.name || "",
+          profile: msg.profile || "",
         }));
 
         const finalMessages = [...formatted, ...pendingSocketMessages.current];
@@ -72,17 +84,39 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   }, [selectedUser]);
 
   useEffect(() => {
+    if (isGroupChat && socket?.connected) {
+      const groupId = selectedUser._id;
+      if (!joinedGroups.current.has(groupId)) {
+        socket.emit("joingroup", groupId);
+        joinedGroups.current.add(groupId);
+      }
+    }
+  }, [selectedUser, socket]);
+
+  useEffect(() => {
+    if (!user) {
+      joinedGroups.current.clear();
+    }
+  }, [user]);
+
+  useEffect(() => {
     const handleReceive = (data) => {
       const incoming = {
         id: Date.now(),
         message: data.msg,
         fromSelf: false,
+        name: data.name || "",
+        profile: data.profile || "",
       };
 
       if (loading) {
         pendingSocketMessages.current.push(incoming);
       } else {
-        if (data.from === (selectedUser._id || selectedUser.id)) {
+        const shouldRender =
+          (isGroupChat && data.groupId === selectedUser._id) ||
+          (!isGroupChat && data.from === selectedUser._id);
+
+        if (shouldRender) {
           setreceivedmsg((prev) => [...prev, incoming]);
         }
       }
@@ -133,15 +167,15 @@ const ChatWindow = ({ selectedUser, onBack }) => {
             >
               {!msg.fromSelf && (
                 <div className="avatar">
-                  {renderAvatar(
-                    selectedUser.profile || selectedUser.groupimg,
-                    selectedUser.name?.charAt(0) ||
-                      selectedUser.email?.charAt(0) ||
-                      "?"
-                  )}
+                  {renderAvatar(msg.profile, msg.name?.charAt(0) || "?")}
                 </div>
               )}
-              <div className="message-bubble">{msg.message}</div>
+              <div className="message-bubble">
+                {isGroupChat && !msg.fromSelf && (
+                  <div className="group-sender-name">{msg.name}</div>
+                )}
+                {msg.message}
+              </div>
               {msg.fromSelf && (
                 <div className="avatar self-avatar">
                   {renderAvatar(

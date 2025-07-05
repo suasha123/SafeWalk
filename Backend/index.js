@@ -10,7 +10,10 @@ const MongoStore = require("connect-mongo");
 const { Server } = require("socket.io");
 const sharedSession = require("express-socket.io-session");
 const addchat = require("./Controllers/addchat");
+const addGroupChat = require("./Controllers/addGroupChat");
+const { group } = require("console");
 require("dotenv").config();
+const UserModel = require("./database/model/usermodel"); 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [];
@@ -33,7 +36,7 @@ const sessionMiddleware = session({
 });
 
 //Then use it with express
-app.set("trust proxy", 1); // ✅ Required for secure cookies on Render
+app.set("trust proxy", 1); //  Required for secure cookies on Render
 app.use(sessionMiddleware);
 
 //Then set up CORS and body parser
@@ -69,10 +72,36 @@ io.use(
 //Socket logic
 io.on("connection", (socket) => {
   const userId = socket.handshake.session?.passport?.user;
-  console.log("User ID from session:", userId);
   socket.join(userId);
+
+  socket.on("joingroup", (groupId) => {
+    socket.join(groupId);
+  });
+
   socket.on("sendmsg", async (msgObj, ack) => {
-    const { msg, to } = msgObj;
+    const { msg, to, groupId } = msgObj;
+
+    if (groupId) {
+      const res = await addGroupChat(userId, groupId, msg);
+
+      const sender = await UserModel.findById(userId).select("name profile");
+
+      if (res && sender) {
+        const newmsgobj = {
+          msg,
+          from: userId,
+          groupId,
+          name: sender.name,
+          profile: sender.profile,
+        };
+        socket.to(groupId).emit("receivemsg", newmsgobj);
+        ack && ack({ ok: true });
+      } else {
+        ack && ack({ ok: false });
+      }
+      return;
+    }
+
     const newmsobj = { msg, to, from: userId };
     const res = await addchat(newmsobj);
     if (res) {
@@ -82,6 +111,7 @@ io.on("connection", (socket) => {
       ack && ack({ ok: false });
     }
   });
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
