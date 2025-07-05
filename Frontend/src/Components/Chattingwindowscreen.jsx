@@ -48,6 +48,8 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   };
 
   useEffect(() => {
+    if (!selectedUser?._id || !user?._id) return;
+
     const fetchMessages = async () => {
       try {
         setLoading(true);
@@ -58,22 +60,23 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         const res = await fetch(url, { credentials: "include" });
         const data = await res.json();
 
-        const formatted = data.messages.map((msg) => ({
-          id: msg._id,
-          message: msg.msg,
-          fromSelf: msg.from === user._id,
-          name: msg.name || (msg.from === user._id ? user.name : selectedUser.name),
-          profile:
-            msg.from === user._id
+        const formatted = data.messages.map((msg) => {
+          const isSelf = msg.from === user._id;
+          return {
+            id: msg._id,
+            message: msg.msg,
+            fromSelf: isSelf,
+            name: msg.name || (isSelf ? user.name : selectedUser.name),
+            profile: isSelf
               ? user.profile
               : isGroupChat
               ? msg.profile || ""
               : selectedUser.profile || "",
-        }));
+          };
+        });
 
-        const finalMessages = [...formatted, ...pendingSocketMessages.current];
+        setreceivedmsg([...formatted, ...pendingSocketMessages.current]);
         pendingSocketMessages.current = [];
-        setreceivedmsg(finalMessages);
       } catch (err) {
         console.error("Failed to fetch messages", err);
       } finally {
@@ -81,8 +84,8 @@ const ChatWindow = ({ selectedUser, onBack }) => {
       }
     };
 
-    if (selectedUser?._id) fetchMessages();
-  }, [selectedUser, isGroupChat, user]);
+    fetchMessages();
+  }, [selectedUser, user, isGroupChat]);
 
   useEffect(() => {
     if (isGroupChat && socket?.connected) {
@@ -191,7 +194,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
       <div className="chat-input-box">
         <input
           type="text"
-          placeholder="Type your message.."
+          placeholder="Type your message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
