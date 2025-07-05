@@ -162,21 +162,27 @@ const ChatWindow = ({ selectedUser, onBack }) => {
             selectedUser.name?.charAt(0) || selectedUser.email?.charAt(0) || "?"
           )}
         </div>
-        <div className="chat-title">{selectedUser.name}</div>
-        {isGroupChat && selectedUser.member?.length > 0 && (
-          <div className="group-members-line">
-            {selectedUser.member.slice(0, Math.min(selectedUser.member?.length , 5)).map((m) => (
-              <span key={m._id} className="group-member-name">
-                @{m.username}
-              </span>
-            ))}
-            {selectedUser.member.length > 5 && (
-              <span className="group-member-more">
-                +{selectedUser.member.length - 5} more
-              </span>
-            )}
-          </div>
-        )}
+
+        <div className="chat-header-content">
+          <div className="chat-title">{selectedUser.name}</div>
+
+          {isGroupChat && (
+            <div className="group-members-scroll">
+              {selectedUser.member
+                .slice(0, Math.min(selectedUser.member.length, 5))
+                .map((m) => (
+                  <span key={m._id} className="group-member-name">
+                    @{m.username}
+                  </span>
+                ))}
+              {selectedUser.member.length > 5 && (
+                <span className="group-member-more">
+                  +{selectedUser.member.length - 5} more
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="chat-messages">

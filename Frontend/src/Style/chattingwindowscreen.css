@@ -537,19 +537,27 @@ body {
     padding-left: 48px; /* aligns under avatar */
 }
 
-.group-member-name {
-    background-color: #2f2c45;
-    color: #aaa;
-    padding: 2px 8px;
-    border-radius: 12px;
-    white-space: nowrap;
-    font-size: 0.75rem;
+.chat-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
+.group-members-scroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.group-member-name,
 .group-member-more {
-    color: #888;
-    font-style: italic;
-    font-size: 0.75rem;
-    padding-left: 4px;
-    align-self: center;
+  font-size: 0.75rem;
+  color: #bbb;
+  background-color: #2d2b41;
+  padding: 4px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
