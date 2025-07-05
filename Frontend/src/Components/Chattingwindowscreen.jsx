@@ -83,7 +83,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         id: msg._id,
         message: msg.msg,
         fromSelf: isSelf,
-        name: isGroupChat ? msg.name : isSelf ? user.name : selectedUser.name,
         profile: isGroupChat
           ? msg.profile
           :  isSelf ?  user.profile
@@ -182,9 +181,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
                 </div>
               )}
               <div className="message-bubble">
-                {isGroupChat && !msg.fromSelf && (
-                  <div className="group-sender-name">{msg.name}</div>
-                )}
                 {msg.message}
               </div>
               {msg.fromSelf && (

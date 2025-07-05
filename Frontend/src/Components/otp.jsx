@@ -42,6 +42,7 @@ export const Otp = () => {
           otpcode: otpnumber,
           email: userdeatils.email,
           password: userdeatils.password,
+          username : userdeatils.username
         }),
       });
       setotp("");

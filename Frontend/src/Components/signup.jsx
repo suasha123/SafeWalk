@@ -43,7 +43,7 @@ export const SignUp = () => {
         `https://safewalk-xbkj.onrender.com/auth/check-username?username=${value}`
       );
       const data = await res.json();
-       setUsernameAvailable(data.available);
+      setUsernameAvailable(data.available);
     } catch (err) {
       setUsernameAvailable(false);
     } finally {
@@ -54,6 +54,7 @@ export const SignUp = () => {
   const handleUsernameChange = (e) => {
     const value = e.target.value;
     setUsername(value);
+    setDetails({ ...userdeatils, username: value });
     setUsernameAvailable(null);
     clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
