@@ -6,6 +6,10 @@ const GroupSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    groupimg: {
+      type: String,
+      required: true,
+    },
     member: [
       {
         type: mongoose.Schema.Types.ObjectId,

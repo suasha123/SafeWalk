@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../Style/GroupOverlayModal.css";
+import { enqueueSnackbar } from "notistack";
 
 export const GroupOverlayModal = ({ onClose }) => {
   const [mode, setMode] = useState("join"); // "join" or "create"
@@ -23,9 +24,29 @@ export const GroupOverlayModal = ({ onClose }) => {
     // Add API call
   };
 
-  const handleCreateGroup = () => {
-    alert(`Creating group: ${groupName}`);
-    // Add API call
+  const handleCreateGroup = async () => {
+    try {
+      if (!groupName && !groupImage) {
+        enqueueSnackbar("Invalid Input", { variant: "warning" });
+        return;
+      }
+      const fromdata = new FormData();
+      fromdata.append("groupimg", groupImage);
+      fromdata.append("groupname", groupName);
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/addgroup",
+        {
+          method: "POST",
+          body: FormData,
+          credentials: "include",
+        }
+      );
+      if (res.ok) {
+        console.log(res);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (

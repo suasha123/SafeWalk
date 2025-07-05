@@ -9,7 +9,7 @@ const path = require("path");
 const MongoStore = require("connect-mongo");
 const { Server } = require("socket.io");
 const sharedSession = require("express-socket.io-session");
-const addchat = require('./Controllers/addchat');
+const addchat = require("./Controllers/addchat");
 require("dotenv").config();
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
@@ -25,7 +25,7 @@ const sessionMiddleware = session({
     ttl: 24 * 60 * 60,
   }),
   cookie: {
-    secure: true,         
+    secure: true,
     httpOnly: true,
     sameSite: "None",
     maxAge: 24 * 60 * 60 * 1000,
@@ -71,18 +71,17 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.session?.passport?.user;
   console.log("User ID from session:", userId);
   socket.join(userId);
-  socket.on("sendmsg" , async(msgObj , ack)=>{
-    const {msg , to} = msgObj;
-    const newmsobj = {msg , to , from : userId}
+  socket.on("sendmsg", async (msgObj, ack) => {
+    const { msg, to } = msgObj;
+    const newmsobj = { msg, to, from: userId };
     const res = await addchat(newmsobj);
-    if(res){
-       io.to(to).emit("receivemsg" , newmsobj);
-       ack && ack({ok : true});
+    if (res) {
+      io.to(to).emit("receivemsg", newmsobj);
+      ack && ack({ ok: true });
+    } else {
+      ack && ack({ ok: false });
     }
-    else{
-      ack && ack({ok : false});
-    }
-  })
+  });
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
@@ -91,7 +90,7 @@ io.on("connection", (socket) => {
 //Routes
 app.use("/upload", require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
-app.use("/api", require("./Routes/userinfo"))
+app.use("/api", require("./Routes/userinfo"));
 app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
