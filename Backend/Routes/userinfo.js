@@ -29,13 +29,12 @@ router.post("/joingrp", async (req, res) => {
     }
 
     return res.status(200).json({ grplink: grp._id, msg: "Joined group" });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server Error" });
   }
 });
-F
+
 router.post("/addgroup", parser.single("groupimg"), async (req, res) => {
   try {
     if (!req.isAuthenticated()) {
