@@ -4,7 +4,6 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 import { IoSend } from "react-icons/io5";
 import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
-import GroupInfoOverlay from "./GroupInfoOverlay";
 
 const ChatWindow = ({ selectedUser, onBack }) => {
   const { socket, user } = useAuth();
@@ -12,7 +11,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   const [rawMessages, setRawMessages] = useState([]);
   const [receivedmsg, setreceivedmsg] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showGroupInfo, setShowGroupInfo] = useState(false);
   const pendingSocketMessages = useRef([]);
   const joinedGroups = useRef(new Set());
   const messagesEndRef = useRef(null);
@@ -29,7 +27,9 @@ const ChatWindow = ({ selectedUser, onBack }) => {
 
     const msgobj = {
       msg: newMessage,
-      ...(isGroupChat ? { groupId: selectedUser._id } : { to: selectedUser._id }),
+      ...(isGroupChat
+        ? { groupId: selectedUser._id }
+        : { to: selectedUser._id }),
     };
 
     setreceivedmsg((prev) => [
@@ -50,6 +50,8 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     });
 
     setNewMessage("");
+
+    // Keep the input focused so the keyboard stays open
     setTimeout(() => {
       document.querySelector(".chat-input-box input")?.focus();
     }, 100);
@@ -148,6 +150,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     }
   }, [receivedmsg]);
 
+  // Scroll to bottom when input is focused (for mobile)
   useEffect(() => {
     const inputBox = document.querySelector(".chat-input-box input");
     if (!inputBox) return;
@@ -172,10 +175,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
 
   return (
     <div className="chat-box">
-      <div
-        className="chat-header"
-        onClick={() => isGroupChat && setShowGroupInfo(true)}
-      >
+      <div className="chat-header">
         {onBack && (
           <button className="back-btn" onClick={onBack}>
             <HiArrowNarrowLeft className="back-icon" />
@@ -261,21 +261,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
           <IoSend />
         </button>
       </div>
-
-      {isGroupChat && showGroupInfo && (
-        <GroupInfoOverlay
-          group={selectedUser}
-          onClose={() => setShowGroupInfo(false)}
-          onExit={() => {
-            console.log("Exit group clicked");
-            setShowGroupInfo(false);
-          }}
-          onEdit={() => {
-            console.log("Edit group clicked");
-            // Trigger edit group overlay here
-          }}
-        />
-      )}
     </div>
   );
 };
