@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ChatWindow from "./Chattingwindowscreen";
 import "../Style/chattingwindowscreen.css";
@@ -8,11 +8,12 @@ import { SplashScreen } from "./SplashScreen";
 import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
 import { GroupOverlayModal } from "./Addgroupoverlay";
-import { useRef } from "react";
+
 const ChatLayout = () => {
   const { isLoggedIn, loading } = useAuth();
   const navigate = useNavigate();
   const { tab = "chats", entityId } = useParams();
+
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState(tab);
   const [currentChat, setCurrentChat] = useState(null);
@@ -22,6 +23,8 @@ const ChatLayout = () => {
   const [contacts, setContacts] = useState(null);
   const [groupChats, setGroupChats] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [groupsLoading, setGroupsLoading] = useState(false);
+
   const chatref = useRef(null);
   const isSearching = searchResults !== null;
   const displayList = isSearching
@@ -41,9 +44,7 @@ const ChatLayout = () => {
     try {
       const res = await fetch(
         "https://safewalk-xbkj.onrender.com/api/getaddedchat",
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
       if (res.ok) {
         const data = await res.json();
@@ -53,23 +54,12 @@ const ChatLayout = () => {
       console.error(err);
     }
   };
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (chatref.current) {
-        chatref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 0); 
-
-    return () => clearTimeout(timeout);
-  }, [contacts, groupChats]);
 
   const loadGroups = async () => {
     try {
       const res = await fetch(
         "https://safewalk-xbkj.onrender.com/api/getgroups",
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
       const data = await res.json();
       if (res.ok) {
@@ -79,6 +69,22 @@ const ChatLayout = () => {
       console.error("Failed to fetch groups", err);
     }
   };
+
+  const handleGroupJoined = async (grplink) => {
+    setGroupsLoading(true);
+    await loadGroups();
+    setGroupsLoading(false);
+    navigate(`/chat/groups/${grplink}`);
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (chatref.current) {
+        chatref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [contacts, groupChats]);
 
   useEffect(() => {
     if (!loading && !isLoggedIn) navigate("/");
@@ -142,13 +148,15 @@ const ChatLayout = () => {
     navigate(`/chat/${selectedTab}`);
   };
 
-  if (loading) return <SplashScreen />;
+  // 👇 Show SplashScreen during auth OR while joining group
+  if (loading || groupsLoading) return <SplashScreen />;
 
   return (
     <>
       <NavBar />
       <div className="full-center-wrapper">
         <div ref={chatref} className="main-chat-layout">
+          {/* Sidebar */}
           <div
             className={`sidebar ${
               isMobile && currentChat ? "hidden-on-mobile" : ""
@@ -179,6 +187,7 @@ const ChatLayout = () => {
               </button>
             </div>
 
+            {/* Search Box */}
             <div className="new-chat-container">
               <div className="search-wrapper">
                 <input
@@ -268,18 +277,21 @@ const ChatLayout = () => {
                       </div>
                       <div className="contact-info-wrapper">
                         <div className="contact-name">{item.name}</div>
-                        {isSearching && !isAdded && selectedTab === "chats" && (
-                          <AddToChatButton
-                            contact={item}
-                            onAdded={loadContacts}
-                          />
-                        )}
+                        {isSearching &&
+                          !isAdded &&
+                          selectedTab === "chats" && (
+                            <AddToChatButton
+                              contact={item}
+                              onAdded={loadContacts}
+                            />
+                          )}
                       </div>
                     </div>
                   );
                 })
               )}
             </div>
+
             {selectedTab === "groups" && (
               <button
                 className="create-group-fab"
@@ -290,6 +302,7 @@ const ChatLayout = () => {
             )}
           </div>
 
+          {/* Chat Window */}
           <div
             className={`chat-area ${
               isMobile && !currentChat ? "hidden-on-mobile" : ""
@@ -310,8 +323,13 @@ const ChatLayout = () => {
           </div>
         </div>
       </div>
+
+      {/* Group Modal */}
       {showGroupModal && (
-        <GroupOverlayModal onClose={() => setShowGroupModal(false)} />
+        <GroupOverlayModal
+          onClose={() => setShowGroupModal(false)}
+          onGroupJoined={handleGroupJoined}
+        />
       )}
     </>
   );

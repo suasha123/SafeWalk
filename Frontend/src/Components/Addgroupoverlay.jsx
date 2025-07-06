@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import "../Style/GroupOverlayModal.css";
-import { useNavigate } from "react-router-dom";
 import { enqueueSnackbar } from "notistack";
-export const GroupOverlayModal = ({ onClose }) => {
-  const [mode, setMode] = useState("join"); // "join" or "create"
+
+export const GroupOverlayModal = ({ onClose, onGroupJoined }) => {
+  const [mode, setMode] = useState("join");
   const [inviteCode, setInviteCode] = useState("");
   const [groupName, setGroupName] = useState("");
   const [groupImage, setGroupImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const navigate = useNavigate();
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setGroupImage(file);
@@ -29,51 +29,52 @@ export const GroupOverlayModal = ({ onClose }) => {
         body: JSON.stringify({ inviteCode }),
         credentials: "include",
       });
+
+      const body = await res.json();
       if (res.ok) {
-        const body = await res.json();
-        const { grplink, msg } = body;
-            onClose();
-        navigate(`/chat/groups/${grplink}`);
+        const { grplink } = body;
+        onClose();
+        onGroupJoined?.(grplink); // 👈 call parent handler
       } else {
-        enqueueSnackbar(msg, { variant: "warning" });
+        enqueueSnackbar(body.msg || "Join failed", { variant: "warning" });
       }
     } catch (err) {
-      enqueueSnackbar("Error occured", { variant: "warning" });
+      enqueueSnackbar("Error occurred", { variant: "error" });
     }
   };
 
   const handleCreateGroup = async () => {
+    if (!groupName || !groupImage) {
+      enqueueSnackbar("Group name and image are required", { variant: "warning" });
+      return;
+    }
+
     try {
-      if (!groupName && !groupImage) {
-        enqueueSnackbar("Invalid Input", { variant: "warning" });
-        return;
-      }
-      const fromdata = new FormData();
-      fromdata.append("groupimg", groupImage);
-      fromdata.append("groupname", groupName);
-      const res = await fetch(
-        "https://safewalk-xbkj.onrender.com/api/addgroup",
-        {
-          method: "POST",
-          body: fromdata,
-          credentials: "include",
-        }
-      );
+      const formData = new FormData();
+      formData.append("groupimg", groupImage);
+      formData.append("groupname", groupName);
+
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/addgroup", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
       if (res.ok) {
-        console.log(res);
-        enqueueSnackbar("Group Created Succesfully", { variant: "success" });
+        enqueueSnackbar("Group Created Successfully", { variant: "success" });
+        onClose();
+      } else {
+        enqueueSnackbar("Group creation failed", { variant: "error" });
       }
     } catch (err) {
-      console.log(err);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     }
   };
 
   return (
     <div className="group-overlay-backdrop">
       <div className="group-overlay-modal">
-        <button className="close-btn" onClick={onClose}>
-          ×
-        </button>
+        <button className="close-btn" onClick={onClose}>×</button>
 
         <div className="tab-switcher">
           <button
