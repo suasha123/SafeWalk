@@ -265,23 +265,23 @@ body {
 
 
 .chat-box {
-  background-color: #1a182c;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+    background-color: #1a182c;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
 .chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 20px;
-  scroll-behavior: smooth;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px;
+    scroll-behavior: smooth;
 }
 
 
@@ -387,9 +387,10 @@ body {
 /* Mobile responsive */
 @media screen and (max-width: 768px) {
     .create-group-fab {
-    bottom: 16px;
-    right: 16px;
-  }
+        bottom: 16px;
+        right: 16px;
+    }
+
     .main-chat-layout {
         display: block;
         width: 100vw;
@@ -423,15 +424,15 @@ body {
 }
 
 .chat-input-box {
-  display: flex;
-  padding: 16px 20px;
-  background-color: #1f1d33;
-  border-top: 1px solid #2f2c45;
-  gap: 10px;
-  align-items: center;
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+    display: flex;
+    padding: 16px 20px;
+    background-color: #1f1d33;
+    border-top: 1px solid #2f2c45;
+    gap: 10px;
+    align-items: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 
 .chat-input-box input {
@@ -539,33 +540,39 @@ body {
     margin-top: 6px;
     font-size: 0.75rem;
     color: #ccc;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding-left: 48px; /* aligns under avatar */
-}
-
-.chat-header-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow: hidden;
-  white-space: nowrap;
+    padding-left: 48px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .group-members-scroll {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  overflow-x: auto;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
+.group-members-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+
+.chat-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+}
 .group-member-name,
 .group-member-more {
-  font-size: 0.75rem;
-  color: #bbb;
-  background-color: #2d2b41;
-  padding: 4px 8px;
-  border-radius: 8px;
-  white-space: nowrap;
+    font-size: 0.75rem;
+    color: #bbb;
+    background-color: #2d2b41;
+    padding: 4px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
 }
