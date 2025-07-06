@@ -50,6 +50,11 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     });
 
     setNewMessage("");
+
+    // Keep the input focused so the keyboard stays open
+    setTimeout(() => {
+      document.querySelector(".chat-input-box input")?.focus();
+    }, 100);
   };
 
   useEffect(() => {
@@ -80,7 +85,6 @@ const ChatWindow = ({ selectedUser, onBack }) => {
     if (!user) return;
 
     const formatted = rawMessages.map((msg) => {
-      //const fromId = typeof msg.from === "object" ? msg.from?._id : msg.from;
       const isSelf = msg.from === user.id;
 
       return {
@@ -145,6 +149,21 @@ const ChatWindow = ({ selectedUser, onBack }) => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [receivedmsg]);
+
+  // Scroll to bottom when input is focused (for mobile)
+  useEffect(() => {
+    const inputBox = document.querySelector(".chat-input-box input");
+    if (!inputBox) return;
+
+    const handleFocus = () => {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    };
+
+    inputBox.addEventListener("focus", handleFocus);
+    return () => inputBox.removeEventListener("focus", handleFocus);
+  }, []);
 
   const renderAvatar = (source, fallbackChar) => {
     return source && source.trim() !== "" ? (
