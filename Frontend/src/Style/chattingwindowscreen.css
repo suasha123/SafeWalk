@@ -577,3 +577,38 @@ body {
     white-space: nowrap;
 }
 
+@media screen and (max-width: 468px) {
+  .chat-header {
+    flex-wrap: nowrap;
+    padding: 12px 16px;
+    gap: 10px;
+    overflow-x: hidden;
+  }
+
+  .chat-header-content {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .group-members-scroll {
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+    display: flex;
+    gap: 6px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .group-members-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chat-title {
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
