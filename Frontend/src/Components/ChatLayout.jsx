@@ -164,7 +164,7 @@ const ChatLayout = () => {
 
     socket.on("newchatadded", handleNewChatAdded);
     return () => socket.off("newchatadded", handleNewChatAdded);
-  }, []);
+  }, [socket]);
 
   // Show SplashScreen during auth OR while joining group
   if (loading || groupsLoading) return <SplashScreen />;
