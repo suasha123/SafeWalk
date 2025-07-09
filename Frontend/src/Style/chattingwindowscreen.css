@@ -629,4 +629,16 @@ body {
   background-color: #2d2b41; 
 }
 
+.contact.new-contact {
+  background-color: #3c2c49 !important;
+}
+
+.red-dot-indicator {
+  display: inline-block;
+  margin-left: 6px;
+  width: 8px;
+  height: 8px;
+  background-color: red;
+  border-radius: 50%;
+}
 
