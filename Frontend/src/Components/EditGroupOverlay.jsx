@@ -15,29 +15,34 @@ export const EditGroupOverlay = ({ selectedUser, onClose }) => {
     }
   };
 
- const handleSave = async () => {
-  try {
-    const formData = new FormData();
-    formData.append("grpimg", imageFile);
-    formData.append("grpname", newName);
-    formData.append("grpid", selectedUser._id);
-    const res = await fetch("https://safewalk-xbkj.onrender.com/upload/updategrp", {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-
-    const data = await res.json();
-    selectedUser.name = newName;
-    if (data.image) {
-      selectedUser.groupimg = data.image; 
+  const handleSave = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("grpimg", imageFile);
+      formData.append("grpname", newName);
+      formData.append("grpid", selectedUser._id);
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/upload/updategrp",
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        selectedUser.name = newName;
+        if (data.image) {
+          selectedUser.groupimg = data.image;
+        }
+        onClose();
+      } else {
+        enqueueSnackbar(data.msg, { variant: "warning" });
+      }
+    } catch (err) {
+      enqueueSnackbar("Error occured", { variant: "warning" });
     }
-    onClose();
-  } catch (err) {
-    enqueueSnackbar(data.msg , {variant : "warning"});
-  }
-};
-
+  };
 
   return (
     <div className="group-info-overlay">
