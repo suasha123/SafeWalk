@@ -612,3 +612,19 @@ body {
     white-space: nowrap;
   }
 }
+
+.chat-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer; /* 👈 show it's clickable */
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.chat-header-content:hover {
+  background-color: #2d2b41; /* 👈 subtle hover background */
+}
