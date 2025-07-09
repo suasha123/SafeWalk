@@ -20,7 +20,7 @@ router.post("/leavegroup", async (req, res) => {
     const currentuser = new mongoose.Types.ObjectId(req.session.passport.user);
     console.log("user hai" + currentuser);
     await GroupModal.findByIdAndUpdate(groupid, {
-      $pull: { member: { _id: currentuser } },
+      $pull: { member: currentuser },
     });
     return res.status(200).json({ msg: "User left the group" });
   } catch (err) {
