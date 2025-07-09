@@ -3,7 +3,7 @@ import "../Style/groupinfooverlay.css";
 import { useAuth } from "./AuthContext";
 import { EditGroupOverlay } from "./EditGroupOverlay"; 
 
-export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup }) => {
+export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup , onGroupUpdated }) => {
   const { user } = useAuth();
   const [leaving, setLeaving] = useState(false);
   const [editingGroup, setEditingGroup] = useState(false); 
@@ -33,6 +33,7 @@ export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup }) => {
     return (
       <EditGroupOverlay
         selectedUser={selectedUser}
+        onGroupUpdated={onGroupUpdated}
         onClose={() => setEditingGroup(false)}
       />
     );

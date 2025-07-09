@@ -274,6 +274,7 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
         <GroupInfoOverlay
           selectedUser={selectedUser}
           onClose={() => setgroupInfo(false)}
+           onGroupUpdated={loadGroups}
           onLeaveGroup={async () => {
             const res = await fetch(
               "https://safewalk-xbkj.onrender.com/api/leavegroup",

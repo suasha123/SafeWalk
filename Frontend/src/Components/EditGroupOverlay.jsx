@@ -2,7 +2,7 @@ import { useState } from "react";
 import "../Style/groupinfooverlay.css";
 import { enqueueSnackbar } from "notistack";
 
-export const EditGroupOverlay = ({ selectedUser, onClose }) => {
+export const EditGroupOverlay = ({ selectedUser, onClose, onGroupUpdated }) => {
   const [newName, setNewName] = useState(selectedUser.name);
   const [newImage, setNewImage] = useState(selectedUser.groupimg);
   const [imageFile, setImageFile] = useState(null);
@@ -31,11 +31,10 @@ export const EditGroupOverlay = ({ selectedUser, onClose }) => {
       );
       const data = await res.json();
       if (res.ok) {
-        selectedUser.name = newName;
-        if (data.image) {
-          selectedUser.groupimg = data.image;
+        if (res.ok) {
+          onGroupUpdated?.();
+          onClose();
         }
-        onClose();
       } else {
         enqueueSnackbar(data.msg, { variant: "warning" });
       }
