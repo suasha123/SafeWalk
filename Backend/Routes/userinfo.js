@@ -17,7 +17,7 @@ router.post("/leavegroup", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(403).json({ msg: "Log in Again" });
     }
-    const currentuser = mongoose.Types.ObjectId(req.session.passport.user);
+    const currentuser = new mongoose.Types.ObjectId(req.session.passport.user);
     console.log("user hai" + currentuser);
     await GroupModal.findByIdAndUpdate(groupid, {
       $pull: { member: { _id: currentuser } },
