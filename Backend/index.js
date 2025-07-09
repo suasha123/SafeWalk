@@ -103,7 +103,7 @@ io.on("connection", (socket) => {
     const res = await addchat(newmsobj);
     const doc = await addtochatmodel.findOne({ addedby: to });
     const hasAdded = doc?.added?.some(
-      (id) => id.toString() === from
+      (id) => id.toString() === userId
     );
     if (res) {
       if (hasAdded) {
