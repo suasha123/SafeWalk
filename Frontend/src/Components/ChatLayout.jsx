@@ -1,3 +1,4 @@
+// Cleaned-up ChatLayout component
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ChatWindow from "./Chattingwindowscreen";
@@ -9,10 +10,12 @@ import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
 import { GroupOverlayModal } from "./Addgroupoverlay";
 import { enqueueSnackbar } from "notistack";
+
 const ChatLayout = () => {
-  const { isLoggedIn, loading , socket} = useAuth();
+  const { isLoggedIn, loading, socket } = useAuth();
   const navigate = useNavigate();
   const { tab = "chats", entityId } = useParams();
+
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState(tab);
   const [currentChat, setCurrentChat] = useState(null);
@@ -23,8 +26,8 @@ const ChatLayout = () => {
   const [groupChats, setGroupChats] = useState([]);
   const [searching, setSearching] = useState(false);
   const [groupsLoading, setGroupsLoading] = useState(false);
-  const [newlyAddedIds, setNewlyAddedIds] = useState([]);
   const chatref = useRef(null);
+
   const isSearching = searchResults !== null;
   const displayList = isSearching
     ? searchResults
@@ -108,20 +111,8 @@ const ChatLayout = () => {
     }
   }, [tab, entityId, contacts, groupChats]);
 
-  useEffect(() => {
-  if (currentChat) {
-    setNewlyAddedIds((prev) =>
-      prev.filter((id) => id !== (currentChat._id || currentChat.id))
-    );
-  }
-}, [currentChat]);
-
-
   const handleClickItem = (item) => {
     setCurrentChat(item);
-    setNewlyAddedIds((prev) =>
-      prev.filter((id) => id !== (item._id || item.id))
-    );
     navigate(`/chat/${selectedTab}/${item._id || item.id}`);
   };
 
@@ -130,15 +121,12 @@ const ChatLayout = () => {
     setSearching(true);
     setSearchResults(null);
     try {
-      const res = await fetch(
-        "https://safewalk-xbkj.onrender.com/api/getusers",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ username: searchTerm }),
-        }
-      );
+      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username: searchTerm }),
+      });
       const result = await res.json();
       if (res.ok) setSearchResults([result]);
       else setSearchResults([]);
@@ -159,7 +147,7 @@ const ChatLayout = () => {
     navigate(`/chat/${selectedTab}`);
   };
 
-  // SOCKET: handle 'newchatadded'
+  // SOCKET: handle new chat added
   useEffect(() => {
     if (!socket || typeof socket.on !== "function") return;
     const handleNewChatAdded = (user) => {
@@ -167,16 +155,12 @@ const ChatLayout = () => {
         if (prev?.some((c) => c._id === user._id)) return prev;
         return [user, ...(prev || [])];
       });
-      setNewlyAddedIds((prev) =>
-        prev.includes(user._id) ? prev : [...prev, user._id]
-      );
     };
 
     socket.on("newchatadded", handleNewChatAdded);
     return () => socket.off("newchatadded", handleNewChatAdded);
   }, [socket]);
 
-  // Show SplashScreen during auth OR while joining group
   if (loading || groupsLoading) return <SplashScreen />;
 
   return (
@@ -184,11 +168,7 @@ const ChatLayout = () => {
       <NavBar />
       <div className="full-center-wrapper">
         <div ref={chatref} className="main-chat-layout">
-          <div
-            className={`sidebar ${
-              isMobile && currentChat ? "hidden-on-mobile" : ""
-            }`}
-          >
+          <div className={`sidebar ${isMobile && currentChat ? "hidden-on-mobile" : ""}`}>
             <div className="sidebar-header">
               <button
                 className={`tab-btn ${selectedTab === "chats" ? "active" : ""}`}
@@ -199,14 +179,9 @@ const ChatLayout = () => {
                 }}
               >
                 Chats
-                {newlyAddedIds.length > 0 && (
-                  <span className="red-dot-indicator"></span>
-                )}
               </button>
               <button
-                className={`tab-btn ${
-                  selectedTab === "groups" ? "active" : ""
-                }`}
+                className={`tab-btn ${selectedTab === "groups" ? "active" : ""}`}
                 onClick={() => {
                   setSelectedTab("groups");
                   clearSearch();
@@ -217,7 +192,6 @@ const ChatLayout = () => {
               </button>
             </div>
 
-            {/* Search Box */}
             <div className="new-chat-container">
               <div className="search-wrapper">
                 <input
@@ -276,25 +250,15 @@ const ChatLayout = () => {
                   const isAdded = contacts?.some(
                     (c) => c._id === item._id || c._id === item.id
                   );
-                  const isNew = newlyAddedIds.includes(item._id || item.id);
 
                   return (
                     <div
                       key={item._id || item.id}
                       className={`contact ${
-                        currentChat?._id === item._id ||
-                        currentChat?.id === item.id
-                          ? "active"
-                          : isNew
-                          ? "new-contact"
-                          : ""
+                        currentChat?._id === item._id || currentChat?.id === item.id ? "active" : ""
                       }`}
                       onClick={() => {
-                        if (
-                          isSearching &&
-                          !isAdded &&
-                          selectedTab === "chats"
-                        ) {
+                        if (isSearching && !isAdded && selectedTab === "chats") {
                           enqueueSnackbar("Please add to chat first", {
                             variant: "warning",
                           });
@@ -313,21 +277,14 @@ const ChatLayout = () => {
                           />
                         ) : (
                           <div className="avatar-fallback">
-                            {(
-                              item.name?.charAt(0) ||
-                              item.username?.charAt(0) ||
-                              "?"
-                            ).toUpperCase()}
+                            {(item.name?.charAt(0) || item.username?.charAt(0) || "?").toUpperCase()}
                           </div>
                         )}
                       </div>
                       <div className="contact-info-wrapper">
                         <div className="contact-name">{item.name}</div>
                         {isSearching && !isAdded && selectedTab === "chats" && (
-                          <AddToChatButton
-                            contact={item}
-                            onAdded={loadContacts}
-                          />
+                          <AddToChatButton contact={item} onAdded={loadContacts} />
                         )}
                       </div>
                     </div>
@@ -337,20 +294,13 @@ const ChatLayout = () => {
             </div>
 
             {selectedTab === "groups" && (
-              <button
-                className="create-group-fab"
-                onClick={() => setShowGroupModal(true)}
-              >
+              <button className="create-group-fab" onClick={() => setShowGroupModal(true)}>
                 <FaPlus />
               </button>
             )}
           </div>
 
-          <div
-            className={`chat-area ${
-              isMobile && !currentChat ? "hidden-on-mobile" : ""
-            }`}
-          >
+          <div className={`chat-area ${isMobile && !currentChat ? "hidden-on-mobile" : ""}`}>
             {currentChat ? (
               <ChatWindow
                 selectedUser={currentChat}
@@ -359,9 +309,7 @@ const ChatLayout = () => {
               />
             ) : (
               <div className="placeholder">
-                <p className="placeholder-text">
-                  Select a chat to start messaging
-                </p>
+                <p className="placeholder-text">Select a chat to start messaging</p>
               </div>
             )}
           </div>
