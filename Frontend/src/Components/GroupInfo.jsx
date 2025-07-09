@@ -1,12 +1,17 @@
 import { useState } from "react";
 import "../Style/groupinfooverlay.css";
 import { useAuth } from "./AuthContext";
-import { EditGroupOverlay } from "./EditGroupOverlay"; 
+import { EditGroupOverlay } from "./EditGroupOverlay";
 
-export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup , onGroupUpdated }) => {
+export const GroupInfoOverlay = ({
+  selectedUser,
+  onClose,
+  onLeaveGroup,
+  onGroupUpdated,
+}) => {
   const { user } = useAuth();
   const [leaving, setLeaving] = useState(false);
-  const [editingGroup, setEditingGroup] = useState(false); 
+  const [editingGroup, setEditingGroup] = useState(false);
 
   const renderAvatar = (profile, username) => {
     if (profile && profile.trim() !== "") {
@@ -42,7 +47,9 @@ export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup , onGroup
   return (
     <div className="group-info-overlay">
       <div className="group-info-modal dark-theme-modal">
-        <button className="close-btn" onClick={onClose}>×</button>
+        <button className="close-btn" onClick={onClose}>
+          ×
+        </button>
 
         <button
           className="edit-group-btn"
@@ -54,6 +61,12 @@ export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup , onGroup
         <div className="group-header">
           {renderAvatar(selectedUser.groupimg, selectedUser.name)}
           <h2 className="group-title">{selectedUser.name}</h2>
+          {selectedUser.invitecode && (
+            <p className="invite-code">
+              Invite Code:{" "}
+              <span className="code-highlight">{selectedUser.invitecode}</span>
+            </p>
+          )}
         </div>
 
         <h4 className="section-heading">
