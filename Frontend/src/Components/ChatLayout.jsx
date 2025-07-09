@@ -108,6 +108,15 @@ const ChatLayout = () => {
     }
   }, [tab, entityId, contacts, groupChats]);
 
+  useEffect(() => {
+  if (currentChat) {
+    setNewlyAddedIds((prev) =>
+      prev.filter((id) => id !== (currentChat._id || currentChat.id))
+    );
+  }
+}, [currentChat]);
+
+
   const handleClickItem = (item) => {
     setCurrentChat(item);
     setNewlyAddedIds((prev) =>
