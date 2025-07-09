@@ -1,10 +1,12 @@
 import { useState } from "react";
 import "../Style/groupinfooverlay.css";
 import { useAuth } from "./AuthContext";
+import { EditGroupOverlay } from "./EditGroupOverlay"; // import the new overlay
 
 export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup }) => {
   const { user } = useAuth();
   const [leaving, setLeaving] = useState(false);
+  const [editingGroup, setEditingGroup] = useState(false); // to trigger edit mode
 
   const renderAvatar = (profile, username) => {
     if (profile && profile.trim() !== "") {
@@ -21,16 +23,32 @@ export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup }) => {
   const handleLeave = async () => {
     setLeaving(true);
     try {
-      await onLeaveGroup(); // parent handles actual logic
+      await onLeaveGroup();
     } finally {
-      setLeaving(false); // just in case
+      setLeaving(false);
     }
   };
+
+  if (editingGroup) {
+    return (
+      <EditGroupOverlay
+        selectedUser={selectedUser}
+        onClose={() => setEditingGroup(false)}
+      />
+    );
+  }
 
   return (
     <div className="group-info-overlay">
       <div className="group-info-modal dark-theme-modal">
         <button className="close-btn" onClick={onClose}>×</button>
+
+        <button
+          className="edit-group-btn"
+          onClick={() => setEditingGroup(true)}
+        >
+          Edit Group
+        </button>
 
         <div className="group-header">
           {renderAvatar(selectedUser.groupimg, selectedUser.name)}
