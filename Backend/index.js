@@ -14,6 +14,8 @@ const addGroupChat = require("./Controllers/addGroupChat");
 const { group } = require("console");
 require("dotenv").config();
 const UserModel = require("./database/model/usermodel");
+const AddChatModel = require("./database/model/addtochatmodel");
+const addtochatmodel = require("./database/model/addtochatmodel");
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [];
@@ -73,19 +75,14 @@ io.use(
 io.on("connection", (socket) => {
   const userId = socket.handshake.session?.passport?.user;
   socket.join(userId);
-
   socket.on("joingroup", (groupId) => {
     socket.join(groupId);
   });
-
   socket.on("sendmsg", async (msgObj, ack) => {
     const { msg, to, groupId } = msgObj;
-
     if (groupId) {
       const res = await addGroupChat(userId, groupId, msg);
-
       const sender = await UserModel.findById(userId).select("name profile");
-
       if (res && sender) {
         const newmsgobj = {
           msg,
@@ -104,8 +101,26 @@ io.on("connection", (socket) => {
 
     const newmsobj = { msg, to, from: userId };
     const res = await addchat(newmsobj);
+    const doc = await addtochatmodel.findOne({ addedby: to });
+    const hasAdded = doc?.added?.some(
+      (id) => id.toString() === from.toString()
+    );
     if (res) {
-      io.to(to).emit("receivemsg", newmsobj);
+      if (hasAdded) {
+        io.to(to).emit("receivemsg", newmsobj);
+      } else {
+        const sender = await UserModel.findById(userId).select(
+          "name username _id profile"
+        );
+        if (sender) {
+          io.to(to).emit("newchatadded", {
+            _id: sender._id,
+            name: sender.name|| "",
+            username: sender.username,
+            profile: sender.profile || "",
+          });
+        }
+      }
       ack && ack({ ok: true });
     } else {
       ack && ack({ ok: false });
