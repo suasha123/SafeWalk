@@ -619,12 +619,12 @@ body {
   gap: 6px;
   overflow: hidden;
   white-space: nowrap;
-  cursor: pointer; /* 👈 show it's clickable */
+  cursor: pointer; 
   padding: 6px 8px;
   border-radius: 8px;
   transition: background 0.3s ease;
 }
 
 .chat-header-content:hover {
-  background-color: #2d2b41; /* 👈 subtle hover background */
+  background-color: #2d2b41; 
 }

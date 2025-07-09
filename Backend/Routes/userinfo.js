@@ -9,6 +9,21 @@ const GroupModal = require("../database/model/groupmodel");
 const { nanoid } = require("nanoid");
 const GroupChatModel = require("../database/model/GroupChatModel");
 const parser = multer({ storage });
+router.post("/leavegroup", async (req, res) => {
+  try {
+    const { groupid } = req.body;
+    if (!req.isAuthenticated()) {
+      return res.status(403).json({ msg: "Log in Again" });
+    }
+    const currentuser = req.session.passport.user;
+    await GroupModal.findByIdAndUpdate(groupid, {
+      $pull: { member: { _id: currentuser } },
+    });
+    return res.status(200).json({ msg: "User left the group" });
+  } catch (err) {
+    return res.status(500).json({ msg: "Server Errro" });
+  }
+});
 router.post("/joingrp", async (req, res) => {
   try {
     if (!req.isAuthenticated()) {
@@ -65,7 +80,10 @@ router.get("/getgroups", async (req, res) => {
 
     const userId = req.session.passport.user;
 
-    const groups = await GroupModal.find({ member: userId }).populate("member" , "username profile");
+    const groups = await GroupModal.find({ member: userId }).populate(
+      "member",
+      "username profile"
+    );
 
     res.status(200).json({ groups });
   } catch (err) {
