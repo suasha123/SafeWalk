@@ -4,13 +4,14 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 import { IoSend } from "react-icons/io5";
 import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
-
+import { GroupInfoOverlay } from "./GroupInfo";
 const ChatWindow = ({ selectedUser, onBack }) => {
   const { socket, user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
   const [rawMessages, setRawMessages] = useState([]);
   const [receivedmsg, setreceivedmsg] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [groupInfo, setgroupInfo] = useState(false);
   const pendingSocketMessages = useRef([]);
   const joinedGroups = useRef(new Set());
   const messagesEndRef = useRef(null);
@@ -174,94 +175,112 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   };
 
   return (
-    <div className="chat-box">
-      <div className="chat-header">
-        {onBack && (
-          <button className="back-btn" onClick={onBack}>
-            <HiArrowNarrowLeft className="back-icon" />
-          </button>
-        )}
-        <div className="avatar">
-          {renderAvatar(
-            isGroupChat ? selectedUser.groupimg : selectedUser.profile,
-            selectedUser.name?.charAt(0) || selectedUser.email?.charAt(0) || "?"
+    <>
+      <div className="chat-box">
+        <div className="chat-header">
+          {onBack && (
+            <button className="back-btn" onClick={onBack}>
+              <HiArrowNarrowLeft className="back-icon" />
+            </button>
           )}
-        </div>
-
-        <div className="chat-header-content">
-          <div className="chat-title">{selectedUser.name}</div>
-
-          {isGroupChat && (
-            <div className="group-members-scroll">
-              {selectedUser.member
-                .slice(0, Math.min(selectedUser.member.length, 5))
-                .map((m) => (
-                  <span key={m._id} className="group-member-name">
-                    @{m.username}
-                  </span>
-                ))}
-              {selectedUser.member.length > 5 && (
-                <span className="group-member-more">
-                  +{selectedUser.member.length - 5} more
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="chat-messages">
-        {loading ? (
-          <div className="loading-spinner">
-            <div className="spinner-circle"></div>
-            Loading messages...
+          <div className="avatar">
+            {renderAvatar(
+              isGroupChat ? selectedUser.groupimg : selectedUser.profile,
+              selectedUser.name?.charAt(0) ||
+                selectedUser.email?.charAt(0) ||
+                "?"
+            )}
           </div>
-        ) : (
-          <>
-            {receivedmsg.map((msg) => (
-              <div
-                key={msg.id}
-                className={`chat-message ${
-                  msg.fromSelf ? "from-self" : "from-other"
-                }`}
-              >
-                {!msg.fromSelf && (
-                  <div className="avatar">
-                    {renderAvatar(
-                      isGroupChat ? msg.profile : selectedUser.profile,
-                      msg.name?.charAt(0) || "?"
-                    )}
-                  </div>
-                )}
-                <div className="message-bubble">{msg.message}</div>
-                {msg.fromSelf && (
-                  <div className="avatar self-avatar">
-                    {renderAvatar(
-                      user?.profile,
-                      user?.name?.charAt(0) || user?.email?.charAt(0) || "?"
-                    )}
-                  </div>
+
+          <div
+            onClick={() => setgroupInfo(!groupInfo)}
+            className="chat-header-content"
+          >
+            <div className="chat-title">{selectedUser.name}</div>
+
+            {isGroupChat && (
+              <div className="group-members-scroll">
+                {selectedUser.member
+                  .slice(0, Math.min(selectedUser.member.length, 5))
+                  .map((m) => (
+                    <span key={m._id} className="group-member-name">
+                      @{m.username}
+                    </span>
+                  ))}
+                {selectedUser.member.length > 5 && (
+                  <span className="group-member-more">
+                    +{selectedUser.member.length - 5} more
+                  </span>
                 )}
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </>
-        )}
-      </div>
+            )}
+          </div>
+        </div>
 
-      <div className="chat-input-box">
-        <input
-          type="text"
-          placeholder="Type your message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        />
-        <button className="send-btn" onClick={handleSend}>
-          <IoSend />
-        </button>
+        <div className="chat-messages">
+          {loading ? (
+            <div className="loading-spinner">
+              <div className="spinner-circle"></div>
+              Loading messages...
+            </div>
+          ) : (
+            <>
+              {receivedmsg.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`chat-message ${
+                    msg.fromSelf ? "from-self" : "from-other"
+                  }`}
+                >
+                  {!msg.fromSelf && (
+                    <div className="avatar">
+                      {renderAvatar(
+                        isGroupChat ? msg.profile : selectedUser.profile,
+                        msg.name?.charAt(0) || "?"
+                      )}
+                    </div>
+                  )}
+                  <div className="message-bubble">{msg.message}</div>
+                  {msg.fromSelf && (
+                    <div className="avatar self-avatar">
+                      {renderAvatar(
+                        user?.profile,
+                        user?.name?.charAt(0) || user?.email?.charAt(0) || "?"
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
+
+        <div className="chat-input-box">
+          <input
+            type="text"
+            placeholder="Type your message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          />
+          <button className="send-btn" onClick={handleSend}>
+            <IoSend />
+          </button>
+        </div>
       </div>
-    </div>
+      {groupInfo && isGroupChat && (
+        <GroupInfoOverlay
+          selectedUser={selectedUser}
+          onClose={() => setgroupInfo(false)}
+          onLeaveGroup={() => {
+            socket.emit("leavegroup", selectedUser._id);
+            setgroupInfo(false);
+            onBack?.(); // Navigate back to chats
+          }}
+        />
+      )}
+    </>
   );
 };
 
