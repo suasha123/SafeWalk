@@ -65,7 +65,7 @@ router.get("/getgroups", async (req, res) => {
 
     const userId = req.session.passport.user;
 
-    const groups = await GroupModal.find({ member: userId }).populate("member" , "username");
+    const groups = await GroupModal.find({ member: userId }).populate("member" , "username profile");
 
     res.status(200).json({ groups });
   } catch (err) {
