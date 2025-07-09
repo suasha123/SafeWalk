@@ -56,9 +56,7 @@ export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup }) => {
           disabled={leaving}
         >
           {leaving ? (
-            <>
-              <span className="spinner"></span> Leaving...
-            </>
+              <span className="spinner"></span>
           ) : (
             "Leave Group"
           )}
