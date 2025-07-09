@@ -9,12 +9,10 @@ import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
 import { GroupOverlayModal } from "./Addgroupoverlay";
 import { enqueueSnackbar } from "notistack";
-
 const ChatLayout = () => {
-  const { isLoggedIn, loading } = useAuth();
+  const { isLoggedIn, loading , socket} = useAuth();
   const navigate = useNavigate();
   const { tab = "chats", entityId } = useParams();
-
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState(tab);
   const [currentChat, setCurrentChat] = useState(null);
@@ -25,7 +23,7 @@ const ChatLayout = () => {
   const [groupChats, setGroupChats] = useState([]);
   const [searching, setSearching] = useState(false);
   const [groupsLoading, setGroupsLoading] = useState(false);
-
+  const [newlyAddedIds, setNewlyAddedIds] = useState([]);
   const chatref = useRef(null);
   const isSearching = searchResults !== null;
   const displayList = isSearching
@@ -112,6 +110,9 @@ const ChatLayout = () => {
 
   const handleClickItem = (item) => {
     setCurrentChat(item);
+    setNewlyAddedIds((prev) =>
+      prev.filter((id) => id !== (item._id || item.id))
+    );
     navigate(`/chat/${selectedTab}/${item._id || item.id}`);
   };
 
@@ -149,6 +150,22 @@ const ChatLayout = () => {
     navigate(`/chat/${selectedTab}`);
   };
 
+  // SOCKET: handle 'newchatadded'
+  useEffect(() => {
+    const handleNewChatAdded = (user) => {
+      setContacts((prev) => {
+        if (prev?.some((c) => c._id === user._id)) return prev;
+        return [user, ...(prev || [])];
+      });
+      setNewlyAddedIds((prev) =>
+        prev.includes(user._id) ? prev : [...prev, user._id]
+      );
+    };
+
+    socket.on("newchatadded", handleNewChatAdded);
+    return () => socket.off("newchatadded", handleNewChatAdded);
+  }, []);
+
   // Show SplashScreen during auth OR while joining group
   if (loading || groupsLoading) return <SplashScreen />;
 
@@ -157,7 +174,6 @@ const ChatLayout = () => {
       <NavBar />
       <div className="full-center-wrapper">
         <div ref={chatref} className="main-chat-layout">
-          {/* Sidebar */}
           <div
             className={`sidebar ${
               isMobile && currentChat ? "hidden-on-mobile" : ""
@@ -173,6 +189,9 @@ const ChatLayout = () => {
                 }}
               >
                 Chats
+                {newlyAddedIds.length > 0 && (
+                  <span className="red-dot-indicator"></span>
+                )}
               </button>
               <button
                 className={`tab-btn ${
@@ -247,6 +266,7 @@ const ChatLayout = () => {
                   const isAdded = contacts?.some(
                     (c) => c._id === item._id || c._id === item.id
                   );
+                  const isNew = newlyAddedIds.includes(item._id || item.id);
 
                   return (
                     <div
@@ -255,13 +275,11 @@ const ChatLayout = () => {
                         currentChat?._id === item._id ||
                         currentChat?.id === item.id
                           ? "active"
+                          : isNew
+                          ? "new-contact"
                           : ""
                       }`}
                       onClick={() => {
-                        const isAdded = contacts?.some(
-                          (c) => c._id === item._id || c._id === item.id
-                        );
-
                         if (
                           isSearching &&
                           !isAdded &&
@@ -318,7 +336,6 @@ const ChatLayout = () => {
             )}
           </div>
 
-          {/* Chat Window */}
           <div
             className={`chat-area ${
               isMobile && !currentChat ? "hidden-on-mobile" : ""
@@ -341,7 +358,6 @@ const ChatLayout = () => {
         </div>
       </div>
 
-      {/* Group Modal */}
       {showGroupModal && (
         <GroupOverlayModal
           onClose={() => setShowGroupModal(false)}
