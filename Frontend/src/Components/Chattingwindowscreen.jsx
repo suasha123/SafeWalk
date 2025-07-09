@@ -273,16 +273,21 @@ const ChatWindow = ({ selectedUser, onBack }) => {
         <GroupInfoOverlay
           selectedUser={selectedUser}
           onClose={() => setgroupInfo(false)}
-          onLeaveGroup={async() => {
-            const res = await fetch('https://safewalk-xbkj.onrender.com/api/leavegroup', {
-              method : 'POST' ,
-              headers : 'application/json',
-              body : JSON.stringify({groupid :  selectedUser._id})
-            })
+          onLeaveGroup={async () => {
+            const res = await fetch(
+              "https://safewalk-xbkj.onrender.com/api/leavegroup",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ groupid: selectedUser._id }),
+              }
+            );
             console.log(res);
-          //  socket.emit("leavegroup", selectedUser._id);
+            //  socket.emit("leavegroup", selectedUser._id);
             setgroupInfo(false);
-           onBack?.(); // Navigate back to chats
+            onBack?.(); // Navigate back to chats
           }}
         />
       )}
