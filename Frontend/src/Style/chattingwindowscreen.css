@@ -629,13 +629,11 @@ body {
   background-color: #2d2b41; 
 }
 
-.sidebar .contact.new-contact:not(.active):not(:hover) {
-  background-color: #563870;
+.contact.new-contact {
+  background-color: #563870 !important;
+  border: 2px dashed yellow;
 }
 
-.contact {
-  transition: background-color 0.3s ease;
-}
 
 .red-dot-indicator {
   background-color: #ff4fc9;
