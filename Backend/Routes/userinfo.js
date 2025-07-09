@@ -17,13 +17,14 @@ router.post("/leavegroup", async (req, res) => {
       return res.status(403).json({ msg: "Log in Again" });
     }
     const currentuser = mongoose.Types.ObjectId(req.session.passport.user);
-    console.log(currentuser);
+    console.log("user hai" + currentuser);
     await GroupModal.findByIdAndUpdate(groupid, {
       $pull: { member: { _id: currentuser } },
     });
     return res.status(200).json({ msg: "User left the group" });
   } catch (err) {
-    return res.status(500).json({ msg: "Server Errro" });
+    console.log(err);
+    return res.status(500).json({ msg: "Server Errror" });
   }
 });
 router.post("/joingrp", async (req, res) => {
