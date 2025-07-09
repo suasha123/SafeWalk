@@ -8,6 +8,7 @@ import { SplashScreen } from "./SplashScreen";
 import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
 import { GroupOverlayModal } from "./Addgroupoverlay";
+import { enqueueSnackbar } from "notistack";
 
 const ChatLayout = () => {
   const { isLoggedIn, loading } = useAuth();
