@@ -312,6 +312,7 @@ const ChatLayout = () => {
               <ChatWindow
                 selectedUser={currentChat}
                 onBack={isMobile ? goBack : null}
+                loadGroups={loadGroups}
               />
             ) : (
               <div className="placeholder">

@@ -6,7 +6,7 @@ import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
 import { GroupInfoOverlay } from "./GroupInfo";
 import { useNavigate } from "react-router-dom";
-const ChatWindow = ({ selectedUser, onBack }) => {
+const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
   const { socket, user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
   const [rawMessages, setRawMessages] = useState([]);
@@ -288,6 +288,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
             );
             const body = await res.json();
             if (res.ok) {
+              loadGroups();
               navigate("/chat/groups");
             } else {
               enqueueSnackbar(body.msg , {variant : "warning"});
