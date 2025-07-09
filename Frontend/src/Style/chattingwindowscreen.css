@@ -629,16 +629,19 @@ body {
   background-color: #2d2b41; 
 }
 
-.contact.new-contact {
-  background-color: #3c2c49 !important;
+.sidebar .contact.new-contact:not(.active):not(:hover) {
+  background-color: #563870;
+}
+
+.contact {
+  transition: background-color 0.3s ease;
 }
 
 .red-dot-indicator {
-  display: inline-block;
-  margin-left: 6px;
+  background-color: #ff4fc9;
   width: 8px;
   height: 8px;
-  background-color: red;
   border-radius: 50%;
+  display: inline-block;
+  margin-left: 6px;
 }
-

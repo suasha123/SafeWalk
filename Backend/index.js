@@ -102,9 +102,7 @@ io.on("connection", (socket) => {
     const newmsobj = { msg, to, from: userId };
     const res = await addchat(newmsobj);
     const doc = await addtochatmodel.findOne({ addedby: to });
-    const hasAdded = doc?.added?.some(
-      (id) => id.toString() === userId
-    );
+    const hasAdded = doc?.added?.some((id) => id.toString() === userId);
     if (res) {
       if (hasAdded) {
         io.to(to).emit("receivemsg", newmsobj);
@@ -113,9 +111,14 @@ io.on("connection", (socket) => {
           "name username _id profile"
         );
         if (sender) {
+          await addtochatmodel.findOneAndUpdate(
+            { addedby: to },
+            { $addToSet: { added: userId } },
+            { upsert: true }
+          );
           io.to(to).emit("newchatadded", {
             _id: sender._id,
-            name: sender.name|| "",
+            name: sender.name || "",
             username: sender.username,
             profile: sender.profile || "",
           });
