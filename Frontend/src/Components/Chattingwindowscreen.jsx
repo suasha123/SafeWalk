@@ -5,6 +5,7 @@ import { IoSend } from "react-icons/io5";
 import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
 import { GroupInfoOverlay } from "./GroupInfo";
+import { useNavigate } from "react-router-dom";
 const ChatWindow = ({ selectedUser, onBack }) => {
   const { socket, user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
@@ -16,7 +17,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
   const joinedGroups = useRef(new Set());
   const messagesEndRef = useRef(null);
   const isGroupChat = !!selectedUser.groupimg;
-
+  const navigate = useNavigate();
   const handleSend = () => {
     if (newMessage.trim() === "") return;
     if (!socket?.connected) {
@@ -281,14 +282,18 @@ const ChatWindow = ({ selectedUser, onBack }) => {
                 headers: {
                   "Content-Type": "application/json",
                 },
-                credentials : "include",
+                credentials: "include",
                 body: JSON.stringify({ groupid: selectedUser._id }),
               }
             );
-            console.log(res);
-            //  socket.emit("leavegroup", selectedUser._id);
-            setgroupInfo(false);
-            onBack?.(); // Navigate back to chats
+            const body = await res.json();
+            if (res.ok) {
+              navigate("/chat/groups");
+            } else {
+              enqueueSnackbar(body.msg , {variant : "warning"});
+              setgroupInfo(false);
+              onBack?.(); 
+            }
           }}
         />
       )}
