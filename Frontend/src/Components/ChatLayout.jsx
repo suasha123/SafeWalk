@@ -152,6 +152,7 @@ const ChatLayout = () => {
 
   // SOCKET: handle 'newchatadded'
   useEffect(() => {
+    if (!socket || typeof socket.on !== "function") return;
     const handleNewChatAdded = (user) => {
       setContacts((prev) => {
         if (prev?.some((c) => c._id === user._id)) return prev;
