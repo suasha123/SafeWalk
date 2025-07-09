@@ -223,11 +223,12 @@
   background-color: #555;
   color: white;
 }
-
 .group-info-modal.dark-theme-modal {
-  max-height: 500px; 
-  overflow: hidden;
+  max-height: 95vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
+
 .invite-code {
   margin-top: 6px;
   font-size: 14px;
