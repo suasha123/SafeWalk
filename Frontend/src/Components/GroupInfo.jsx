@@ -1,12 +1,12 @@
 import { useState } from "react";
 import "../Style/groupinfooverlay.css";
 import { useAuth } from "./AuthContext";
-import { EditGroupOverlay } from "./EditGroupOverlay"; // import the new overlay
+import { EditGroupOverlay } from "./EditGroupOverlay"; 
 
 export const GroupInfoOverlay = ({ selectedUser, onClose, onLeaveGroup }) => {
   const { user } = useAuth();
   const [leaving, setLeaving] = useState(false);
-  const [editingGroup, setEditingGroup] = useState(false); // to trigger edit mode
+  const [editingGroup, setEditingGroup] = useState(false); 
 
   const renderAvatar = (profile, username) => {
     if (profile && profile.trim() !== "") {

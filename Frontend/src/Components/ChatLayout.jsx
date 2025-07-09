@@ -148,7 +148,7 @@ const ChatLayout = () => {
     navigate(`/chat/${selectedTab}`);
   };
 
-  // 👇 Show SplashScreen during auth OR while joining group
+  // Show SplashScreen during auth OR while joining group
   if (loading || groupsLoading) return <SplashScreen />;
 
   return (

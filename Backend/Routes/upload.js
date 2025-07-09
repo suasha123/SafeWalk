@@ -3,7 +3,33 @@ const router = express.Router();
 const multer = require("multer");
 const { storage } = require("../config/cloudinaryconfig");
 const usermodel = require("../database/model/usermodel");
+const GroupModal = require("../database/model/groupmodel");
 const parser = multer({ storage });
+router.post("/updategrp", parser.single("grpimg"), async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+  const { grpname, grpid } = req.body;
+  const newgrpimgg = req.file;
+  try {
+    if (grpname) {
+      await GroupModal.findByIdAndUpdate(grpid, { name: grpname });
+    }
+    if (newgrpimgg) {
+      await GroupModal.findByIdAndUpdate(grpid, { groupimg: newgrpimgg.path });
+    }
+    res
+      .status(200)
+      .json({
+        msg: "Changed Successfully",
+        name: grpname,
+        image: newgrpimgg?.path || null,
+      });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
 router.post("/profile", parser.single("image"), async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.status(401).json({ msg: "Unauthorized" });
@@ -11,12 +37,12 @@ router.post("/profile", parser.single("image"), async (req, res) => {
 
   const { username } = req.body;
   const image = req.file;
-  const userId = req.user._id; 
+  const userId = req.user._id;
 
   try {
     const updateFields = {};
     if (username) updateFields.username = username;
-    if (image) updateFields.profile = image.path; 
+    if (image) updateFields.profile = image.path;
     const updatedUser = await usermodel.findByIdAndUpdate(
       userId,
       { $set: updateFields },
@@ -24,8 +50,8 @@ router.post("/profile", parser.single("image"), async (req, res) => {
     );
     res.status(200).json({
       msg: "Profile updated successfully",
-      username : updatedUser.username,
-      profile : updatedUser.profile
+      username: updatedUser.username,
+      profile: updatedUser.profile,
     });
   } catch (err) {
     console.error(err);

@@ -1,28 +1,50 @@
 import { useState } from "react";
 import "../Style/groupinfooverlay.css";
+import { enqueueSnackbar } from "notistack";
 
 export const EditGroupOverlay = ({ selectedUser, onClose }) => {
   const [newName, setNewName] = useState(selectedUser.name);
   const [newImage, setNewImage] = useState(selectedUser.groupimg);
-
+  const [imageFile, setImageFile] = useState(null);
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
       setNewImage(url);
+      setImageFile(file);
     }
   };
 
-  const handleSave = () => {
+ const handleSave = async () => {
+  try {
+    const formData = new FormData();
+    formData.append("grpimg", imageFile);
+    formData.append("grpname", newName);
+    formData.append("grpid", selectedUser._id);
+    const res = await fetch("https://safewalk-xbkj.onrender.com/upload/updategrp", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    const data = await res.json();
     selectedUser.name = newName;
-    selectedUser.groupimg = newImage;
+    if (data.image) {
+      selectedUser.groupimg = data.image; 
+    }
     onClose();
-  };
+  } catch (err) {
+    enqueueSnackbar(data.msg , {variant : "warning"});
+  }
+};
+
 
   return (
     <div className="group-info-overlay">
       <div className="group-info-modal dark-theme-modal">
-        <button className="close-btn" onClick={onClose}>×</button>
+        <button className="close-btn" onClick={onClose}>
+          ×
+        </button>
 
         <h2 className="group-title">Edit Group Info</h2>
 
@@ -49,8 +71,12 @@ export const EditGroupOverlay = ({ selectedUser, onClose }) => {
         />
 
         <div className="edit-buttons">
-          <button className="cancel-btn" onClick={onClose}>Cancel</button>
-          <button className="save-btn" onClick={handleSave}>Save</button>
+          <button className="cancel-btn" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="save-btn" onClick={handleSave}>
+            Save
+          </button>
         </div>
       </div>
     </div>
