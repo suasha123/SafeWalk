@@ -281,6 +281,7 @@ const ChatWindow = ({ selectedUser, onBack }) => {
                 headers: {
                   "Content-Type": "application/json",
                 },
+                credentials : "include",
                 body: JSON.stringify({ groupid: selectedUser._id }),
               }
             );
