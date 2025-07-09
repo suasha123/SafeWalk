@@ -12,10 +12,12 @@ const parser = multer({ storage });
 router.post("/leavegroup", async (req, res) => {
   try {
     const { groupid } = req.body;
+    console.log(groupid);
     if (!req.isAuthenticated()) {
       return res.status(403).json({ msg: "Log in Again" });
     }
-    const currentuser = req.session.passport.user;
+    const currentuser = mongoose.Types.ObjectId(req.session.passport.user);
+    console.log(currentuser);
     await GroupModal.findByIdAndUpdate(groupid, {
       $pull: { member: { _id: currentuser } },
     });
