@@ -161,7 +161,7 @@ router.get("/getaddedchat", async (req, res) => {
     const userId = req.session?.passport?.user;
     const addedlist = await chatAddModel
       .findOne({ addedby: userId })
-      .populate("added", "name email _id profile");
+      .populate("added", "name username _id profile");
     return res
       .status(200)
       .json({ msg: "ok", userslist: addedlist ? addedlist.added : [] });

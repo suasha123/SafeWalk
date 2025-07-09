@@ -269,7 +269,7 @@ const ChatLayout = () => {
                           <div className="avatar-fallback">
                             {(
                               item.name?.charAt(0) ||
-                              item.email?.charAt(0) ||
+                              item.username?.charAt(0) ||
                               "?"
                             ).toUpperCase()}
                           </div>
