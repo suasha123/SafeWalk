@@ -256,7 +256,24 @@ const ChatLayout = () => {
                           ? "active"
                           : ""
                       }`}
-                      onClick={() => handleClickItem(item)}
+                      onClick={() => {
+                        const isAdded = contacts?.some(
+                          (c) => c._id === item._id || c._id === item.id
+                        );
+
+                        if (
+                          isSearching &&
+                          !isAdded &&
+                          selectedTab === "chats"
+                        ) {
+                          enqueueSnackbar("Please add to chat first", {
+                            variant: "warning",
+                          });
+                          return;
+                        }
+
+                        handleClickItem(item);
+                      }}
                     >
                       <div className="avatar">
                         {item.profile || item.groupimg ? (
@@ -277,14 +294,12 @@ const ChatLayout = () => {
                       </div>
                       <div className="contact-info-wrapper">
                         <div className="contact-name">{item.name}</div>
-                        {isSearching &&
-                          !isAdded &&
-                          selectedTab === "chats" && (
-                            <AddToChatButton
-                              contact={item}
-                              onAdded={loadContacts}
-                            />
-                          )}
+                        {isSearching && !isAdded && selectedTab === "chats" && (
+                          <AddToChatButton
+                            contact={item}
+                            onAdded={loadContacts}
+                          />
+                        )}
                       </div>
                     </div>
                   );
