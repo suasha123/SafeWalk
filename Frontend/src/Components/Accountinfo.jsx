@@ -89,7 +89,7 @@ const AccountOverlay = ({ onClose }) => {
   };
 
   const getAvatarLetter = () =>
- user.useremail?.[0]?.toUpperCase();
+ user.username?.[0]?.toUpperCase();
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -119,7 +119,7 @@ const AccountOverlay = ({ onClose }) => {
             )}
             <div>
               <p className={styles.name}>
-                {user.username || user.useremail.split("@")[0]}
+                {user.username}
               </p>
               <p className={styles.email}>
                 {user.useremail}

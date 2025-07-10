@@ -40,9 +40,9 @@ const OverlayCard = () => {
           )}
           <div>
             <p className={styles.name}>
-              {user.useremail?.split("@")[0]}
+              {user.username?.split("@")[0]}
             </p>
-            <p className={styles.email}>{user.useremail}</p>
+            <p className={styles.email}>{user.username}</p>
           </div>
         </div>
 
