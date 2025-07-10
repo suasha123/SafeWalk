@@ -35,14 +35,14 @@ const OverlayCard = () => {
             <img className={styless.profile} src={user.profile} />
           ) : (
             <div className={styles.avatar}>
-              { user.useremail.charAt(0).toUpperCase()}
+              { user.username.charAt(0).toUpperCase()}
             </div>
           )}
           <div>
             <p className={styles.name}>
-              {user.username?.split("@")[0]}
+              {user.username}
             </p>
-            <p className={styles.email}>{user.username}</p>
+            <p className={styles.email}>{user.useremail}</p>
           </div>
         </div>
 
