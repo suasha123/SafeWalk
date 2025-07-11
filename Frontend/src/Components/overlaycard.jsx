@@ -49,7 +49,7 @@ const OverlayCard = () => {
         <div className={styles.actions}>
           <button
             onClick={() => {
-              setShowOverlay(true);
+              setShowOverlay(true)l;
             }}
             className={styles.actionBtn}
           >
