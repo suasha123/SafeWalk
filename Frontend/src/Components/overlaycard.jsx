@@ -38,7 +38,7 @@ const OverlayCard = () => {
               { user.username.charAt(0).toUpperCase()}
             </div>
           )}
-          <div>
+          <div>jj
             <p className={styles.name}>
               {user.username}
             </p>
