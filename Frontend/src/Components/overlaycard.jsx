@@ -40,7 +40,7 @@ const OverlayCard = () => {
           )}
           <div>
             <p className={styles.name}>
-           j   {user.username}
+             {user.username}
             </p>
             <p className={styles.email}>{user.useremail}</p>
           </div>
