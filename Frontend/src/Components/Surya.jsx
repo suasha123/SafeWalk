@@ -25,9 +25,10 @@ export const Surya = () => {
   }, []);
 
   return (
-    <div style={{ height: "500px", width: "100%" }}>
+  <div style={{ height: "500px", width: "100%" }}>
+    {pos && (
       <MapContainer
-        center={pos != null ? pos : [51.505, -0.09]}
+        center={pos}
         zoom={13}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
@@ -36,10 +37,11 @@ export const Surya = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Marker position={pos != null ? pos : [51.505, -0.09]}>
+        <Marker position={pos}>
           <Popup>You are here!</Popup>
         </Marker>
       </MapContainer>
-    </div>
+    )}
+  </div>
   );
 };
