@@ -17,4 +17,4 @@ router.get("/searchPlace", async (req, res) => {
     return res.status(500).json({ msg: "Server Error" });
   }
 });
-module.exports = { router };
+module.exports = router;
