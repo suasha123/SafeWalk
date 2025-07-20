@@ -5,7 +5,7 @@ import { SignIn } from './Components/SignIn';
 import { SignUp } from './Components/signup';
 import { Otp } from './Components/otp';
 import ChatLayout from './Components/ChatLayout';
-import { Surya } from './Components/Surya';
+import { SafeWalkMap } from './Components/Surya';
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
         <Route path="/chat" element={<Navigate to="/chat/chats" />} />
         <Route path="/chat/:tab" element={<ChatLayout />} />
         <Route path="/chat/:tab/:entityId" element={<ChatLayout />} />
-        <Route path="/surya" element={<Surya />} />
+        <Route path="/surya" element={<SafeWalkMap />} />
       </Routes>
     </Router>
   );

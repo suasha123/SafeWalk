@@ -14,8 +14,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
-
-// ✅ Updated SearchBox using fetch instead of axios
 function SearchBox({ onSelect }) {
   const [input, setInput] = useState("");
   const [results, setResults] = useState([]);
