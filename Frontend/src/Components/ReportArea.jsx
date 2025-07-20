@@ -11,6 +11,7 @@ import { useAuth } from "./AuthContext";
 import { NavBar } from "./Navbar";
 import { useNavigate } from "react-router-dom";
 import { SplashScreen } from "./SplashScreen";
+import { FlyToLocation } from "./FlyTo";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -97,10 +98,8 @@ export const Report = () => {
     const fetchResults = async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            query
-          )}`,
-          { signal: controller.signal }
+          `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(query)}`,
+            { signal: controller.signal }
         );
         const data = await res.json();
         console.log(data);
@@ -128,7 +127,7 @@ export const Report = () => {
         <input
           type="text"
           className="search-input"
-          placeholder="🔍 Search a location..."
+          placeholder="Search a location..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -140,7 +139,7 @@ export const Report = () => {
                 onClick={() => {
                   setSelectedLoc([+res.lat, +res.lon]);
                   setLoc(null)
-                  setQuery(res.display_name);
+                  setQuery("");
                   setResults([]);
                 }}
               >
@@ -191,9 +190,12 @@ export const Report = () => {
               center={selectedLoc ?? pos ?? [51.505, -0.09]}
               zoom={13}
               scrollWheelZoom={true}
+              zoomControl={false}
               className="map"
               // onClick={(e) => handleMapClick(e)} // Add this later
             >
+            <FlyToLocation position={selectedLoc} />
+          
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

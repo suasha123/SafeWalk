@@ -139,6 +139,7 @@ io.on("connection", (socket) => {
 app.use("/upload", require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
 app.use("/api", require("./Routes/userinfo"));
+app.use("/search",require("./Routes/Search"));
 app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
