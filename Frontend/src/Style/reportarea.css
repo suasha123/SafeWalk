@@ -1,0 +1,88 @@
+.map-container {
+  position: relative;
+  margin-top: 2rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0 20px #ff00c8;
+  border: 1px solid #5a189a;
+  background-color: #141414;
+}
+
+.leaflet-map {
+  height: 400px;
+  width: 100%;
+  filter: brightness(0.9) contrast(1.2);
+  border-radius: 1rem;
+}
+
+.search-box {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: #1e1e2f;
+  border: 1px solid #5a189a;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  width: 300px;
+  color: #fff;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 0.3rem;
+  background: #2b2b3f;
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+
+.search-box ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.search-box li {
+  padding: 0.4rem;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.search-box li:hover {
+  background: #3a3a5a;
+}
+
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.report-form select,
+.report-form textarea {
+  width: 100%;
+  padding: 0.4rem;
+  border-radius: 0.3rem;
+  border: 1px solid #5a189a;
+  background: #2b2b3f;
+  color: white;
+}
+
+.report-form button {
+  padding: 0.4rem;
+  background: #7b2cbf;
+  border: none;
+  color: white;
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+
+.loading {
+  color: #fff;
+  text-align: center;
+  padding: 1rem;
+}
