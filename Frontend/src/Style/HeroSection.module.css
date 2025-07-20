@@ -130,6 +130,7 @@
   background-color:  #14141c;
   border: 1px solid rgb(122, 114, 114);
   transition: all 0.4s ease;
+  cursor: pointer;
 }
  .buttontwo:hover{
   background-color: #2b2b36;

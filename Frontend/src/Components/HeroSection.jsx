@@ -1,12 +1,13 @@
 import styles from "../Style/HeroSection.module.css";
 import { Typewriter } from "react-simple-typewriter";
-import AOS from "aos";
+import { useNavigate } from "react-router-dom";
 import "aos/dist/aos.css";
 import { loadSlim } from "@tsparticles/slim";
 import { useEffect, useRef, useMemo, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import Aos from "aos";
 export const HeroSection = () => {
+  const navigate = useNavigate();
   const waapiRef = useRef();
   const [init, setInit] = useState(false);
   //animation
@@ -148,7 +149,7 @@ export const HeroSection = () => {
         >
           <button className={styles.buttons}>
            Start Safe Walk </button>
-          <button className={styles.buttontwo}> Report Area </button>
+          <button onClick={()=>{navigate("/report-area")}} className={styles.buttontwo}> Report Area </button>
         </div>
       </div>
       <div
