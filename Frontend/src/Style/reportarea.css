@@ -524,3 +524,9 @@
 .map-button.report-btn:hover {
   background-color: #45286e;
 }
+@media(max-width : 768px){
+  .search-bar-container {
+  position: absolute;
+  top: 90px;
+}
+}
