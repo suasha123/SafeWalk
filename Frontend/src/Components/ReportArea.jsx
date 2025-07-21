@@ -42,6 +42,16 @@ export const Report = () => {
   const [loadingg, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [clickLoc, setclickLoc] = useState(null);
+  const [reportData, setReportData] = useState({
+    type: "Accident",
+    description: "",
+    datetime: new Date(
+      new Date().getTime() - new Date().getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .slice(0, 16),
+  });
+
   const fetchmyLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -130,7 +140,32 @@ export const Report = () => {
       controller.abort();
     };
   }, [query]);
+  const handleReport = async () => {
+    const location = selectedLoc || clickLoc || pos;
+    if (!location) return alert("No location selected");
+    const payload = {
+      ...reportData,
+      location: {
+        lat: location[0],
+        lng: location[1],
+      },
+    };
 
+    console.log("Submitting report:", payload);
+
+    const response = await fetch(`https://safewalk-xbkj.onrender.com/upload/report` , {
+      method : 'POST' ,
+      headers:{
+        "Content-Type": "application/json",
+      },
+      body : JSON.stringify(payload),
+      credentials : "include"
+    });
+     console.log("Send data");
+     console.log(response);
+    // Send payload to your backend here
+    setShowReportModal(false);
+  };
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
   const ClickHandler = ({ onClick }) => {
@@ -171,9 +206,7 @@ export const Report = () => {
         )}
       </div>
 
-      <div
-        className="maincontainer"
-      >
+      <div className="maincontainer">
         {showOverlay && (
           <div className={`overlay ${overlayExit ? "overlay-exit" : ""}`}>
             <div className="overlay-content">
@@ -455,7 +488,13 @@ export const Report = () => {
           </div>
           <div className="report-body">
             <label>Incident Type</label>
-            <select className="report-input">
+            <select
+              value={reportData.type}
+              onChange={(e) =>
+                setReportData({ ...reportData, type: e.target.value })
+              }
+              className="report-input"
+            >
               <option>Accident</option>
               <option>Harassment</option>
               <option>Theft</option>
@@ -466,13 +505,21 @@ export const Report = () => {
             <textarea
               className="report-input"
               placeholder="Describe what happened..."
+              maxLength={20}
+              value={reportData.description}
+              onChange={(e) =>
+                setReportData({ ...reportData, description: e.target.value })
+              }
             />
 
             <label>Date & Time</label>
             <input
               className="report-input"
               type="datetime-local"
-              defaultValue={new Date().toISOString().slice(0, 16)}
+              value={reportData.datetime}
+              onChange={(e) =>
+                setReportData({ ...reportData, datetime: e.target.value })
+              }
             />
 
             <div className="report-actions">
@@ -482,7 +529,9 @@ export const Report = () => {
               >
                 Cancel
               </button>
-              <button className="submit-btn">Submit</button>
+              <button onClick={handleReport} className="submit-btn">
+                Submit
+              </button>
             </div>
           </div>
         </div>

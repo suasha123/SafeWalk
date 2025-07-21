@@ -5,6 +5,11 @@ const { storage } = require("../config/cloudinaryconfig");
 const usermodel = require("../database/model/usermodel");
 const GroupModal = require("../database/model/groupmodel");
 const parser = multer({ storage });
+router.post("/report" , async(req,res)=>{
+  const {payload} = req.body;
+  console.log(payload);
+  return res.status(200).json({msg : "Uploaded Data"});
+})
 router.post("/updategrp", parser.single("grpimg"), async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ msg: "Unauthorized" });
