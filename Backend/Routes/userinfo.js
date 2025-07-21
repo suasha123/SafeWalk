@@ -11,6 +11,34 @@ const mongoose = require("mongoose");
 const GroupChatModel = require("../database/model/GroupChatModel");
 const ReportModel = require("../database/model/ReportModel");
 const parser = multer({ storage });
+// Get reports for a location
+router.get("/getReports", async (req, res) => {
+  const { lat, long, type } = req.query;
+  const userId = req.session.passport?.user;
+
+  if (!lat || !long) {
+    return res.status(400).json({ msg: "Missing location data" });
+  }
+
+  const query = {
+    lat: { $regex: new RegExp(`^${lat.slice(0, 5)}`) },
+    long: { $regex: new RegExp(`^${long.slice(0, 5)}`) },
+  };
+
+  try {
+    const filter = type === "your" ? { ...query, id: userId } : query;
+
+    const reports = await ReportModel.find(filter).populate(
+      "id",
+      "username profile"
+    );
+    res.json(reports);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error fetching reports" });
+  }
+});
+
 router.get("/getCount", async (req, res) => {
   if (!req.session?.passport?.user) {
     return res.status(403).json({ msg: "Unauthorized" });
@@ -20,7 +48,9 @@ router.get("/getCount", async (req, res) => {
     const { lat, long } = req.query;
 
     if (!lat || !long) {
-      return res.status(400).json({ msg: "Latitude and longitude are required" });
+      return res
+        .status(400)
+        .json({ msg: "Latitude and longitude are required" });
     }
 
     const count = await ReportModel.countDocuments({
@@ -28,7 +58,7 @@ router.get("/getCount", async (req, res) => {
       long: parseFloat(long),
     });
 
-    return res.status(200).json({ count }); 
+    return res.status(200).json({ count });
   } catch (err) {
     console.error("getCount error:", err);
     return res.status(500).json({ msg: "Server error" });
