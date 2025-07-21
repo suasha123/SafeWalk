@@ -8,10 +8,13 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import "../Style/reportarea.css";
 import { useAuth } from "./AuthContext";
+import { CiLocationOn } from "react-icons/ci";
+import { TbMessageReport } from "react-icons/tb";
 import { NavBar } from "./Navbar";
 import { useNavigate } from "react-router-dom";
 import { SplashScreen } from "./SplashScreen";
 import { FlyToLocation } from "./FlyTo";
+import { IoEyeOutline } from "react-icons/io5";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -41,7 +44,7 @@ export const Report = () => {
         }
       },
       (err) => {
-        console.error("Geolocation error:", err.message);
+        console.error("Geolocation error:", err.code, err.message);
       },
       {
         enableHighAccuracy: true,
@@ -98,8 +101,10 @@ export const Report = () => {
     const fetchResults = async () => {
       try {
         const res = await fetch(
-          `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(query)}`,
-            { signal: controller.signal }
+          `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(
+            query
+          )}`,
+          { signal: controller.signal }
         );
         const data = await res.json();
         console.log(data);
@@ -138,7 +143,7 @@ export const Report = () => {
                 key={idx}
                 onClick={() => {
                   setSelectedLoc([+res.lat, +res.lon]);
-                  setLoc(null)
+                  setLoc(null);
                   setQuery("");
                   setResults([]);
                 }}
@@ -163,7 +168,7 @@ export const Report = () => {
               >
                 &times;
               </button>
-              <h2 className="heading">📍 Report Area Info</h2>
+              <h2 className="heading">Report Area Info</h2>
               <li className="info">
                 This section allows you to see your current location on the map.
               </li>
@@ -194,8 +199,8 @@ export const Report = () => {
               className="map"
               // onClick={(e) => handleMapClick(e)} // Add this later
             >
-            <FlyToLocation position={selectedLoc} />
-          
+              <FlyToLocation position={selectedLoc} />
+
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -215,7 +220,95 @@ export const Report = () => {
           </Fragment>
         )}
       </div>
-      <div className="bottom-info"></div>
+      <div className="summary-cards-row">
+        <div className="summary-card">
+          <h4 className="heading-with-icon">
+            <CiLocationOn className="glow-icon" />
+            <span>Current Location</span>
+          </h4>
+          <p>
+            {selectedLoc
+              ? `${selectedLoc[0].toFixed(3)}, ${selectedLoc[1].toFixed(3)}`
+              : pos
+              ? `${pos[0].toFixed(3)}, ${pos[1].toFixed(3)}`
+              : "Fetching..."}
+          </p>
+        </div>
+        <div className="summary-card">
+          <h4 className="heading-with-icon">
+            <TbMessageReport className="glow-icon" />
+            <span>Users Reported</span>
+          </h4>
+          <p>0</p>
+        </div>
+        <div
+          className="summary-card see-reviews"
+          onClick={() => {
+            const section = document.querySelector(".bottom-info");
+            section?.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          <h4 className="heading-with-icon">
+            <IoEyeOutline className="glow-icon" />
+            <span>See Reviews</span>
+          </h4>
+          <p>Scroll to bottom</p>
+        </div>
+      </div>
+
+      <div className="bottom-info">
+        <div className="report-div">
+          <h3 className="report-heading">📋 User Reports</h3>
+        </div>
+
+        <div className="review-scroll-area">
+          {selectedLoc || pos ? (
+            <>
+              <div className="review-card">
+                <img src="https://i.pravatar.cc/40?img=5" className="avatar" />
+                <div className="review-content">
+                  <h4 className="reviewer-name">Riya Sharma</h4>
+                  <p className="review-text">
+                    Felt safe walking here at night. Good lighting and crowd
+                    around.
+                  </p>
+                </div>
+              </div>
+              <div className="review-card">
+                <img src="https://i.pravatar.cc/40?img=5" className="avatar" />
+                <div className="review-content">
+                  <h4 className="reviewer-name">Riya Sharma</h4>
+                  <p className="review-text">
+                    Felt safe walking here at night. Good lighting and crowd
+                    around.
+                  </p>
+                </div>
+              </div>
+              <div className="review-card">
+                <img src="https://i.pravatar.cc/40?img=5" className="avatar" />
+                <div className="review-content">
+                  <h4 className="reviewer-name">Riya Sharma</h4>
+                  <p className="review-text">
+                    Felt safe walking here at night. Good lighting and crowd
+                    around.
+                  </p>
+                </div>
+              </div>
+              <div className="review-card">
+                <img src="https://i.pravatar.cc/40?img=8" className="avatar" />
+                <div className="review-content">
+                  <h4 className="reviewer-name">Amit Verma</h4>
+                  <p className="review-text">
+                    Saw suspicious people last week. Be alert around 10PM.
+                  </p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="no-reports">🔍 No reports found for this area yet.</p>
+          )}
+        </div>
+      </div>
 
       {/* Bottom Sheet Modal for Report */}
       {showReportModal && (

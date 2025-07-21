@@ -3,6 +3,7 @@ const router = express.Router();
 require("dotenv").config();
 router.get("/searchPlace", async (req, res) => {
   const location = req.query.query;
+  console.log("Token being sent:", process.env.SEARCHTOKEN);
   if (!location || typeof location !== "string" || location.length < 2) {
     return res.status(400).json({ msg: "Invalid query" });
   }
