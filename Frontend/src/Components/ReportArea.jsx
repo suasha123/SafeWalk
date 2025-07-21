@@ -43,6 +43,7 @@ export const Report = () => {
   const [loadingg, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [clickLoc, setclickLoc] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [reportData, setReportData] = useState({
     type: "Accident",
     description: "",
@@ -144,6 +145,7 @@ export const Report = () => {
   const handleReport = async () => {
     const location = selectedLoc || clickLoc || pos;
     if (!location) return alert("No location selected");
+    setIsSubmitting(true);
     try {
       const payload = {
         ...reportData,
@@ -174,6 +176,9 @@ export const Report = () => {
     } catch (err) {
        enqueueSnackbar("Error Occured" , {variant : "error"});
     }
+     finally {
+    setIsSubmitting(false); 
+  }
   };
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
@@ -538,8 +543,8 @@ export const Report = () => {
               >
                 Cancel
               </button>
-              <button onClick={handleReport} className="submit-btn">
-                Submit
+              <button  disabled={isSubmitting} onClick={handleReport} className="submit-btn">
+                {isSubmitting ? "Processing..." : "Submit"}
               </button>
             </div>
           </div>
