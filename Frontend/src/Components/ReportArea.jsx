@@ -18,6 +18,8 @@ import { IoEyeOutline } from "react-icons/io5";
 import { useMapEvent } from "react-leaflet";
 import { MdMyLocation } from "react-icons/md";
 import { TbReport } from "react-icons/tb";
+import "aos/dist/aos.css";
+import Aos from "aos";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -40,7 +42,8 @@ export const Report = () => {
   const [loadingg, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [clickLoc, setclickLoc] = useState(null);
-  const fetchmyLoc = ()=>{navigator.geolocation.getCurrentPosition(
+  const fetchmyLoc = () => {
+    navigator.geolocation.getCurrentPosition(
       (pos) => {
         if (pos) {
           const { latitude, longitude } = pos.coords;
@@ -55,10 +58,11 @@ export const Report = () => {
         timeout: 10000,
         maximumAge: 0,
       }
-    )
+    );
   };
   useEffect(() => {
     fetchmyLoc();
+    Aos.init({ once: true });
     const interval = setInterval(() => setIndex((index) => index + 1), 2000);
     return () => clearTimeout(interval);
   }, []);
@@ -167,7 +171,9 @@ export const Report = () => {
         )}
       </div>
 
-      <div className="maincontainer">
+      <div
+        className="maincontainer"
+      >
         {showOverlay && (
           <div className={`overlay ${overlayExit ? "overlay-exit" : ""}`}>
             <div className="overlay-content">
@@ -251,7 +257,10 @@ export const Report = () => {
                   fetchmyLoc();
                 }}
               >
-                <MdMyLocation style={{ fontSize : "18px" , marginRight : "5px"}}/> My Location
+                <MdMyLocation
+                  style={{ fontSize: "18px", marginRight: "5px" }}
+                />{" "}
+                My Location
               </button>
               <button
                 className="map-button report-btn"
@@ -261,14 +270,20 @@ export const Report = () => {
                   }
                 }}
               >
-                <TbReport style={{ fontSize : "20px" , marginRight : "3px"}}/> Report Here
+                <TbReport style={{ fontSize: "20px", marginRight: "3px" }} />{" "}
+                Report Here
               </button>
             </div>
           </Fragment>
         )}
       </div>
       <div className="summary-cards-row">
-        <div className="summary-card">
+        <div
+          data-aos="fade-right"
+          data-aos-duration="1000"
+          data-aos-easing="ease"
+          className="summary-card"
+        >
           <h4 className="heading-with-icon">
             <CiLocationOn className="glow-icon" />
             <span>Current Location</span>
@@ -283,7 +298,12 @@ export const Report = () => {
               : "Fetching..."}
           </p>
         </div>
-        <div className="summary-card">
+        <div
+          data-aos="zoom-in-up"
+          data-aos-duration="1000"
+          data-aos-easing="ease"
+          className="summary-card"
+        >
           <h4 className="heading-with-icon">
             <TbMessageReport className="glow-icon" />
             <span>Users Reported</span>
@@ -291,6 +311,9 @@ export const Report = () => {
           <p>0</p>
         </div>
         <div
+          data-aos="fade-left"
+          data-aos-duration="1000"
+          data-aos-easing="ease"
           className="summary-card see-reviews"
           onClick={() => {
             const section = document.querySelector(".bottom-info");
@@ -327,7 +350,12 @@ export const Report = () => {
           </div>
         </div>
 
-        <div className="review-scroll-area">
+        <div
+          data-aos="fade-down"
+          data-aos-duration="1000"
+          data-aos-easing="ease"
+          className="review-scroll-area"
+        >
           {activeTab === "user" ? (
             <>
               {selectedLoc || pos ? (
@@ -389,7 +417,7 @@ export const Report = () => {
               )}
             </>
           ) : (
-            <>
+            <Fragment>
               <div className="review-card">
                 <img src="https://i.pravatar.cc/40?img=12" className="avatar" />
                 <div className="review-content">
@@ -408,7 +436,7 @@ export const Report = () => {
                   </p>
                 </div>
               </div>
-            </>
+            </Fragment>
           )}
         </div>
       </div>
