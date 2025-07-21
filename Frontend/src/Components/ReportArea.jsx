@@ -222,8 +222,6 @@ export const Report = () => {
       setIsSubmitting(false);
     }
   };
-  if (loading) return <SplashScreen />;
-  if (!isLoggedIn) return null;
   useEffect(() => {
     const fetchData = async () => {
       const Location = pos || selectedLoc || clickLoc;
@@ -258,7 +256,8 @@ export const Report = () => {
     });
     return null;
   };
-
+  if (loading) return <SplashScreen />;
+  if (!isLoggedIn) return null;
   return (
     <>
       <NavBar />
