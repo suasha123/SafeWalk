@@ -182,8 +182,6 @@ export const Report = () => {
       setIsSubmitting(false);
     }
   };
-  if (loading) return <SplashScreen />;
-  if (!isLoggedIn) return null;
   useEffect(() => {
     const fetchData = async () => {
       const Location = pos || selectedLoc || clickLoc;
@@ -218,7 +216,8 @@ export const Report = () => {
     });
     return null;
   };
-
+  if (loading) return <SplashScreen />;
+  if (!isLoggedIn) return null;
   return (
     <>
       <NavBar />
@@ -386,7 +385,7 @@ export const Report = () => {
             <TbMessageReport className="glow-icon" />
             <span>Users Reported</span>
           </h4>
-        <p>{userCount === null ? "Loading" : userCount}</p>
+          <p>{userCount === null ? "Loading" : userCount}</p>
         </div>
         <div
           data-aos="fade-left"
@@ -448,6 +447,30 @@ export const Report = () => {
                       <p className="review-text">
                         Felt safe walking here at night. Good lighting and crowd
                         around.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
                       </p>
                     </div>
                   </div>
