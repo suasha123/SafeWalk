@@ -30,7 +30,7 @@ L.Icon.Default.mergeOptions({
 const TEXTS = ["Loading Map", "Fetching Location"];
 export const Report = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("user"); // "user" or "your"
+  const [activeTab, setActiveTab] = useState("user");
   const [showOverlay, setShowOverlay] = useState(true);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -44,6 +44,7 @@ export const Report = () => {
   const [index, setIndex] = useState(0);
   const [clickLoc, setclickLoc] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userCount, setuserCount] = useState(null);
   const [reportData, setReportData] = useState({
     type: "Accident",
     description: "",
@@ -120,7 +121,6 @@ export const Report = () => {
     }
 
     const controller = new AbortController();
-
     const fetchResults = async () => {
       try {
         const res = await fetch(
@@ -166,19 +166,21 @@ export const Report = () => {
         }
       );
       const res = await response.json();
-      if(response.ok){
-        enqueueSnackbar(res.msg , {variant : "success"});
+      if (response.ok) {
+        enqueueSnackbar(res.msg, { variant: "success" });
+        setReportData((prev) => ({
+          ...prev,
+          description: "",
+        }));
         setShowReportModal(false);
-      }
-      else{
-        enqueueSnackbar(res.msg , {variant : "Warning"});
+      } else {
+        enqueueSnackbar(res.msg, { variant: "Warning" });
       }
     } catch (err) {
-       enqueueSnackbar("Error Occured" , {variant : "error"});
+      enqueueSnackbar("Error Occured", { variant: "error" });
+    } finally {
+      setIsSubmitting(false);
     }
-     finally {
-    setIsSubmitting(false); 
-  }
   };
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
@@ -188,6 +190,29 @@ export const Report = () => {
     });
     return null;
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      const Location = pos || selectedLoc || clickLoc;
+      setuserCount(null);
+      try {
+        const response = await fetch(
+          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${Location.lat}&long=${Location.long}`,
+          {
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setuserCount(data.count);
+        }
+      } catch (error) {
+        console.error("Failed to fetch count:", error);
+      }
+    };
+
+    fetchData();
+  }, [pos, selectedLoc, clickLoc]);
+
   return (
     <>
       <NavBar />
@@ -355,7 +380,7 @@ export const Report = () => {
             <TbMessageReport className="glow-icon" />
             <span>Users Reported</span>
           </h4>
-          <p>0</p>
+          <p>{userCount || "Loading"}</p>
         </div>
         <div
           data-aos="fade-left"
@@ -543,7 +568,11 @@ export const Report = () => {
               >
                 Cancel
               </button>
-              <button  disabled={isSubmitting} onClick={handleReport} className="submit-btn">
+              <button
+                disabled={isSubmitting}
+                onClick={handleReport}
+                className="submit-btn"
+              >
                 {isSubmitting ? "Processing..." : "Submit"}
               </button>
             </div>

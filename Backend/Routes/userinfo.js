@@ -9,7 +9,32 @@ const GroupModal = require("../database/model/groupmodel");
 const { nanoid } = require("nanoid");
 const mongoose = require("mongoose");
 const GroupChatModel = require("../database/model/GroupChatModel");
+const ReportModel = require("../database/model/ReportModel");
 const parser = multer({ storage });
+router.get("/getCount", async (req, res) => {
+  if (!req.session?.passport?.user) {
+    return res.status(403).json({ msg: "Unauthorized" });
+  }
+
+  try {
+    const { lat, long } = req.query;
+
+    if (!lat || !long) {
+      return res.status(400).json({ msg: "Latitude and longitude are required" });
+    }
+
+    const count = await ReportModel.countDocuments({
+      lat: parseFloat(lat),
+      long: parseFloat(long),
+    });
+
+    return res.status(200).json({ count }); 
+  } catch (err) {
+    console.error("getCount error:", err);
+    return res.status(500).json({ msg: "Server error" });
+  }
+});
+
 router.post("/leavegroup", async (req, res) => {
   try {
     const { groupid } = req.body;
