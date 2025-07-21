@@ -20,6 +20,7 @@ import { MdMyLocation } from "react-icons/md";
 import { TbReport } from "react-icons/tb";
 import "aos/dist/aos.css";
 import Aos from "aos";
+import { enqueueSnackbar } from "notistack";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -143,28 +144,36 @@ export const Report = () => {
   const handleReport = async () => {
     const location = selectedLoc || clickLoc || pos;
     if (!location) return alert("No location selected");
-    const payload = {
-      ...reportData,
-      location: {
-        lat: location[0],
-        lng: location[1],
-      },
-    };
-
-    console.log("Submitting report:", payload);
-
-    const response = await fetch(`https://safewalk-xbkj.onrender.com/upload/report` , {
-      method : 'POST' ,
-      headers:{
-        "Content-Type": "application/json",
-      },
-      body : JSON.stringify(payload),
-      credentials : "include"
-    });
-     console.log("Send data");
-     console.log(response);
-    // Send payload to your backend here
-    setShowReportModal(false);
+    try {
+      const payload = {
+        ...reportData,
+        location: {
+          lat: location[0],
+          lng: location[1],
+        },
+      };
+      const response = await fetch(
+        `https://safewalk-xbkj.onrender.com/upload/report`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          credentials: "include",
+        }
+      );
+      const res = await response.json();
+      if(response.ok){
+        enqueueSnackbar(res.msg , {variant : "success"});
+        setShowReportModal(false);
+      }
+      else{
+        enqueueSnackbar(res.msg , {variant : "Warning"});
+      }
+    } catch (err) {
+       enqueueSnackbar("Error Occured" , {variant : "error"});
+    }
   };
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;

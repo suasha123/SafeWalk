@@ -27,10 +27,8 @@ router.post("/report", async (req, res) => {
       timeofReport: payload.datetime,
       type: payload.type, 
     });
-    console.log("Report saved:", payload);
     return res.status(200).json({ msg: "Uploaded Data" });
   } catch (err) {
-    console.error("Error saving report:", err);
     return res.status(500).json({ msg: "Failed to upload data" });
   }
 });
