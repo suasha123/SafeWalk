@@ -184,19 +184,18 @@ export const Report = () => {
   };
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
-  const ClickHandler = ({ onClick }) => {
-    useMapEvent("click", (e) => {
-      onClick(e);
-    });
-    return null;
-  };
   useEffect(() => {
     const fetchData = async () => {
       const Location = pos || selectedLoc || clickLoc;
+
+      if (!Location || Location.length !== 2) return;
+
+      const [lat, long] = Location;
+
       setuserCount(null);
       try {
         const response = await fetch(
-          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${Location.lat}&long=${Location.long}`,
+          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${lat}&long=${long}`,
           {
             credentials: "include",
           }
@@ -212,6 +211,13 @@ export const Report = () => {
 
     fetchData();
   }, [pos, selectedLoc, clickLoc]);
+
+  const ClickHandler = ({ onClick }) => {
+    useMapEvent("click", (e) => {
+      onClick(e);
+    });
+    return null;
+  };
 
   return (
     <>
@@ -380,7 +386,7 @@ export const Report = () => {
             <TbMessageReport className="glow-icon" />
             <span>Users Reported</span>
           </h4>
-          <p>{userCount || "Loading"}</p>
+        <p>{userCount === null ? "Loading" : userCount}</p>
         </div>
         <div
           data-aos="fade-left"
