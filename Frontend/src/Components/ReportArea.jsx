@@ -15,6 +15,9 @@ import { useNavigate } from "react-router-dom";
 import { SplashScreen } from "./SplashScreen";
 import { FlyToLocation } from "./FlyTo";
 import { IoEyeOutline } from "react-icons/io5";
+import { useMapEvent } from "react-leaflet";
+import { MdMyLocation } from "react-icons/md";
+import { TbReport } from "react-icons/tb";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -24,6 +27,7 @@ L.Icon.Default.mergeOptions({
 const TEXTS = ["Loading Map", "Fetching Location"];
 export const Report = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("user"); // "user" or "your"
   const [showOverlay, setShowOverlay] = useState(true);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -35,8 +39,8 @@ export const Report = () => {
   const waapiRef = useRef();
   const [loadingg, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
+  const [clickLoc, setclickLoc] = useState(null);
+  const fetchmyLoc = ()=>{navigator.geolocation.getCurrentPosition(
       (pos) => {
         if (pos) {
           const { latitude, longitude } = pos.coords;
@@ -51,7 +55,10 @@ export const Report = () => {
         timeout: 10000,
         maximumAge: 0,
       }
-    );
+    )
+  };
+  useEffect(() => {
+    fetchmyLoc();
     const interval = setInterval(() => setIndex((index) => index + 1), 2000);
     return () => clearTimeout(interval);
   }, []);
@@ -107,8 +114,7 @@ export const Report = () => {
           { signal: controller.signal }
         );
         const data = await res.json();
-        console.log(data);
-        setResults(data.slice(0, 5)); // Show top 5
+        setResults(data.slice(0, 5));
       } catch (err) {
         if (err.name !== "AbortError") console.error(err);
       }
@@ -123,6 +129,12 @@ export const Report = () => {
 
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
+  const ClickHandler = ({ onClick }) => {
+    useMapEvent("click", (e) => {
+      onClick(e);
+    });
+    return null;
+  };
   return (
     <>
       <NavBar />
@@ -190,16 +202,21 @@ export const Report = () => {
           </div>
         ) : (
           <Fragment>
-            {/*<button onClick={() => setShowReportModal(true)}>Test Modal</button>*/}
             <MapContainer
-              center={selectedLoc ?? pos ?? [51.505, -0.09]}
+              center={selectedLoc ?? pos ?? clickLoc ?? [51.505, -0.09]}
               zoom={13}
               scrollWheelZoom={true}
               zoomControl={false}
               className="map"
-              // onClick={(e) => handleMapClick(e)} // Add this later
             >
-              <FlyToLocation position={selectedLoc} />
+              <ClickHandler
+                onClick={(e) => {
+                  setLoc(null);
+                  setSelectedLoc(null);
+                  setclickLoc([e.latlng.lat, e.latlng.lng]);
+                }}
+              />
+              <FlyToLocation position={selectedLoc || pos || clickLoc} />
 
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"
@@ -216,7 +233,37 @@ export const Report = () => {
                   <Popup>Search Result</Popup>
                 </Marker>
               )}
+
+              {clickLoc && (
+                <Marker position={clickLoc}>
+                  <Popup>Search Result</Popup>
+                </Marker>
+              )}
             </MapContainer>
+            {/* Floating Map Controls */}
+            <div className="map-action-buttons">
+              <button
+                className="map-button loc-btn"
+                onClick={() => {
+                  setSelectedLoc(null);
+                  setclickLoc(null);
+                  setLoc(null);
+                  fetchmyLoc();
+                }}
+              >
+                <MdMyLocation style={{ fontSize : "18px" , marginRight : "5px"}}/> My Location
+              </button>
+              <button
+                className="map-button report-btn"
+                onClick={() => {
+                  if (pos || clickLoc || selectedLoc) {
+                    setShowReportModal(true);
+                  }
+                }}
+              >
+                <TbReport style={{ fontSize : "20px" , marginRight : "3px"}}/> Report Here
+              </button>
+            </div>
           </Fragment>
         )}
       </div>
@@ -231,6 +278,8 @@ export const Report = () => {
               ? `${selectedLoc[0].toFixed(3)}, ${selectedLoc[1].toFixed(3)}`
               : pos
               ? `${pos[0].toFixed(3)}, ${pos[1].toFixed(3)}`
+              : clickLoc
+              ? `${clickLoc[0].toFixed(3)}, ${clickLoc[1].toFixed(3)}`
               : "Fetching..."}
           </p>
         </div>
@@ -258,54 +307,108 @@ export const Report = () => {
 
       <div className="bottom-info">
         <div className="report-div">
-          <h3 className="report-heading">📋 User Reports</h3>
+          <div className="tab-switcher">
+            <div
+              className={`tab-button ${
+                activeTab === "user" ? "active-tab" : ""
+              }`}
+              onClick={() => setActiveTab("user")}
+            >
+              📋 User Reports
+            </div>
+            <div
+              className={`tab-button ${
+                activeTab === "your" ? "active-tab" : ""
+              }`}
+              onClick={() => setActiveTab("your")}
+            >
+              🧾 Your Reports
+            </div>
+          </div>
         </div>
 
         <div className="review-scroll-area">
-          {selectedLoc || pos ? (
+          {activeTab === "user" ? (
+            <>
+              {selectedLoc || pos ? (
+                <>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=5"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Riya Sharma</h4>
+                      <p className="review-text">
+                        Felt safe walking here at night. Good lighting and crowd
+                        around.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="no-reports">
+                  🔍 No reports found for this area yet.
+                </p>
+              )}
+            </>
+          ) : (
             <>
               <div className="review-card">
-                <img src="https://i.pravatar.cc/40?img=5" className="avatar" />
+                <img src="https://i.pravatar.cc/40?img=12" className="avatar" />
                 <div className="review-content">
-                  <h4 className="reviewer-name">Riya Sharma</h4>
+                  <h4 className="reviewer-name">You</h4>
                   <p className="review-text">
-                    Felt safe walking here at night. Good lighting and crowd
-                    around.
+                    Reported harassment incident on 12 July. Action pending.
                   </p>
                 </div>
               </div>
               <div className="review-card">
-                <img src="https://i.pravatar.cc/40?img=5" className="avatar" />
+                <img src="https://i.pravatar.cc/40?img=12" className="avatar" />
                 <div className="review-content">
-                  <h4 className="reviewer-name">Riya Sharma</h4>
+                  <h4 className="reviewer-name">You</h4>
                   <p className="review-text">
-                    Felt safe walking here at night. Good lighting and crowd
-                    around.
-                  </p>
-                </div>
-              </div>
-              <div className="review-card">
-                <img src="https://i.pravatar.cc/40?img=5" className="avatar" />
-                <div className="review-content">
-                  <h4 className="reviewer-name">Riya Sharma</h4>
-                  <p className="review-text">
-                    Felt safe walking here at night. Good lighting and crowd
-                    around.
-                  </p>
-                </div>
-              </div>
-              <div className="review-card">
-                <img src="https://i.pravatar.cc/40?img=8" className="avatar" />
-                <div className="review-content">
-                  <h4 className="reviewer-name">Amit Verma</h4>
-                  <p className="review-text">
-                    Saw suspicious people last week. Be alert around 10PM.
+                    Accident reported on 9 July near main road.
                   </p>
                 </div>
               </div>
             </>
-          ) : (
-            <p className="no-reports">🔍 No reports found for this area yet.</p>
           )}
         </div>
       </div>
