@@ -4,12 +4,37 @@ const multer = require("multer");
 const { storage } = require("../config/cloudinaryconfig");
 const usermodel = require("../database/model/usermodel");
 const GroupModal = require("../database/model/groupmodel");
+const ReportModel = require("../database/model/ReportModel");
 const parser = multer({ storage });
-router.post("/report" , async(req,res)=>{
-  const {payload} = req.body;
-  console.log(payload);
-  return res.status(200).json({msg : "Uploaded Data"});
-})
+router.post("/report", async (req, res) => {
+  const payload = req.body;
+
+  if (!payload) {
+    return res.status(403).json({ msg: "Invalid Request" });
+  }
+
+  const userId = req.session?.passport?.user;
+  if (!userId) {
+    return res.status(403).json({ msg: "Not Logged In" });
+  }
+
+  try {
+    await ReportModel.create({
+      id: userId,
+      desc: payload.description,
+      lat: payload.location.lat,
+      long: payload.location.lng,
+      timeofReport: payload.datetime,
+      type: payload.type, 
+    });
+    console.log("Report saved:", payload);
+    return res.status(200).json({ msg: "Uploaded Data" });
+  } catch (err) {
+    console.error("Error saving report:", err);
+    return res.status(500).json({ msg: "Failed to upload data" });
+  }
+});
+
 router.post("/updategrp", parser.single("grpimg"), async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ msg: "Unauthorized" });
@@ -23,13 +48,11 @@ router.post("/updategrp", parser.single("grpimg"), async (req, res) => {
     if (newgrpimgg) {
       await GroupModal.findByIdAndUpdate(grpid, { groupimg: newgrpimgg.path });
     }
-    res
-      .status(200)
-      .json({
-        msg: "Changed Successfully",
-        name: grpname,
-        image: newgrpimgg?.path || null,
-      });
+    res.status(200).json({
+      msg: "Changed Successfully",
+      name: grpname,
+      image: newgrpimgg?.path || null,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "Server error" });
