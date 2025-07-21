@@ -45,9 +45,6 @@ export const Report = () => {
   const [clickLoc, setclickLoc] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userCount, setuserCount] = useState(null);
-  const [fetchedReports, setFetchedReports] = useState([]);
-  const [reportSectionInView, setReportSectionInView] = useState(false);
-  const reportRef = useRef();
   const [reportData, setReportData] = useState({
     type: "Accident",
     description: "",
@@ -99,43 +96,6 @@ export const Report = () => {
     }, 10000);
     return () => clearTimeout(timeout);
   }, []);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setReportSectionInView(true);
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (reportRef.current) observer.observe(reportRef.current);
-
-    return () => {
-      if (reportRef.current) observer.unobserve(reportRef.current);
-    };
-  }, []);
-  useEffect(() => {
-    const loc = pos || selectedLoc || clickLoc;
-    if (!reportSectionInView || !loc) return;
-
-    const fetchReports = async () => {
-      try {
-        const res = await fetch(
-          `https://safewalk-xbkj.onrender.com/api/getReports?lat=${loc[0]}&long=${loc[1]}&type=${activeTab}`,
-          {
-            credentials: "include",
-          }
-        );
-        const data = await res.json();
-        setFetchedReports(data);
-      } catch (err) {
-        console.error("Failed to fetch reports:", err);
-      }
-    };
-
-    fetchReports();
-  }, [reportSectionInView, pos, selectedLoc, clickLoc, activeTab]);
 
   useEffect(() => {
     if (loading) return;
@@ -222,6 +182,8 @@ export const Report = () => {
       setIsSubmitting(false);
     }
   };
+  if (loading) return <SplashScreen />;
+  if (!isLoggedIn) return null;
   useEffect(() => {
     const fetchData = async () => {
       const Location = pos || selectedLoc || clickLoc;
@@ -256,8 +218,7 @@ export const Report = () => {
     });
     return null;
   };
-  if (loading) return <SplashScreen />;
-  if (!isLoggedIn) return null;
+
   return (
     <>
       <NavBar />
@@ -425,7 +386,7 @@ export const Report = () => {
             <TbMessageReport className="glow-icon" />
             <span>Users Reported</span>
           </h4>
-          <p>{userCount === null ? "Loading" : userCount}</p>
+        <p>{userCount === null ? "Loading" : userCount}</p>
         </div>
         <div
           data-aos="fade-left"
@@ -445,7 +406,7 @@ export const Report = () => {
         </div>
       </div>
 
-      <div ref={reportRef} className="bottom-info">
+      <div className="bottom-info">
         <div className="report-div">
           <div className="tab-switcher">
             <div
@@ -475,21 +436,58 @@ export const Report = () => {
         >
           {activeTab === "user" ? (
             <>
-              {fetchedReports.length > 0 ? (
-                fetchedReports.map((report, idx) => (
-                  <div key={idx} className="review-card">
+              {selectedLoc || pos ? (
+                <>
+                  <div className="review-card">
                     <img
-                      src={report.id.profile || "https://i.pravatar.cc/40"}
+                      src="https://i.pravatar.cc/40?img=5"
                       className="avatar"
                     />
                     <div className="review-content">
-                      <h4 className="reviewer-name">
-                        {report.id.name || "Anonymous"}
-                      </h4>
-                      <p className="review-text">{report.desc}</p>
+                      <h4 className="reviewer-name">Riya Sharma</h4>
+                      <p className="review-text">
+                        Felt safe walking here at night. Good lighting and crowd
+                        around.
+                      </p>
                     </div>
                   </div>
-                ))
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="review-card">
+                    <img
+                      src="https://i.pravatar.cc/40?img=8"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">Amit Verma</h4>
+                      <p className="review-text">
+                        Saw suspicious people last week. Be alert around 10PM.
+                      </p>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <p className="no-reports">
                   🔍 No reports found for this area yet.
@@ -497,26 +495,26 @@ export const Report = () => {
               )}
             </>
           ) : (
-            <>
-              {fetchedReports.length > 0 ? (
-                fetchedReports.map((report, idx) => (
-                  <div key={idx} className="review-card">
-                    <img
-                      src={report.id.profile || "https://i.pravatar.cc/40"}
-                      className="avatar"
-                    />
-                    <div className="review-content">
-                      <h4 className="reviewer-name">You</h4>
-                      <p className="review-text">{report.desc}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="no-reports">
-                  📭 You haven’t reported anything in this area.
-                </p>
-              )}
-            </>
+            <Fragment>
+              <div className="review-card">
+                <img src="https://i.pravatar.cc/40?img=12" className="avatar" />
+                <div className="review-content">
+                  <h4 className="reviewer-name">You</h4>
+                  <p className="review-text">
+                    Reported harassment incident on 12 July. Action pending.
+                  </p>
+                </div>
+              </div>
+              <div className="review-card">
+                <img src="https://i.pravatar.cc/40?img=12" className="avatar" />
+                <div className="review-content">
+                  <h4 className="reviewer-name">You</h4>
+                  <p className="review-text">
+                    Accident reported on 9 July near main road.
+                  </p>
+                </div>
+              </div>
+            </Fragment>
           )}
         </div>
       </div>
