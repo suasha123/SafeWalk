@@ -188,52 +188,81 @@ export const Report = () => {
     }
   };
   useEffect(() => {
-    const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
+    const fetchData = async () => {
+      const Location = pos || selectedLoc || clickLoc;
 
-    const fetchReports = async () => {
-      const loc = pos || selectedLoc || clickLoc;
+      if (!Location || Location.length !== 2) return;
 
-      if (activeTab === "user") {
-        if (!loc || loc.length !== 2 || lastFetchedLoc === key) return;
+      const [lat, long] = Location;
 
-        setTabLoading(true); 
-        try {
-          const res = await fetch(
-            `https://safewalk-xbkj.onrender.com/api/getReportsByLocation?lat=${loc[0]}&long=${loc[1]}`,
-            { credentials: "include" }
-          );
-          const data = await res.json();
-          setUserReports(data || []);
-          setLastFetchedLoc(key);
-        } catch (error) {
-          console.error("Error fetching user reports:", error);
-        } finally {
-          setTabLoading(false);
+      setuserCount(null);
+      try {
+        const response = await fetch(
+          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${lat}&long=${long}`,
+          {
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setuserCount(data.count);
         }
-      }
-
-      if (activeTab === "your") {
-        if (hasFetchedMyReports) return;
-
-        setTabLoading(true); 
-        try {
-          const res = await fetch(
-            `https://safewalk-xbkj.onrender.com/api/getReportsByUser`,
-            { credentials: "include" }
-          );
-          const data = await res.json();
-          setMyReports(data || []);
-          setHasFetchedMyReports(true);
-        } catch (error) {
-          console.error("Error fetching my reports:", error);
-        } finally {
-          setTabLoading(false);
-        }
+      } catch (error) {
+        console.error("Failed to fetch count:", error);
       }
     };
 
-    fetchReports();
-  }, [activeTab, pos, selectedLoc, clickLoc]);
+    fetchData();
+  }, [pos, selectedLoc, clickLoc]);
+
+  useEffect(() => {
+  const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
+
+  const fetchReports = async () => {
+    const loc = pos || selectedLoc || clickLoc;
+
+    if (activeTab === "user") {
+      if (!loc || loc.length !== 2 || lastFetchedLoc === key) return;
+
+      setTabLoading(true); // ✅ only start loading if fetch will run
+      try {
+        const res = await fetch(
+          `https://safewalk-xbkj.onrender.com/api/getReportsByLocation?lat=${loc[0]}&long=${loc[1]}`,
+          { credentials: "include" }
+        );
+        const data = await res.json();
+        setUserReports(data || []);
+        setLastFetchedLoc(key);
+      } catch (error) {
+        console.error("Error fetching user reports:", error);
+      } finally {
+        setTabLoading(false);
+      }
+    }
+
+    if (activeTab === "your") {
+      if (hasFetchedMyReports) return;
+
+      setTabLoading(true); // ✅ only start loading if fetch will run
+      try {
+        const res = await fetch(
+          `https://safewalk-xbkj.onrender.com/api/getReportsByUser`,
+          { credentials: "include" }
+        );
+        const data = await res.json();
+        setMyReports(data || []);
+        setHasFetchedMyReports(true);
+      } catch (error) {
+        console.error("Error fetching my reports:", error);
+      } finally {
+        setTabLoading(false);
+      }
+    }
+  };
+
+  fetchReports();
+}, [activeTab, pos, selectedLoc, clickLoc]);
+
 
   const ClickHandler = ({ onClick }) => {
     useMapEvent("click", (e) => {
