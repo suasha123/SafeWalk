@@ -47,6 +47,8 @@ export const Report = () => {
   const [userCount, setuserCount] = useState(null);
   const [userReports, setUserReports] = useState([]);
   const [myReports, setMyReports] = useState([]);
+  const [tabLoading, setTabLoading] = useState(false);
+  const [lastFetchedLoc, setLastFetchedLoc] = useState(null);
   const [reportData, setReportData] = useState({
     type: "Accident",
     description: "",
@@ -214,9 +216,20 @@ export const Report = () => {
 
   useEffect(() => {
     const fetchReports = async () => {
+      setTabLoading(true);
+      const loc = pos || selectedLoc || clickLoc;
+
       if (activeTab === "user") {
-        const loc = pos || selectedLoc || clickLoc;
-        if (!loc || loc.length !== 2) return;
+        if (!loc || loc.length !== 2) {
+          setTabLoading(false);
+          return;
+        }
+
+        const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
+        if (lastFetchedLoc === key) {
+          setTabLoading(false);
+          return;
+        }
 
         try {
           const res = await fetch(
@@ -225,8 +238,11 @@ export const Report = () => {
           );
           const data = await res.json();
           setUserReports(data || []);
+          setLastFetchedLoc(key);
         } catch (error) {
           console.error("Error fetching user reports:", error);
+        } finally {
+          setTabLoading(false);
         }
       } else if (activeTab === "your") {
         try {
@@ -240,6 +256,8 @@ export const Report = () => {
           setMyReports(data || []);
         } catch (error) {
           console.error("Error fetching my reports:", error);
+        } finally {
+          setTabLoading(false);
         }
       }
     };
@@ -470,7 +488,9 @@ export const Report = () => {
           data-aos-easing="ease"
           className="review-scroll-area"
         >
-          {activeTab === "user" ? (
+          {tabLoading ? (
+            <div className="tab-loading-spinner" />
+          ) : activeTab === "user" ? (
             <>
               {userReports.length > 0 ? (
                 userReports.map((report, idx) => (
