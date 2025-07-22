@@ -11,10 +11,8 @@ const mongoose = require("mongoose");
 const GroupChatModel = require("../database/model/GroupChatModel");
 const ReportModel = require("../database/model/ReportModel");
 const parser = multer({ storage });
-
-router.get("/getReports", async (req, res) => {
-  const { lat, long, type } = req.query;
-  const userId = req.session.passport?.user;
+router.get("/getReportsByLocation", async (req, res) => {
+  const { lat, long } = req.query;
 
   if (!lat || !long) {
     return res.status(400).json({ msg: "Missing location data" });
@@ -24,10 +22,9 @@ router.get("/getReports", async (req, res) => {
     lat: { $regex: new RegExp(`^${lat.slice(0, 5)}`) },
     long: { $regex: new RegExp(`^${long.slice(0, 5)}`) },
   };
-  const filter = type === "your" ? { ...query, id: userId } : query;
 
   try {
-    const reports = await ReportModel.find(filter)
+    const reports = await ReportModel.find(query)
       .populate("id", "username profile")
       .lean();
 
@@ -44,6 +41,32 @@ router.get("/getReports", async (req, res) => {
     res.status(500).json({ msg: "Error fetching reports" });
   }
 });
+router.get("/getReportsByUser", async (req, res) => {
+  const userId = req.session.passport?.user;
+
+  if (!userId) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  try {
+    const reports = await ReportModel.find({ id: userId })
+      .populate("id", "username profile")
+      .lean();
+
+    const formattedReports = reports.map((report) => ({
+      username: report.id?.username || "You",
+      avatar: report.id?.profile || "",
+      description: report.desc,
+      datetime: report.timeofReport,
+    }));
+
+    res.json(formattedReports);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error fetching your reports" });
+  }
+});
+
 
 router.get("/getCount", async (req, res) => {
   if (!req.session?.passport?.user) {
