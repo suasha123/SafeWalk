@@ -230,9 +230,12 @@ export const Report = () => {
         }
       } else if (activeTab === "your") {
         try {
-          const res = await fetch(`https://safewalk-xbkj.onrender.com/api/getReportsByUser`, {
-            credentials: "include",
-          });
+          const res = await fetch(
+            `https://safewalk-xbkj.onrender.com/api/getReportsByUser`,
+            {
+              credentials: "include",
+            }
+          );
           const data = await res.json();
           setMyReports(data || []);
         } catch (error) {
@@ -472,15 +475,18 @@ export const Report = () => {
               {userReports.length > 0 ? (
                 userReports.map((report, idx) => (
                   <div className="review-card" key={idx}>
-                    <img
-                      src={report.avatar}
-                      className="avatar"
-                    />
+                    <img src={report.avatar} className="avatar" />
                     <div className="review-content">
                       <h4 className="reviewer-name">
                         {report.username || "Anonymous"}
                       </h4>
-                      <p className="review-text">{report.description}</p>
+                      <p className="review-text">
+                        {report.description}
+                        <br />
+                        <small>
+                          {new Date(report.datetime).toLocaleString()}
+                        </small>
+                      </p>
                     </div>
                   </div>
                 ))
@@ -495,10 +501,7 @@ export const Report = () => {
               {myReports.length > 0 ? (
                 myReports.map((report, idx) => (
                   <div className="review-card" key={idx}>
-                    <img
-                      src="https://i.pravatar.cc/40?img=12"
-                      className="avatar"
-                    />
+                    <img src={report.avatar} className="avatar" />
                     <div className="review-content">
                       <h4 className="reviewer-name">You</h4>
                       <p className="review-text">
