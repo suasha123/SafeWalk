@@ -523,12 +523,14 @@
 .map-button.report-btn:hover {
   background-color: #45286e;
 }
-@media(max-width : 768px){
+
+@media(max-width : 768px) {
   .search-bar-container {
-  position: absolute;
-  top: 90px;
+    position: absolute;
+    top: 90px;
+  }
 }
-}
+
 .submit-btn:disabled {
   background-color: #4f46e5;
   color: #ccc;
@@ -538,7 +540,7 @@
   width: 40px;
   height: 40px;
   border: 5px solid #b967f6;
-  border-top: 5px solid white;
+  border-top: 5px solid #e0b3ff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: auto;

@@ -49,6 +49,7 @@ export const Report = () => {
   const [myReports, setMyReports] = useState([]);
   const [tabLoading, setTabLoading] = useState(false);
   const [lastFetchedLoc, setLastFetchedLoc] = useState(null);
+  const [hasFetchedMyReports, setHasFetchedMyReports] = useState(false);
   const [reportData, setReportData] = useState({
     type: "Accident",
     description: "",
@@ -244,7 +245,7 @@ export const Report = () => {
         } finally {
           setTabLoading(false);
         }
-      } else if (activeTab === "your") {
+      } else if (activeTab === "your" && !hasFetchedMyReports) {
         try {
           const res = await fetch(
             `https://safewalk-xbkj.onrender.com/api/getReportsByUser`,
@@ -254,6 +255,7 @@ export const Report = () => {
           );
           const data = await res.json();
           setMyReports(data || []);
+          setHasFetchedMyReports(true);
         } catch (error) {
           console.error("Error fetching my reports:", error);
         } finally {
