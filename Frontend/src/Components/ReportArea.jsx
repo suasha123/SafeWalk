@@ -188,49 +188,15 @@ export const Report = () => {
     }
   };
   useEffect(() => {
-    const fetchData = async () => {
-      const Location = pos || selectedLoc || clickLoc;
+    const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
 
-      if (!Location || Location.length !== 2) return;
-
-      const [lat, long] = Location;
-
-      setuserCount(null);
-      try {
-        const response = await fetch(
-          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${lat}&long=${long}`,
-          {
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setuserCount(data.count);
-        }
-      } catch (error) {
-        console.error("Failed to fetch count:", error);
-      }
-    };
-
-    fetchData();
-  }, [pos, selectedLoc, clickLoc]);
-
-  useEffect(() => {
     const fetchReports = async () => {
-      setTabLoading(true);
       const loc = pos || selectedLoc || clickLoc;
+
       if (activeTab === "user") {
-        if (!loc || loc.length !== 2) {
-          setTabLoading(false);
-          return;
-        }
+        if (!loc || loc.length !== 2 || lastFetchedLoc === key) return;
 
-        const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
-        if (lastFetchedLoc === key) {
-          setTabLoading(false);
-          return;
-        }
-
+        setTabLoading(true); 
         try {
           const res = await fetch(
             `https://safewalk-xbkj.onrender.com/api/getReportsByLocation?lat=${loc[0]}&long=${loc[1]}`,
@@ -244,13 +210,16 @@ export const Report = () => {
         } finally {
           setTabLoading(false);
         }
-      } else if (activeTab === "your" && !hasFetchedMyReports) {
+      }
+
+      if (activeTab === "your") {
+        if (hasFetchedMyReports) return;
+
+        setTabLoading(true); 
         try {
           const res = await fetch(
             `https://safewalk-xbkj.onrender.com/api/getReportsByUser`,
-            {
-              credentials: "include",
-            }
+            { credentials: "include" }
           );
           const data = await res.json();
           setMyReports(data || []);
@@ -263,7 +232,7 @@ export const Report = () => {
       }
     };
 
-    {!hasFetchedMyReports && fetchReports()};
+    fetchReports();
   }, [activeTab, pos, selectedLoc, clickLoc]);
 
   const ClickHandler = ({ onClick }) => {
