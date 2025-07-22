@@ -45,6 +45,8 @@ export const Report = () => {
   const [clickLoc, setclickLoc] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userCount, setuserCount] = useState(null);
+  const [userReports, setUserReports] = useState([]);
+  const [myReports, setMyReports] = useState([]);
   const [reportData, setReportData] = useState({
     type: "Accident",
     description: "",
@@ -209,6 +211,38 @@ export const Report = () => {
 
     fetchData();
   }, [pos, selectedLoc, clickLoc]);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      if (activeTab === "user") {
+        const loc = pos || selectedLoc || clickLoc;
+        if (!loc || loc.length !== 2) return;
+
+        try {
+          const res = await fetch(
+            `https://safewalk-xbkj.onrender.com/api/getReportsByLocation?lat=${loc[0]}&long=${loc[1]}`,
+            { credentials: "include" }
+          );
+          const data = await res.json();
+          setUserReports(data || []);
+        } catch (error) {
+          console.error("Error fetching user reports:", error);
+        }
+      } else if (activeTab === "your") {
+        try {
+          const res = await fetch(`https://safewalk-xbkj.onrender.com/api/getReportsByUser`, {
+            credentials: "include",
+          });
+          const data = await res.json();
+          setMyReports(data || []);
+        } catch (error) {
+          console.error("Error fetching my reports:", error);
+        }
+      }
+    };
+
+    fetchReports();
+  }, [activeTab, pos, selectedLoc, clickLoc]);
 
   const ClickHandler = ({ onClick }) => {
     useMapEvent("click", (e) => {
@@ -435,82 +469,21 @@ export const Report = () => {
         >
           {activeTab === "user" ? (
             <>
-              {selectedLoc || pos ? (
-                <>
-                  <div className="review-card">
+              {userReports.length > 0 ? (
+                userReports.map((report, idx) => (
+                  <div className="review-card" key={idx}>
                     <img
-                      src="https://i.pravatar.cc/40?img=5"
+                      src={report.avatar}
                       className="avatar"
                     />
                     <div className="review-content">
-                      <h4 className="reviewer-name">Riya Sharma</h4>
-                      <p className="review-text">
-                        Felt safe walking here at night. Good lighting and crowd
-                        around.
-                      </p>
+                      <h4 className="reviewer-name">
+                        {report.username || "Anonymous"}
+                      </h4>
+                      <p className="review-text">{report.description}</p>
                     </div>
                   </div>
-                  <div className="review-card">
-                    <img
-                      src="https://i.pravatar.cc/40?img=8"
-                      className="avatar"
-                    />
-                    <div className="review-content">
-                      <h4 className="reviewer-name">Amit Verma</h4>
-                      <p className="review-text">
-                        Saw suspicious people last week. Be alert around 10PM.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="review-card">
-                    <img
-                      src="https://i.pravatar.cc/40?img=8"
-                      className="avatar"
-                    />
-                    <div className="review-content">
-                      <h4 className="reviewer-name">Amit Verma</h4>
-                      <p className="review-text">
-                        Saw suspicious people last week. Be alert around 10PM.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="review-card">
-                    <img
-                      src="https://i.pravatar.cc/40?img=8"
-                      className="avatar"
-                    />
-                    <div className="review-content">
-                      <h4 className="reviewer-name">Amit Verma</h4>
-                      <p className="review-text">
-                        Saw suspicious people last week. Be alert around 10PM.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="review-card">
-                    <img
-                      src="https://i.pravatar.cc/40?img=8"
-                      className="avatar"
-                    />
-                    <div className="review-content">
-                      <h4 className="reviewer-name">Amit Verma</h4>
-                      <p className="review-text">
-                        Saw suspicious people last week. Be alert around 10PM.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="review-card">
-                    <img
-                      src="https://i.pravatar.cc/40?img=8"
-                      className="avatar"
-                    />
-                    <div className="review-content">
-                      <h4 className="reviewer-name">Amit Verma</h4>
-                      <p className="review-text">
-                        Saw suspicious people last week. Be alert around 10PM.
-                      </p>
-                    </div>
-                  </div>
-                </>
+                ))
               ) : (
                 <p className="no-reports">
                   🔍 No reports found for this area yet.
@@ -518,26 +491,31 @@ export const Report = () => {
               )}
             </>
           ) : (
-            <Fragment>
-              <div className="review-card">
-                <img src="https://i.pravatar.cc/40?img=12" className="avatar" />
-                <div className="review-content">
-                  <h4 className="reviewer-name">You</h4>
-                  <p className="review-text">
-                    Reported harassment incident on 12 July. Action pending.
-                  </p>
-                </div>
-              </div>
-              <div className="review-card">
-                <img src="https://i.pravatar.cc/40?img=12" className="avatar" />
-                <div className="review-content">
-                  <h4 className="reviewer-name">You</h4>
-                  <p className="review-text">
-                    Accident reported on 9 July near main road.
-                  </p>
-                </div>
-              </div>
-            </Fragment>
+            <>
+              {myReports.length > 0 ? (
+                myReports.map((report, idx) => (
+                  <div className="review-card" key={idx}>
+                    <img
+                      src="https://i.pravatar.cc/40?img=12"
+                      className="avatar"
+                    />
+                    <div className="review-content">
+                      <h4 className="reviewer-name">You</h4>
+                      <p className="review-text">
+                        {report.description} <br />
+                        <small>
+                          {new Date(report.datetime).toLocaleString()}
+                        </small>
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="no-reports">
+                  📭 You haven't submitted any reports yet.
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>

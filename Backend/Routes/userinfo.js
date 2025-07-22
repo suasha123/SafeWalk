@@ -11,7 +11,7 @@ const mongoose = require("mongoose");
 const GroupChatModel = require("../database/model/GroupChatModel");
 const ReportModel = require("../database/model/ReportModel");
 const parser = multer({ storage });
-// Get reports for a location
+
 router.get("/getReports", async (req, res) => {
   const { lat, long, type } = req.query;
   const userId = req.session.passport?.user;
@@ -24,15 +24,21 @@ router.get("/getReports", async (req, res) => {
     lat: { $regex: new RegExp(`^${lat.slice(0, 5)}`) },
     long: { $regex: new RegExp(`^${long.slice(0, 5)}`) },
   };
+  const filter = type === "your" ? { ...query, id: userId } : query;
 
   try {
-    const filter = type === "your" ? { ...query, id: userId } : query;
+    const reports = await ReportModel.find(filter)
+      .populate("id", "username profile")
+      .lean();
 
-    const reports = await ReportModel.find(filter).populate(
-      "id",
-      "username profile"
-    );
-    res.json(reports);
+    const formattedReports = reports.map((report) => ({
+      username: report.id?.username || "Anonymous",
+      avatar: report.id?.profile || "",
+      description: report.desc,
+      datetime: report.timeofReport,
+    }));
+
+    res.json(formattedReports);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error fetching reports" });
