@@ -219,7 +219,6 @@ export const Report = () => {
     const fetchReports = async () => {
       setTabLoading(true);
       const loc = pos || selectedLoc || clickLoc;
-
       if (activeTab === "user") {
         if (!loc || loc.length !== 2) {
           setTabLoading(false);
@@ -264,7 +263,7 @@ export const Report = () => {
       }
     };
 
-    fetchReports();
+    {!hasFetchedMyReports && fetchReports()};
   }, [activeTab, pos, selectedLoc, clickLoc]);
 
   const ClickHandler = ({ onClick }) => {
