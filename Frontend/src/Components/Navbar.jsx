@@ -3,12 +3,11 @@ import styles from "../Style/Navbar.module.css";
 import stylepfp from "../Style/overlay.module.css";
 import { FaUserGroup } from "react-icons/fa6";
 import { IoMdNotificationsOutline } from "react-icons/io";
-import { FiMenu } from "react-icons/fi"; // Better hamburger
+import { FiMenu } from "react-icons/fi"; 
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import OverlayCard from "./overlaycard";
 import AccountOverlay from "./Accountinfo";
-
 export const NavBar = () => {
   const { isLoggedIn, user, setprofilecard, profile ,showOverlay , setShowOverlay} = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,9 +20,9 @@ export const NavBar = () => {
   return (
     <div className={styles.maindiv}>
       {(showOverlay || (isLoggedIn && !user.username)) && <AccountOverlay onClose={() => setShowOverlay(false)} />}
-      <a href="#" className={styles.logo}>
+      <Link to={"/"} className={styles.logo}>
         safeWalk
-      </a>
+      </Link>
       {isLoggedIn && (
         <div className={styles.groupdiv}>
           <div onClick={() => navigate("/chat")} className={styles.groupinner}>

@@ -1,0 +1,195 @@
+.startButtonDiv{
+    width: 100%;
+    height: 55px;
+    background-color: #23232f;
+    border: 1px solid  #30303c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3.8rem;
+
+}
+.startButton{
+    width: max-content;
+    padding: 0.5rem;
+    height: 41px;
+    background-color: #7a2bf0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    border-radius: 5px;
+    transition: all 0.5s ease;
+    font-size: 15px;
+    cursor: pointer;
+    &:hover{
+        background-color: #cc66de;
+    }
+}
+.buttontwo{
+    background-color: #181424;
+    border: 1px solid white;
+    transition: all 0.5s ease;
+    &:hover{
+        background-color: #28213c;
+    }
+}
+@media(max-width : 768px){
+    .startButtonDiv{
+        gap: 2rem;
+    }
+}
+
+.safeWalkModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #181424;
+  border: 1px solid #e600ff;
+  box-shadow: 0 0 20px #ff00ff66;
+  border-radius: 12px;
+  padding: 2rem;
+  z-index: 1000;
+  width: 90%;
+  max-width: 450px;
+  color: white;
+}
+
+.safeWalkModal h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #f15fff;
+}
+
+.safeWalkModal label {
+  display: block;
+  margin-top: 1rem;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.safeWalkModal input,
+.safeWalkModal select {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #5b5b7a;
+  background-color: #1f1b2e;
+  color: white;
+  font-size: 0.95rem;
+}
+
+.safeWalkModal input:focus {
+  outline: none;
+  border-color: #d147ff;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.modalButtons button {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.modalButtons .startBtn {
+  background-color: #a054f4;
+  color: white;
+}
+
+.modalButtons .startBtn:hover {
+  background-color: #6c31a7;
+}
+
+.modalButtons .sendBtn {
+  background-color: transparent;
+  color: #e0e0e0;
+  border: 1px solid #ffffff70;
+}
+
+.modalButtons .sendBtn:hover {
+  background-color: #28213c;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+}
+
+.useCurrentLocation {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  color: #9a9aff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.useCurrentLocation:hover {
+  color: #d6b3ff;
+}
+
+.modalClose {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: transparent;
+  color: #ccc;
+  font-size: 1.3rem;
+  border: none;
+  cursor: pointer;
+}
+
+@media(max-width : 445px){
+    .safeWalkModal{
+         padding-left: 0.7rem;
+          padding-right: 0.7rem;
+    }
+}
+
+@media (max-width: 445px) {
+  .safeWalkModal {
+    width: 95%;
+    max-width: none;
+    padding: 1.2rem 1rem;
+  }
+
+  .modalButtons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .modalButtons button {
+    width: 80%;
+    align-self: center;
+  }
+
+  .modalClose {
+    top: 0.4rem;
+    right: 0.4rem;
+    font-size: 1.1rem;
+  }
+}
+@media (max-width: 400px) {
+  .safeWalkModal h2 {
+    font-size: 1.2rem;
+  }
+
+  .safeWalkModal input,
+  .safeWalkModal select {
+    font-size: 0.85rem;
+  }
+}
