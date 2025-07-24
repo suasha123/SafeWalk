@@ -347,9 +347,12 @@
 
 /* Full width on smaller screens */
 @media (max-width: 768px) {
+  .review-scroll-area{
+   padding: 0px;
+  }
   .review-card {
-    flex: 1 1 100%;
-    max-width: 100%;
+    min-width: 100%;
+    padding: 0.5rem;
   }
 }
 
@@ -399,7 +402,7 @@
   padding: 1rem;
   border-radius: 12px;
   flex: 1 1 30%;
-  min-width: 180px;
+  min-width: 200px;
   max-width: 300px;
   text-align: center;
   cursor: default;
