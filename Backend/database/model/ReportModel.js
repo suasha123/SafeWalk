@@ -22,6 +22,10 @@ const ReportSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    incidenttype :{
+      type : String ,
+      required : true,
+    }
   },
   { timestamps: true }
 );

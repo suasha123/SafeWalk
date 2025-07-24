@@ -141,7 +141,7 @@ export const Report = () => {
       }
     };
 
-    const timeout = setTimeout(fetchResults, 400); // Debounce
+    const timeout = setTimeout(fetchResults, 400); 
     return () => {
       clearTimeout(timeout);
       controller.abort();
