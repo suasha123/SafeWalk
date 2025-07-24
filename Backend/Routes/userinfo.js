@@ -33,9 +33,9 @@ router.get("/getReportsByLocation", async (req, res) => {
       avatar: report.id?.profile || "",
       description: report.desc,
       datetime: report.timeofReport,
-      type : report.incidenttype,
-      long : report.long,
-      lat : report.lat
+      type: report.incidenttype,
+      long: report.long,
+      lat: report.lat,
     }));
 
     res.json(formattedReports);
@@ -58,10 +58,10 @@ router.get("/getReportsByUser", async (req, res) => {
 
     const formattedReports = reports.map((report) => ({
       description: report.desc,
-      type : report.incidenttype,
+      type: report.incidenttype,
       datetime: report.timeofReport,
-      long : report.long,
-      lat : report.lat
+      long: report.long,
+      lat: report.lat,
     }));
 
     res.json(formattedReports);
@@ -70,7 +70,6 @@ router.get("/getReportsByUser", async (req, res) => {
     res.status(500).json({ msg: "Error fetching your reports" });
   }
 });
-
 
 router.get("/getCount", async (req, res) => {
   if (!req.session?.passport?.user) {
@@ -86,9 +85,12 @@ router.get("/getCount", async (req, res) => {
         .json({ msg: "Latitude and longitude are required" });
     }
 
+    const latPrefix = lat.slice(0, 5);
+    const longPrefix = long.slice(0, 5);
+
     const count = await ReportModel.countDocuments({
-      lat:  { $regex: `^${lat.slice(0, 5)}` },
-      long: {$regex: `^${lat.slice(0, 5)}`},
+      lat: { $regex: `^${latPrefix}` },
+      long: { $regex: `^${longPrefix}` },
     });
 
     return res.status(200).json({ count });
