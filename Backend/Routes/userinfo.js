@@ -33,6 +33,9 @@ router.get("/getReportsByLocation", async (req, res) => {
       avatar: report.id?.profile || "",
       description: report.desc,
       datetime: report.timeofReport,
+      type : report.incidenttype,
+      long : report.long,
+      lat : report.lat
     }));
 
     res.json(formattedReports);
@@ -54,11 +57,11 @@ router.get("/getReportsByUser", async (req, res) => {
       .lean();
 
     const formattedReports = reports.map((report) => ({
-      username: report.id?.username || "You",
-      avatar: report.id?.profile || "",
       description: report.desc,
-      
+      type : report.incidenttype,
       datetime: report.timeofReport,
+      long : report.long,
+      lat : report.lat
     }));
 
     res.json(formattedReports);
