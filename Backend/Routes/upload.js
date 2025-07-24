@@ -25,7 +25,7 @@ router.post("/report", async (req, res) => {
       lat: payload.location.lat,
       long: payload.location.lng,
       timeofReport: payload.datetime,
-      type: payload.type, 
+      incidenttype : payload.type, 
     });
     return res.status(200).json({ msg: "Uploaded Data" });
   } catch (err) {
