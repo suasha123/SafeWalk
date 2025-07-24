@@ -87,8 +87,8 @@ router.get("/getCount", async (req, res) => {
     }
 
     const count = await ReportModel.countDocuments({
-      lat:  { $regex: `^${lat}` },
-      long: {$regex: `^${long}`},
+      lat:  { $regex: `^${lat.slice(0, 5)}` },
+      long: {$regex: `^${lat.slice(0, 5)}`},
     });
 
     return res.status(200).json({ count });
