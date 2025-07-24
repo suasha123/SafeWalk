@@ -194,11 +194,13 @@ export const Report = () => {
       if (!Location || Location.length !== 2) return;
 
       const [lat, long] = Location;
+      const Latitude = parseFloat(lat.toFixed(3));
+      const Longitude = parseFloat(long.toFixed(3));
 
       setuserCount(null);
       try {
         const response = await fetch(
-          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${lat}&long=${long}`,
+          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${Latitude}&long=${Longitude}`,
           {
             credentials: "include",
           }
@@ -218,17 +220,16 @@ export const Report = () => {
   useEffect(() => {
     const fetchReports = async () => {
       const loc = pos || selectedLoc || clickLoc;
-
       if (activeTab === "user") {
         if (!loc || loc.length !== 2) return;
-
         const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
         if (lastFetchedLoc === key) return;
-
+              const lat = parseFloat(loc[0].toFixed(3));
+      const long = parseFloat(loc[1].toFixed(3));
         setTabLoading(true);
         try {
           const res = await fetch(
-            `https://safewalk-xbkj.onrender.com/api/getReportsByLocation?lat=${loc[0]}&long=${loc[1]}`,
+            `https://safewalk-xbkj.onrender.com/api/getReportsByLocation?lat=${lat}&long=${long}`,
             { credentials: "include" }
           );
           const data = await res.json();
@@ -500,15 +501,23 @@ export const Report = () => {
                         {report.username || "Anonymous"}
                       </h4>
                       <p>
-                        <strong style={{color :  "#2563eb" , marginRight : "10px" }}>Incident:</strong> {report.type}
+                        <strong
+                          style={{ color: "#2563eb", marginRight: "10px" }}
+                        >
+                          Incident:
+                        </strong>{" "}
+                        {report.type}
                       </p>
                       <p className="review-text">
-                      <strong style={{color :  "#ff3d5dff" , marginRight : "10px" }}>Description :</strong>
+                        <strong
+                          style={{ color: "#ff3d5dff", marginRight: "10px" }}
+                        >
+                          Description :
+                        </strong>
                         {report.description}
                         <br />
                       </p>
                     </div>
-                     
                   </div>
                 ))
               ) : (
@@ -524,15 +533,28 @@ export const Report = () => {
                   <div className="review-card" key={idx}>
                     <div className="review-content">
                       <h4 className="reviewer-name">
-                      <strong style={{color :  "#e357d8ff" , marginRight : "10px" }}>Location:</strong>
-                        {parseFloat(report.lat).toFixed(2)}, 
+                        <strong
+                          style={{ color: "#e357d8ff", marginRight: "10px" }}
+                        >
+                          Location:
+                        </strong>
+                        {parseFloat(report.lat).toFixed(2)},
                         {parseFloat(report.long).toFixed(2)}
                       </h4>
                       <p>
-                        <strong style={{color :  "#2563eb" , marginRight : "10px" }}>Incident:</strong> {report.type}
+                        <strong
+                          style={{ color: "#2563eb", marginRight: "10px" }}
+                        >
+                          Incident:
+                        </strong>{" "}
+                        {report.type}
                       </p>
                       <p className="review-text">
-                      <strong style={{color :  "#ff3d5dff" , marginRight : "10px" }}>Description:</strong>
+                        <strong
+                          style={{ color: "#ff3d5dff", marginRight: "10px" }}
+                        >
+                          Description:
+                        </strong>
                         {report.description} <br />
                       </p>
                     </div>
