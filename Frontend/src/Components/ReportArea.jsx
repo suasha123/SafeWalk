@@ -141,7 +141,7 @@ export const Report = () => {
       }
     };
 
-    const timeout = setTimeout(fetchResults, 400); 
+    const timeout = setTimeout(fetchResults, 400);
     return () => {
       clearTimeout(timeout);
       controller.abort();
@@ -499,6 +499,9 @@ export const Report = () => {
                       <h4 className="reviewer-name">
                         {report.username || "Anonymous"}
                       </h4>
+                      <p>
+                        <strong>Incident:</strong> {report.type}
+                      </p>
                       <p className="review-text">
                         {report.description}
                         <br />
@@ -520,9 +523,14 @@ export const Report = () => {
               {myReports.length > 0 ? (
                 myReports.map((report, idx) => (
                   <div className="review-card" key={idx}>
-                    <img src={report.avatar} className="avatar" />
                     <div className="review-content">
-                      <h4 className="reviewer-name">You</h4>
+                      <h4 className="reviewer-name">
+                        `${parseFloat(report.lat).toFixed(2)}, $
+                        {parseFloat(report.long).toFixed(2)}`
+                      </h4>
+                      <p>
+                        <strong>Incident:</strong> {report.type}
+                      </p>
                       <p className="review-text">
                         {report.description} <br />
                         <small>
@@ -573,7 +581,7 @@ export const Report = () => {
             <textarea
               className="report-input"
               placeholder="Describe what happened..."
-              maxLength={20}
+              maxLength={50}
               value={reportData.description}
               onChange={(e) =>
                 setReportData({ ...reportData, description: e.target.value })
