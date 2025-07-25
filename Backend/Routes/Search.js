@@ -18,7 +18,7 @@ router.get("/searchPlace", async (req, res) => {
   }
 });
 
-router.get("/getPath", async (req, res) => {
+router.get("/findPath", async (req, res) => {
   try {
     const { src, dest } = req.query;
     console.log(src , dest);
