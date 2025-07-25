@@ -41,7 +41,7 @@
 }
 
 .safeWalkModal {
-  position: fixed;
+  position: relative;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -135,7 +135,6 @@
   font-size: 0.85rem;
   color: #9a9aff;
   cursor: pointer;
-  text-decoration: underline;
 }
 
 .useCurrentLocation:hover {
@@ -192,4 +191,45 @@
   .safeWalkModal select {
     font-size: 0.85rem;
   }
+}
+
+.autocomplete-list {
+  position: absolute;
+  width: 100%;
+  background-color: #1f1b2e;
+  border: 1px solid #5b5b7a;
+  border-radius: 8px;
+  margin-top: 0.3rem;
+  padding: 0;
+  list-style: none;
+  max-height: 180px;
+  min-height: 60px;
+  overflow-y: auto;
+  left: 0px;
+  z-index: 2000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+
+.autocomplete-item {
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.autocomplete-item:hover {
+  background-color: #28213c;
+}
+
+.autocomplete-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.autocomplete-list::-webkit-scrollbar-thumb {
+  background-color: #7a2bf0;
+  border-radius: 4px;
+}
+
+.autocomplete-list::-webkit-scrollbar-track {
+  background: transparent;
 }

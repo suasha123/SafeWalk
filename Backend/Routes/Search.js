@@ -3,7 +3,6 @@ const router = express.Router();
 require("dotenv").config();
 router.get("/searchPlace", async (req, res) => {
   const location = req.query.query;
-  console.log("Token being sent:", process.env.SEARCHTOKEN);
   if (!location || typeof location !== "string" || location.length < 2) {
     return res.status(400).json({ msg: "Invalid query" });
   }
@@ -18,4 +17,45 @@ router.get("/searchPlace", async (req, res) => {
     return res.status(500).json({ msg: "Server Error" });
   }
 });
+
+router.get("/getPath", async (req, res) => {
+  try {
+    const { src, dest } = req.query;
+    console.log(src , dest);
+    if (!src || !dest) {
+      return res.status(400).json({ msg: "src and dest required" });
+    }
+
+    const srcCoords = src.split(",").map(Number);   
+    const destCoords = dest.split(",").map(Number); 
+
+    const body = {
+      coordinates: [
+        [srcCoords[1], srcCoords[0]],   
+        [destCoords[1], destCoords[0]],  
+      ],
+    };
+
+    const response = await fetch("https://api.openrouteservice.org/v2/directions/driving-car", {
+      method: "POST",
+      headers: {
+        "Authorization": process.env.ROUTE_API,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      return res.status(500).json({ msg: "ORS error", error: errText });
+    }
+
+    const data = await response.json();
+    return res.json(data);
+  } catch (err) {
+    console.error("Error in /getPath:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;
