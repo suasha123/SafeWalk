@@ -56,7 +56,7 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
     // Keep the input focused so the keyboard stays open
     setTimeout(() => {
       document.querySelector(".chat-input-box input")?.focus();
-    }, 100);
+    }, 10);
   };
 
   useEffect(() => {

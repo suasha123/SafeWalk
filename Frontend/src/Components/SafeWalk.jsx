@@ -3,8 +3,11 @@ import {
   TileLayer,
   Marker,
   Popup,
+  Polyline,
+  useMap,
   useMapEvent,
 } from "react-leaflet";
+import polyline from "@mapbox/polyline";
 import "leaflet/dist/leaflet.css";
 import { Fragment, useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -21,41 +24,61 @@ import { FlyToLocation } from "./FlyTo";
 import { FaWalking } from "react-icons/fa";
 import { TbMessageReport } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
-import { useMap } from "react-leaflet";
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
+
 const destMarkerIcon = new L.Icon({
   iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png", // red icon from CDN
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
 });
+
 const TEXTS = ["Loading Map", "Fetching Location"];
+const FitMapToRoute = ({ polylineCoords }) => {
+  const map = useMap();
+  const hasFlown = useRef(false);
+
+  useEffect(() => {
+    if (polylineCoords?.length > 0 && !hasFlown.current) {
+      const bounds = L.latLngBounds(polylineCoords);
+      map.flyToBounds(bounds, { padding: [50, 50] });
+      hasFlown.current = true;
+    }
+  }, [polylineCoords, map]);
+
+  return null;
+};
+
 export const SafeWalk = () => {
+  const [routePolyline, setRoutePolyline] = useState(null);
   const { loading, isLoggedIn } = useAuth();
   const [pos, setLoc] = useState(null);
   const [loadingg, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const waapiRef = useRef();
   const navigate = useNavigate();
+
   const [sourceQuery, setSourceQuery] = useState("");
-  const [sourceResults, setSourceResults] = useState([]);
   const [destinationQuery, setDestinationQuery] = useState("");
+  const [sourceResults, setSourceResults] = useState([]);
   const [destinationResults, setDestinationResults] = useState([]);
-  const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
-  const [sourceLoc, setsourceLoc] = useState(null);
-  const [destLoc, setDesLoc] = useState(null);
+  const [sourceLoc, setSourceLoc] = useState(null);
+  const [destLoc, setDestLoc] = useState(null);
   const [sourceMarker, setSourceMarker] = useState(null);
   const [desMarker, setDesMarker] = useState(null);
+  const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
+
   const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -67,84 +90,51 @@ export const SafeWalk = () => {
       (err) => {
         console.error("Geolocation error:", err.code, err.message);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  };
-  const FitMap = ({ sourceLoc, destLoc }) => {
-    const map = useMap();
-    useEffect(() => {
-      if (map && sourceLoc && destLoc) {
-        const bounds = [sourceLoc, destLoc];
-        map.flyToBounds(bounds, { padding: [50, 50] });
-      }
-    }, [map, sourceLoc, destLoc]);
-    return null;
   };
 
   useEffect(() => {
     fetchMyLoc();
-    const interval = setInterval(() => setIndex((index) => index + 1), 2000);
+    const interval = setInterval(() => setIndex((i) => i + 1), 2000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (pos) {
-      setLoading(false);
-    }
+    if (pos) setLoading(false);
   }, [pos]);
 
   useEffect(() => {
     if (loading) return;
-    const waapiElement = waapiRef.current;
-    if (!waapiElement) return;
-    const waapiAnimation = waapiElement.animate(
-      [{ color: "#ff0088" }, { color: "#0d63f8" }],
-      {
-        duration: 2000,
-        iterations: Infinity,
-        direction: "alternate",
-        easing: "linear",
-      }
-    );
-    return () => {
-      waapiAnimation.cancel();
-    };
+    const el = waapiRef.current;
+    if (!el) return;
+    const animation = el.animate([{ color: "#ff0088" }, { color: "#0d63f8" }], {
+      duration: 2000,
+      iterations: Infinity,
+      direction: "alternate",
+      easing: "linear",
+    });
+    return () => animation.cancel();
   }, [loading]);
 
-  const ClickHandler = ({ onClick }) => {
-    useMapEvent("click", (e) => {
-      onClick(e);
-    });
-    return null;
-  };
-
   useEffect(() => {
-    if (!sourceQuery) {
-      setSourceResults([]);
-      return;
-    }
-
     const controller = new AbortController();
-    const fetchResults = async () => {
+    const fetchResults = async (query, setter) => {
+      if (!query) return setter([]);
       try {
         const res = await fetch(
           `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(
-            sourceQuery
+            query
           )}`,
           { signal: controller.signal }
         );
         const data = await res.json();
-        setSourceResults(data.slice(0, 5));
+        setter(data.slice(0, 5));
       } catch (err) {
         if (err.name !== "AbortError") console.error(err);
       }
     };
-
-    const timeout = setTimeout(fetchResults, 400);
+    const timeout = setTimeout(() => fetchResults(sourceQuery, setSourceResults), 400);
     return () => {
       clearTimeout(timeout);
       controller.abort();
@@ -152,28 +142,23 @@ export const SafeWalk = () => {
   }, [sourceQuery]);
 
   useEffect(() => {
-    if (!destinationQuery) {
-      setDestinationResults([]);
-      return;
-    }
-
     const controller = new AbortController();
-    const fetchResults = async () => {
+    const fetchResults = async (query, setter) => {
+      if (!query) return setter([]);
       try {
         const res = await fetch(
           `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(
-            destinationQuery
+            query
           )}`,
           { signal: controller.signal }
         );
         const data = await res.json();
-        setDestinationResults(data.slice(0, 5));
+        setter(data.slice(0, 5));
       } catch (err) {
         if (err.name !== "AbortError") console.error(err);
       }
     };
-
-    const timeout = setTimeout(fetchResults, 400);
+    const timeout = setTimeout(() => fetchResults(destinationQuery, setDestinationResults), 400);
     return () => {
       clearTimeout(timeout);
       controller.abort();
@@ -189,6 +174,8 @@ export const SafeWalk = () => {
         )}&dest=${destLoc.join(",")}`
       );
       const data = await res.json();
+      const decoded = polyline.decode(data.routes[0].geometry);
+      setRoutePolyline(decoded);
     } catch (err) {
       console.error("Error fetching path:", err);
     }
@@ -202,33 +189,15 @@ export const SafeWalk = () => {
       <NavBar />
       <div className="startButtonDiv">
         <div className="startButton" onClick={() => setShowSafeWalkModal(true)}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <FaWalking style={{ fontSize: "25px" }} />
-            <p> Start safeWalk</p>
-          </div>
+          <FaWalking style={{ fontSize: "25px" }} />
+          <p>Start safeWalk</p>
         </div>
-        <div className="startButton buttontwo">
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onClick={() => {
-              navigate("/report-area");
-            }}
-          >
-            <TbMessageReport style={{ fontSize: "25px", marginRight: "3px" }} />
-            <p> Report Area</p>
-          </div>
+        <div
+          className="startButton buttontwo"
+          onClick={() => navigate("/report-area")}
+        >
+          <TbMessageReport style={{ fontSize: "25px", marginRight: "3px" }} />
+          <p>Report Area</p>
         </div>
       </div>
 
@@ -245,15 +214,13 @@ export const SafeWalk = () => {
         ) : (
           <Fragment>
             <MapContainer
-              center={pos ?? [51.505, -0.09]}
+              center={pos}
               zoom={13}
               scrollWheelZoom={true}
               zoomControl={false}
               className="map"
             >
-              <ClickHandler onClick={() => {}} />
               <FlyToLocation position={pos} />
-              <FitMap sourceLoc={sourceLoc} destLoc={destLoc} />
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -273,46 +240,41 @@ export const SafeWalk = () => {
                   <Popup>Destination</Popup>
                 </Marker>
               )}
+              {routePolyline && (
+                <>
+                  <Polyline positions={routePolyline} color="blue" />
+                  <FitMapToRoute polylineCoords={routePolyline} />
+                </>
+              )}
             </MapContainer>
           </Fragment>
         )}
       </div>
 
-      {/* SafeWalk Modal */}
       {showSafeWalkModal && (
         <div className="modalOverlay">
           <div className="safeWalkModal">
-            <button
-              className="modalClose"
-              onClick={() => setShowSafeWalkModal(false)}
-            >
+            <button className="modalClose" onClick={() => setShowSafeWalkModal(false)}>
               ×
             </button>
-
-            <label htmlFor="src">Source</label>
+            <label>Source</label>
             <input
-              type="text"
               value={source}
-              name="src"
               onChange={(e) => {
                 setSource(e.target.value);
                 setSourceQuery(e.target.value);
               }}
-              placeholder="e.g., Mumbai, Maharashtra"
+              placeholder="e.g. Mumbai"
             />
             {sourceResults.length > 0 && (
               <ul className="autocomplete-list">
                 {sourceResults.map((result, i) => (
                   <li
                     key={i}
-                    className="autocomplete-item"
                     onClick={() => {
                       setSource(result.display_name);
+                      setSourceLoc([parseFloat(result.lat), parseFloat(result.lon)]);
                       setSourceQuery("");
-                      setsourceLoc([
-                        parseFloat(result.lat),
-                        parseFloat(result.lon),
-                      ]);
                       setSourceResults([]);
                     }}
                   >
@@ -321,47 +283,37 @@ export const SafeWalk = () => {
                 ))}
               </ul>
             )}
-
             <div
               className="useCurrentLocation"
               onClick={() => {
                 navigator.geolocation.getCurrentPosition((pos) => {
                   const { latitude, longitude } = pos.coords;
-                  const locationText = `Lat: ${latitude}, Long: ${longitude}`;
-                  setSource(locationText);
-                  setSourceQuery("");
-                  setSourceResults([]);
-                  setsourceLoc([latitude, longitude]);
+                  setSource(`Lat: ${latitude}, Long: ${longitude}`);
+                  setSourceLoc([latitude, longitude]);
                 });
               }}
             >
               Use current location
             </div>
 
-            <label htmlFor="dest">Destination</label>
+            <label>Destination</label>
             <input
-              type="text"
               value={destination}
-              name="dest"
               onChange={(e) => {
                 setDestination(e.target.value);
                 setDestinationQuery(e.target.value);
               }}
-              placeholder="e.g., Delhi, Delhi"
+              placeholder="e.g. Delhi"
             />
             {destinationResults.length > 0 && (
               <ul className="autocomplete-list">
                 {destinationResults.map((result, i) => (
                   <li
                     key={i}
-                    className="autocomplete-item"
                     onClick={() => {
                       setDestination(result.display_name);
+                      setDestLoc([parseFloat(result.lat), parseFloat(result.lon)]);
                       setDestinationQuery("");
-                      setDesLoc([
-                        parseFloat(result.lat),
-                        parseFloat(result.lon),
-                      ]);
                       setDestinationResults([]);
                     }}
                   >
@@ -375,14 +327,12 @@ export const SafeWalk = () => {
               <button
                 className="startBtn"
                 onClick={async () => {
-                  await findPath();
-                  if (sourceLoc && sourceLoc[0] && sourceLoc[1]) {
-                    setSourceMarker(sourceLoc);
-                  }
-                  if (destLoc && destLoc[0] && destLoc[1]) {
-                    setDesMarker(destLoc);
-                  }
+                  setRoutePolyline(null); 
                   setLoc(null);
+                  await findPath();
+                  setSourceMarker(sourceLoc);
+                  setDesMarker(destLoc);
+                  setShowSafeWalkModal(false);
                 }}
               >
                 Start SafeWalk
