@@ -270,7 +270,7 @@ export const SafeWalk = () => {
                   <Popup>You are here!</Popup>
                 </Marker>
               )}
-              {sourceMarker && trackingButton(
+              {sourceMarker && trackingButton &&(
                 <Marker position={sourceMarker}>
                   <Popup>Source</Popup>
                 </Marker>
