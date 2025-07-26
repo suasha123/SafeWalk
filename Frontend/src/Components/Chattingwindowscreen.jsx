@@ -50,10 +50,7 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
         enqueueSnackbar("Message not sent.", { variant: "error" });
       }
     });
-
     setNewMessage("");
-
-    // Keep the input focused so the keyboard stays open
     setTimeout(() => {
       document.querySelector(".chat-input-box input")?.focus();
     },10);
