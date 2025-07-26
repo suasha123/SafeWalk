@@ -5,6 +5,7 @@ import {
   Popup,
   Polyline,
   useMap,
+  useMapEvent,
 } from "react-leaflet";
 import polyline from "@mapbox/polyline";
 import "leaflet/dist/leaflet.css";
@@ -26,7 +27,6 @@ import { useNavigate } from "react-router-dom";
 import { FaRoute } from "react-icons/fa6";
 import { GiDeathZone } from "react-icons/gi";
 import { MdStopCircle } from "react-icons/md";
-
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -44,14 +44,7 @@ const destMarkerIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-const walkerIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-});
-
 const TEXTS = ["Loading Map", "Fetching Location"];
-
 const FitMapToRoute = ({ polylineCoords }) => {
   const map = useMap();
   const hasFlown = useRef(false);
@@ -68,7 +61,6 @@ const FitMapToRoute = ({ polylineCoords }) => {
 };
 
 export const SafeWalk = () => {
-  const [trackedPath, setTrackedPath] = useState([]);
   const [routePolyline, setRoutePolyline] = useState(null);
   const { loading, isLoggedIn } = useAuth();
   const [pos, setLoc] = useState(null);
@@ -76,7 +68,8 @@ export const SafeWalk = () => {
   const [index, setIndex] = useState(0);
   const waapiRef = useRef();
   const navigate = useNavigate();
-  const [tracking, setTracking] = useState(false);
+  const [showDanger, setShowDanger] = useState(false);
+  const [tracking, setTracking] = useState(true);
   const [sourceQuery, setSourceQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
   const [sourceResults, setSourceResults] = useState([]);
@@ -89,17 +82,23 @@ export const SafeWalk = () => {
   const [desMarker, setDesMarker] = useState(null);
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
 
-  useEffect(() => {
+  const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setLoc([latitude, longitude]);
+        if (pos) {
+          const { latitude, longitude } = pos.coords;
+          setLoc([latitude, longitude]);
+        }
       },
       (err) => {
-        console.error("Geolocation error:", err);
+        console.error("Geolocation error:", err.code, err.message);
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+  };
+
+  useEffect(() => {
+    fetchMyLoc();
     const interval = setInterval(() => setIndex((i) => i + 1), 2000);
     return () => clearInterval(interval);
   }, []);
@@ -109,8 +108,9 @@ export const SafeWalk = () => {
   }, [pos]);
 
   useEffect(() => {
+    if (loading) return;
     const el = waapiRef.current;
-    if (!el || loading) return;
+    if (!el) return;
     const animation = el.animate([{ color: "#ff0088" }, { color: "#0d63f8" }], {
       duration: 2000,
       iterations: Infinity,
@@ -126,7 +126,9 @@ export const SafeWalk = () => {
       if (!query) return setter([]);
       try {
         const res = await fetch(
-          `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(query)}`,
+          `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(
+            query
+          )}`,
           { signal: controller.signal }
         );
         const data = await res.json();
@@ -135,7 +137,10 @@ export const SafeWalk = () => {
         if (err.name !== "AbortError") console.error(err);
       }
     };
-    const timeout = setTimeout(() => fetchResults(sourceQuery, setSourceResults), 400);
+    const timeout = setTimeout(
+      () => fetchResults(sourceQuery, setSourceResults),
+      400
+    );
     return () => {
       clearTimeout(timeout);
       controller.abort();
@@ -148,7 +153,9 @@ export const SafeWalk = () => {
       if (!query) return setter([]);
       try {
         const res = await fetch(
-          `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(query)}`,
+          `https://safewalk-xbkj.onrender.com/search/searchPlace?query=${encodeURIComponent(
+            query
+          )}`,
           { signal: controller.signal }
         );
         const data = await res.json();
@@ -157,7 +164,10 @@ export const SafeWalk = () => {
         if (err.name !== "AbortError") console.error(err);
       }
     };
-    const timeout = setTimeout(() => fetchResults(destinationQuery, setDestinationResults), 400);
+    const timeout = setTimeout(
+      () => fetchResults(destinationQuery, setDestinationResults),
+      400
+    );
     return () => {
       clearTimeout(timeout);
       controller.abort();
@@ -168,7 +178,9 @@ export const SafeWalk = () => {
     if (!sourceLoc || !destLoc) return;
     try {
       const res = await fetch(
-        `https://safewalk-xbkj.onrender.com/search/findPath?src=${sourceLoc.join(",")}&dest=${destLoc.join(",")}`
+        `https://safewalk-xbkj.onrender.com/search/findPath?src=${sourceLoc.join(
+          ","
+        )}&dest=${destLoc.join(",")}`
       );
       const data = await res.json();
       const decoded = polyline.decode(data.routes[0].geometry);
@@ -177,21 +189,6 @@ export const SafeWalk = () => {
       console.error("Error fetching path:", err);
     }
   };
-
-  let trackedPolyline = [];
-  let remainingPolyline = routePolyline;
-  if (routePolyline && trackedPath.length > 0) {
-    const lastTracked = trackedPath[trackedPath.length - 1];
-    const closestIndex = routePolyline.findIndex(
-      ([lat, lng]) =>
-        Math.abs(lat - lastTracked[0]) < 0.0005 &&
-        Math.abs(lng - lastTracked[1]) < 0.0005
-    );
-    if (closestIndex !== -1) {
-      trackedPolyline = routePolyline.slice(0, closestIndex + 1);
-      remainingPolyline = routePolyline.slice(closestIndex);
-    }
-  }
 
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
@@ -204,7 +201,10 @@ export const SafeWalk = () => {
           <FaWalking style={{ fontSize: "25px" }} />
           <p>Start safeWalk</p>
         </div>
-        <div className="startButton buttontwo" onClick={() => navigate("/report-area")}>
+        <div
+          className="startButton buttontwo"
+          onClick={() => navigate("/report-area")}
+        >
           <TbMessageReport style={{ fontSize: "25px", marginRight: "3px" }} />
           <p>Report Area</p>
         </div>
@@ -234,57 +234,65 @@ export const SafeWalk = () => {
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {pos && <Marker position={pos} icon={walkerIcon}><Popup>You are here!</Popup></Marker>}
-              {sourceMarker && <Marker position={sourceMarker}><Popup>Source</Popup></Marker>}
-              {desMarker && <Marker position={desMarker} icon={destMarkerIcon}><Popup>Destination</Popup></Marker>}
-              {trackedPolyline.length > 0 && <Polyline positions={trackedPolyline} color="yellow" />}
-              {remainingPolyline?.length > 0 && (
+              {pos && (
+                <Marker position={pos}>
+                  <Popup>You are here!</Popup>
+                </Marker>
+              )}
+              {sourceMarker && (
+                <Marker position={sourceMarker}>
+                  <Popup>Source</Popup>
+                </Marker>
+              )}
+              {desMarker && (
+                <Marker position={desMarker} icon={destMarkerIcon}>
+                  <Popup>Destination</Popup>
+                </Marker>
+              )}
+              {routePolyline && (
                 <>
-                  <Polyline positions={remainingPolyline} color="blue" />
+                  <Polyline positions={routePolyline} color="blue" />
                   <FitMapToRoute polylineCoords={routePolyline} />
                 </>
               )}
             </MapContainer>
-
-            <div className="floating-buttons">
-              {!tracking ? (
-                <button
+            {!loadingg && (
+              <div className="floating-buttons">
+                {tracking && <button
                   className="floating-btn"
                   onClick={() => {
-                    setTracking(true);
-                    const id = navigator.geolocation.watchPosition(
-                      (pos) => {
-                        const { latitude, longitude } = pos.coords;
-                        const currentPos = [latitude, longitude];
-                        setLoc(currentPos);
-                        setTrackedPath((prev) => [...prev, currentPos]);
-                      },
-                      (err) => console.error("Tracking error:", err),
-                      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                    );
+                    // Add your start tracking logic here
+                    setTracking(false);
+                    alert("Tracking started!");
                   }}
                 >
-                  <FaRoute size={"25px"} color="#ffffff" /> Start Tracking
+                <FaRoute size={"25px"} color="#ffffffff"/> Start Tracking
                 </button>
-              ) : (
-                <button
+                }
+                {!tracking && (
+                  <button
                   className="floating-btn stop"
                   onClick={() => {
-                    setTracking(false);
+                    setTracking(true)
                     alert("Tracking stopped");
                   }}
                 >
-                  <MdStopCircle fontSize={"25px"} />
-                  Stop Tracking
+                <MdStopCircle  fontSize={"25px"}/>
+                Stop Tracking
                 </button>
-              )}
-              <button
-                className="floating-btn danger"
-                onClick={() => alert("Toggled Danger Zones")}
-              >
-                <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
-              </button>
-            </div>
+                )}
+
+                <button
+                  className="floating-btn danger"
+                  onClick={() => {
+                    // Add logic to toggle danger zones
+                    alert("Toggled Danger Zones");
+                  }}
+                >
+                  <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
+                </button>
+              </div>
+            )}
           </Fragment>
         )}
       </div>
@@ -292,7 +300,12 @@ export const SafeWalk = () => {
       {showSafeWalkModal && (
         <div className="modalOverlay">
           <div className="safeWalkModal">
-            <button className="modalClose" onClick={() => setShowSafeWalkModal(false)}>×</button>
+            <button
+              className="modalClose"
+              onClick={() => setShowSafeWalkModal(false)}
+            >
+              ×
+            </button>
             <label>Source</label>
             <input
               value={source}
@@ -309,7 +322,10 @@ export const SafeWalk = () => {
                     key={i}
                     onClick={() => {
                       setSource(result.display_name);
-                      setSourceLoc([parseFloat(result.lat), parseFloat(result.lon)]);
+                      setSourceLoc([
+                        parseFloat(result.lat),
+                        parseFloat(result.lon),
+                      ]);
                       setSourceQuery("");
                       setSourceResults([]);
                     }}
@@ -331,6 +347,7 @@ export const SafeWalk = () => {
             >
               Use current location
             </div>
+
             <label>Destination</label>
             <input
               value={destination}
@@ -347,7 +364,10 @@ export const SafeWalk = () => {
                     key={i}
                     onClick={() => {
                       setDestination(result.display_name);
-                      setDestLoc([parseFloat(result.lat), parseFloat(result.lon)]);
+                      setDestLoc([
+                        parseFloat(result.lat),
+                        parseFloat(result.lon),
+                      ]);
                       setDestinationQuery("");
                       setDestinationResults([]);
                     }}
@@ -357,11 +377,13 @@ export const SafeWalk = () => {
                 ))}
               </ul>
             )}
+
             <div className="modalButtons">
               <button
                 className="startBtn"
                 onClick={async () => {
                   setRoutePolyline(null);
+                  setLoc(null);
                   await findPath();
                   setSourceMarker(sourceLoc);
                   setDesMarker(destLoc);
