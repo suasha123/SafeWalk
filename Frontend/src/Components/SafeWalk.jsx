@@ -70,7 +70,7 @@ export const SafeWalk = () => {
   const [index, setIndex] = useState(0);
   const waapiRef = useRef();
   const navigate = useNavigate();
-  const [trackedPath, setTrackedPath] = useState([]);
+  const [trackedPath, setTrackedPath] = useState(null);
   const trackingIntervalRef = useRef(null);
   const [trackingButton, setTrackingButton] = useState(true);
   const [sourceQuery, setSourceQuery] = useState("");
@@ -215,7 +215,10 @@ export const SafeWalk = () => {
     const nearestLng = snapped.geometry.coordinates[0];
     setLoc([nearestLat, nearestLng]);
     const index = snapped.properties.index;
-    const covered = routePolyline.slice(0, index + 1);
+    const covered = [
+      ...routePolyline.slice(0, index + 1),
+      [nearestLat, nearestLng],
+    ];
     setTrackedPath(covered);
   };
   const stopTracking = () => {
@@ -288,7 +291,7 @@ export const SafeWalk = () => {
                   {/*<FitMapToRoute polylineCoords={routePolyline} />*/}
                 </>
               )}
-              {trackedPath.length > 1 && (
+              {trackedPath && trackedPath.length > 1 && (
                 <Polyline positions={trackedPath} color="green" weight={6} />
               )}
             </MapContainer>
