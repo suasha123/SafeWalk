@@ -207,7 +207,6 @@ export const SafeWalk = () => {
   };
   const updateTrackedPath = (currentPos) => {
     if (!routePolyline) return;
-
     const routeLine = lineString(routePolyline.map(([lat, lng]) => [lng, lat]));
     const userPoint = point([currentPos[1], currentPos[0]]);
     const snapped = nearestPointOnLine(routeLine, userPoint);
@@ -216,7 +215,7 @@ export const SafeWalk = () => {
     setLoc([nearestLat, nearestLng]);
     const index = snapped.properties.index;
     const covered = routePolyline.slice(0, index + 1);
-    setTrackedPath(covered); // This updates the green line
+    setTrackedPath(covered);
   };
   const stopTracking = () => {
     clearInterval(trackingIntervalRef.current);
@@ -262,7 +261,6 @@ export const SafeWalk = () => {
               zoomControl={false}
               className="map"
             >
-              <FlyToLocation position={pos} />
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -272,7 +270,7 @@ export const SafeWalk = () => {
                   <Popup>You are here!</Popup>
                 </Marker>
               )}
-              {sourceMarker && (
+              {sourceMarker && trackingButton(
                 <Marker position={sourceMarker}>
                   <Popup>Source</Popup>
                 </Marker>
