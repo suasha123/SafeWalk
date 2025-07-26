@@ -73,7 +73,7 @@ export const SafeWalk = () => {
   const navigate = useNavigate();
   const [trackingButton , setTrackingButton] =  useState(true);
   const [showDanger, setShowDanger] = useState(false);
-  const [tracking, setTracking] = useState(true);
+  const [tracking, setTracking] = useState(false);
   const [sourceQuery, setSourceQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
   const [sourceResults, setSourceResults] = useState([]);
@@ -304,8 +304,9 @@ export const SafeWalk = () => {
                         navigator.geolocation.clearWatch(watchId);
                         setWatchId(null);
                       }
-                      setTracking(false);
                       alert("Tracking stopped");
+                       setTracking(false);
+                    setTrackingButton(true);
                     }}
                   >
                     <MdStopCircle fontSize={"25px"} />
@@ -318,6 +319,7 @@ export const SafeWalk = () => {
                   onClick={() => {
                     // Add logic to toggle danger zones
                     alert("Toggled Danger Zones");
+                   
                   }}
                 >
                   <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
