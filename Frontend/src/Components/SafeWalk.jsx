@@ -61,6 +61,9 @@ const FitMapToRoute = ({ polylineCoords }) => {
 };
 
 export const SafeWalk = () => {
+  const [watchId, setWatchId] = useState(null);
+  const [trackedPath, setTrackedPath] = useState([]);
+
   const [routePolyline, setRoutePolyline] = useState(null);
   const { loading, isLoggedIn } = useAuth();
   const [pos, setLoc] = useState(null);
@@ -255,31 +258,58 @@ export const SafeWalk = () => {
                   <FitMapToRoute polylineCoords={routePolyline} />
                 </>
               )}
+              {trackedPath.length > 1 && (
+                <Polyline positions={trackedPath} color="green" />
+              )}
             </MapContainer>
             {!loadingg && (
               <div className="floating-buttons">
-                {tracking && <button
-                  className="floating-btn"
-                  onClick={() => {
-                    // Add your start tracking logic here
-                    setTracking(false);
-                    alert("Tracking started!");
-                  }}
-                >
-                <FaRoute size={"25px"} color="#ffffffff"/> Start Tracking
-                </button>
-                }
+                {tracking && (
+                  <button
+                    className="floating-btn"
+                    onClick={() => {
+                      const id = navigator.geolocation.watchPosition(
+                        (position) => {
+                          const { latitude, longitude } = position.coords;
+                          const newPos = [latitude, longitude];
+                          setLoc(newPos); // Update current position on map
+
+                          // Append to tracked path
+                          setTrackedPath((prev) => [...prev, newPos]);
+                        },
+                        (error) => {
+                          console.error("Tracking error:", error);
+                        },
+                        {
+                          enableHighAccuracy: true,
+                          maximumAge: 10000,
+                          timeout: 10000,
+                        }
+                      );
+
+                      setWatchId(id);
+                      setTracking(true);
+                      alert("Tracking started!");
+                    }}
+                  >
+                    <FaRoute size={"25px"} color="#ffffffff" /> Start Tracking
+                  </button>
+                )}
                 {!tracking && (
                   <button
-                  className="floating-btn stop"
-                  onClick={() => {
-                    setTracking(true)
-                    alert("Tracking stopped");
-                  }}
-                >
-                <MdStopCircle  fontSize={"25px"}/>
-                Stop Tracking
-                </button>
+                    className="floating-btn stop"
+                    onClick={() => {
+                      if (watchId !== null) {
+                        navigator.geolocation.clearWatch(watchId);
+                        setWatchId(null);
+                      }
+                      setTracking(false);
+                      alert("Tracking stopped");
+                    }}
+                  >
+                    <MdStopCircle fontSize={"25px"} />
+                    Stop Tracking
+                  </button>
                 )}
 
                 <button
