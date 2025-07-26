@@ -193,17 +193,18 @@ export const SafeWalk = () => {
     }
   };
   const handleTracking = () => {
-    trackingIntervalRef.current = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const currentPos = [latitude, longitude];
-          updateTrackedPath(currentPos); // logic below
-        },
-        (err) => console.error(err),
-        { enableHighAccuracy: true }
-      );
-    }, 5000);
+    trackingIntervalRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        updateTrackedPath([latitude, longitude]);
+      },
+      (err) => console.error(err),
+      {
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 10000,
+      }
+    );
   };
   const updateTrackedPath = (currentPos) => {
     if (!routePolyline) return;
@@ -218,7 +219,8 @@ export const SafeWalk = () => {
     setTrackedPath(covered);
   };
   const stopTracking = () => {
-    clearInterval(trackingIntervalRef.current);
+    navigator.geolocation.clearWatch(trackingIntervalRef.current);
+
     trackingIntervalRef.current = null;
   };
 
@@ -270,7 +272,7 @@ export const SafeWalk = () => {
                   <Popup>You are here!</Popup>
                 </Marker>
               )}
-              {sourceMarker && trackingButton &&(
+              {sourceMarker && trackingButton && (
                 <Marker position={sourceMarker}>
                   <Popup>Source</Popup>
                 </Marker>
