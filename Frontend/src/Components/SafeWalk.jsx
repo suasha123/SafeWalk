@@ -27,6 +27,8 @@ import { useNavigate } from "react-router-dom";
 import { FaRoute } from "react-icons/fa6";
 import { GiDeathZone } from "react-icons/gi";
 import { MdStopCircle } from "react-icons/md";
+import * as turf from "@turf/turf";
+import { point, lineString, nearestPointOnLine } from "@turf/turf";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -61,9 +63,6 @@ const FitMapToRoute = ({ polylineCoords }) => {
 };
 
 export const SafeWalk = () => {
-  const [watchId, setWatchId] = useState(null);
-  const [trackedPath, setTrackedPath] = useState([]);
-
   const [routePolyline, setRoutePolyline] = useState(null);
   const { loading, isLoggedIn } = useAuth();
   const [pos, setLoc] = useState(null);
@@ -71,9 +70,9 @@ export const SafeWalk = () => {
   const [index, setIndex] = useState(0);
   const waapiRef = useRef();
   const navigate = useNavigate();
-  const [trackingButton , setTrackingButton] =  useState(true);
-  const [showDanger, setShowDanger] = useState(false);
-  const [tracking, setTracking] = useState(false);
+  const [trackedPath, setTrackedPath] = useState([]);
+  const trackingIntervalRef = useRef(null);
+  const [trackingButton, setTrackingButton] = useState(true);
   const [sourceQuery, setSourceQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
   const [sourceResults, setSourceResults] = useState([]);
@@ -193,6 +192,36 @@ export const SafeWalk = () => {
       console.error("Error fetching path:", err);
     }
   };
+  const handleTracking = () => {
+    trackingIntervalRef.current = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          const currentPos = [latitude, longitude];
+          updateTrackedPath(currentPos); // logic below
+        },
+        (err) => console.error(err),
+        { enableHighAccuracy: true }
+      );
+    }, 5000);
+  };
+  const updateTrackedPath = (currentPos) => {
+    if (!routePolyline) return;
+
+    const routeLine = lineString(routePolyline.map(([lat, lng]) => [lng, lat]));
+    const userPoint = point([currentPos[1], currentPos[0]]);
+    const snapped = nearestPointOnLine(routeLine, userPoint);
+    const nearestLat = snapped.geometry.coordinates[1];
+    const nearestLng = snapped.geometry.coordinates[0];
+    setLoc([nearestLat, nearestLng]);
+    const index = snapped.properties.index;
+    const covered = routePolyline.slice(0, index + 1);
+    setTrackedPath(covered); // This updates the green line
+  };
+  const stopTracking = () => {
+    clearInterval(trackingIntervalRef.current);
+    trackingIntervalRef.current = null;
+  };
 
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
@@ -255,12 +284,12 @@ export const SafeWalk = () => {
               )}
               {routePolyline && (
                 <>
-                  <Polyline positions={routePolyline} color="blue" />
-                  <FitMapToRoute polylineCoords={routePolyline} />
+                  <Polyline positions={routePolyline} color="blue" weight={4} />
+                  {/*<FitMapToRoute polylineCoords={routePolyline} />*/}
                 </>
               )}
               {trackedPath.length > 1 && (
-                <Polyline positions={trackedPath} color="green" />
+                <Polyline positions={trackedPath} color="green" weight={6} />
               )}
             </MapContainer>
             {!loadingg && (
@@ -269,28 +298,7 @@ export const SafeWalk = () => {
                   <button
                     className="floating-btn"
                     onClick={() => {
-                      const id = navigator.geolocation.watchPosition(
-                        (position) => {
-                          const { latitude, longitude } = position.coords;
-                          const newPos = [latitude, longitude];
-                          setLoc(newPos); // Update current position on map
-
-                          // Append to tracked path
-                          setTrackedPath((prev) => [...prev, newPos]);
-                        },
-                        (error) => {
-                          console.error("Tracking error:", error);
-                        },
-                        {
-                          enableHighAccuracy: true,
-                          maximumAge: 10000,
-                          timeout: 10000,
-                        }
-                      );
-
-                      setWatchId(id);
-                      setTrackingButton(false);
-                      alert("Tracking started!");
+                      handleTracking;
                     }}
                   >
                     <FaRoute size={"25px"} color="#ffffffff" /> Start Tracking
@@ -300,13 +308,7 @@ export const SafeWalk = () => {
                   <button
                     className="floating-btn stop"
                     onClick={() => {
-                      if (watchId !== null) {
-                        navigator.geolocation.clearWatch(watchId);
-                        setWatchId(null);
-                      }
-                      alert("Tracking stopped");
-                       setTracking(false);
-                    setTrackingButton(true);
+                      stopTracking;
                     }}
                   >
                     <MdStopCircle fontSize={"25px"} />
@@ -319,7 +321,6 @@ export const SafeWalk = () => {
                   onClick={() => {
                     // Add logic to toggle danger zones
                     alert("Toggled Danger Zones");
-                   
                   }}
                 >
                   <GiDeathZone size={"25px"} color="red" /> Show Danger Zones

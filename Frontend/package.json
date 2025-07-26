@@ -17,6 +17,7 @@
     "@mui/material": "^7.1.2",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.8.1",
+    "@turf/turf": "^7.2.0",
     "aos": "^3.0.0-beta.6",
     "leaflet": "^1.9.4",
     "motion": "^12.9.5",
