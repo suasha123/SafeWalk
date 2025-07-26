@@ -71,6 +71,7 @@ export const SafeWalk = () => {
   const [index, setIndex] = useState(0);
   const waapiRef = useRef();
   const navigate = useNavigate();
+  const [trackingButton , setTrackingButton] =  useState(true);
   const [showDanger, setShowDanger] = useState(false);
   const [tracking, setTracking] = useState(true);
   const [sourceQuery, setSourceQuery] = useState("");
@@ -264,7 +265,7 @@ export const SafeWalk = () => {
             </MapContainer>
             {!loadingg && (
               <div className="floating-buttons">
-                {tracking && (
+                {trackingButton && (
                   <button
                     className="floating-btn"
                     onClick={() => {
@@ -288,14 +289,14 @@ export const SafeWalk = () => {
                       );
 
                       setWatchId(id);
-                      setTracking(true);
+                      setTrackingButton(false);
                       alert("Tracking started!");
                     }}
                   >
                     <FaRoute size={"25px"} color="#ffffffff" /> Start Tracking
                   </button>
                 )}
-                {!tracking && (
+                {!trackingButton && (
                   <button
                     className="floating-btn stop"
                     onClick={() => {
