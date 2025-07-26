@@ -299,6 +299,7 @@ export const SafeWalk = () => {
                     className="floating-btn"
                     onClick={() => {
                       handleTracking;
+                      setTrackingButton(false);
                     }}
                   >
                     <FaRoute size={"25px"} color="#ffffffff" /> Start Tracking
@@ -309,6 +310,7 @@ export const SafeWalk = () => {
                     className="floating-btn stop"
                     onClick={() => {
                       stopTracking;
+                      setTrackingButton(true);
                     }}
                   >
                     <MdStopCircle fontSize={"25px"} />
