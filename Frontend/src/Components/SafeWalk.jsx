@@ -298,7 +298,7 @@ export const SafeWalk = () => {
                   <button
                     className="floating-btn"
                     onClick={() => {
-                      handleTracking;
+                      handleTracking();
                       setTrackingButton(false);
                     }}
                   >
@@ -309,7 +309,7 @@ export const SafeWalk = () => {
                   <button
                     className="floating-btn stop"
                     onClick={() => {
-                      stopTracking;
+                      stopTracking();
                       setTrackingButton(true);
                     }}
                   >
