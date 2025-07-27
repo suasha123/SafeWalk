@@ -88,7 +88,7 @@ export const SafeWalk = () => {
   const [desMarker, setDesMarker] = useState(null);
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -202,7 +202,6 @@ export const SafeWalk = () => {
         setSourceMarker(data.src);
         setDesMarker(data.dest);
         setRoutePolyline(data.path);
-        
       } else {
         enqueueSnackbar(data.msg || "Something went wrong", {
           variant: "error",
@@ -226,7 +225,7 @@ export const SafeWalk = () => {
       const result = await storepathinBackend(decoded);
       const m = await result.json();
       if (result.ok) {
-        navigate(`/safe-walk/walkid=${m._id}`);
+        navigate(`/safe-walk?walkid=${m._id}`);
         //setRoutePolyline(decoded);
       } else {
         enqueueSnackbar(m.msg, { variant: "error" });
