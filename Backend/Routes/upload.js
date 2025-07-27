@@ -19,7 +19,7 @@ router.post('/fetchedpath', async (req,res)=>{
     return res.status(400).json({msg : "No payload"});
   }
   const doc = await Track.create({
-    id : userid,
+    userid,
     src : payload.src,
     dest : payload.dest,
     path : payload.path,
