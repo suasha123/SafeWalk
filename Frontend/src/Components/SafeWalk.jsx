@@ -434,7 +434,7 @@ export const SafeWalk = () => {
                 <button
                   className="floating-btn danger"
                   onClick={() => {
-                    alert("Toggled Danger Zone");
+                    alert("Toggled Danger Zones");
                   }}
                 >
                   <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
