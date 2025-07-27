@@ -7,7 +7,7 @@ import {
   useMap,
   useMapEvent,
 } from "react-leaflet";
-import polyline from "@mapbox/polyline";
+import polyline, { encode } from "@mapbox/polyline";
 import "leaflet/dist/leaflet.css";
 import { Fragment, useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -24,11 +24,12 @@ import { FlyToLocation } from "./FlyTo";
 import { FaWalking } from "react-icons/fa";
 import { TbMessageReport } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
-import { FaRoute } from "react-icons/fa6";
+import { FaRoute, FaS } from "react-icons/fa6";
 import { GiDeathZone } from "react-icons/gi";
 import { MdStopCircle } from "react-icons/md";
 import * as turf from "@turf/turf";
 import { point, lineString, nearestPointOnLine } from "@turf/turf";
+import { enqueueSnackbar } from "notistack";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -75,7 +76,8 @@ export const SafeWalk = () => {
   const [trackingButton, setTrackingButton] = useState(true);
   const [sourceQuery, setSourceQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
-  const [sourceResults, setSourceResults] = useState([]);
+  //const [sourceResults, setSourceResults] = useState([]);
+  const [updatingLoc, setUpdatingLoc] = useState(false);
   const [destinationResults, setDestinationResults] = useState([]);
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
@@ -84,7 +86,7 @@ export const SafeWalk = () => {
   const [sourceMarker, setSourceMarker] = useState(null);
   const [desMarker, setDesMarker] = useState(null);
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
-
+  const [loadingR, setLoadingR] = useState(false);
   const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -187,11 +189,34 @@ export const SafeWalk = () => {
       );
       const data = await res.json();
       const decoded = polyline.decode(data.routes[0].geometry);
+      console.log(`decoded hai ${decoded}`);
+      await storepathinBackend(decoded);
       setRoutePolyline(decoded);
     } catch (err) {
       console.error("Error fetching path:", err);
     }
   };
+  const storepathinBackend = async(path)=>{
+    if(!path){
+      return ;
+    }
+    try{
+      const payload = {src : sourceLoc , des : destLoc  , path};
+     const response = await fetch(`https://safewalk-xbkj.onrender.com/upload/fetchedpath`,{
+      method : 'POST' ,
+      headers : {
+        'Content-Type' : 'application/json'
+      },
+      credentials : "include",
+      body : JSON.stringify(payload)
+     })
+     console.log(response);
+    }
+    catch(err){
+      console.log(err);
+    }
+
+  }
   const handleTracking = () => {
     trackingIntervalRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -213,6 +238,7 @@ export const SafeWalk = () => {
     const snapped = nearestPointOnLine(routeLine, userPoint);
     const nearestLat = snapped.geometry.coordinates[1];
     const nearestLng = snapped.geometry.coordinates[0];
+    //backend ka code likhenege first store then update the resposne form backend
     setLoc([nearestLat, nearestLng]);
     const index = snapped.properties.index;
     const covered = [
@@ -292,7 +318,7 @@ export const SafeWalk = () => {
                 </>
               )}
               {trackedPath && trackedPath.length > 1 && (
-                <Polyline positions={trackedPath} color="green" weight={6} />
+                <Polyline positions={trackedPath} color="#802cf4" weight={5} />
               )}
             </MapContainer>
             {!loadingg && (
@@ -301,6 +327,12 @@ export const SafeWalk = () => {
                   <button
                     className="floating-btn"
                     onClick={() => {
+                      if (!sourceLoc || !destLoc) {
+                        enqueueSnackbar("Start SafeWalk !", {
+                          variant: "warning",
+                        });
+                        return;
+                      }
                       handleTracking();
                       setTrackingButton(false);
                     }}
@@ -341,6 +373,7 @@ export const SafeWalk = () => {
           <div className="safeWalkModal">
             <button
               className="modalClose"
+              disabled={loadingR}
               onClick={() => setShowSafeWalkModal(false)}
             >
               ×
@@ -352,9 +385,10 @@ export const SafeWalk = () => {
                 setSource(e.target.value);
                 setSourceQuery(e.target.value);
               }}
-              placeholder="e.g. Mumbai"
+              placeholder="Choose Your Location"
+              readOnly
             />
-            {sourceResults.length > 0 && (
+            {/* {sourceResults.length > 0 && (
               <ul className="autocomplete-list">
                 {sourceResults.map((result, i) => (
                   <li
@@ -373,18 +407,24 @@ export const SafeWalk = () => {
                   </li>
                 ))}
               </ul>
-            )}
+            )}*/}
             <div
               className="useCurrentLocation"
               onClick={() => {
+                if(updatingLoc){
+                  enqueueSnackbar("Fetching Location" , {variant : "warning"})
+                  return
+                }
+                setUpdatingLoc(true);
                 navigator.geolocation.getCurrentPosition((pos) => {
                   const { latitude, longitude } = pos.coords;
                   setSource(`Lat: ${latitude}, Long: ${longitude}`);
                   setSourceLoc([latitude, longitude]);
+                  setUpdatingLoc(false);
                 });
               }}
             >
-              Use current location
+              {updatingLoc ? "Fetching Location" : "Update current location"}
             </div>
 
             <label>Destination</label>
@@ -420,18 +460,28 @@ export const SafeWalk = () => {
             <div className="modalButtons">
               <button
                 className="startBtn"
+                disabled={loadingR}
                 onClick={async () => {
+                  if (!source || !destination) {
+                    enqueueSnackbar("Input Field Required", {
+                      variant: "warning",
+                    });
+                    return;
+                  }
+                  setLoadingR(true);
                   setRoutePolyline(null);
                   setLoc(null);
                   await findPath();
                   setSourceMarker(sourceLoc);
                   setDesMarker(destLoc);
                   setShowSafeWalkModal(false);
+                  setLoadingR(false);
+                  setSource("");
+                  setDestination("");
                 }}
               >
-                Start SafeWalk
+                {loadingR ? "Fetching Route" : "Start SafeWalk"}
               </button>
-              <button className="sendBtn">Send to Chat & Group</button>
             </div>
           </div>
         </div>

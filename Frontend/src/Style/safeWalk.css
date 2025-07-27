@@ -88,7 +88,7 @@
 
 .modalButtons {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   margin-top: 2rem;
 }
 
@@ -98,6 +98,7 @@
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.95rem;
+  min-width: 200px;
   transition: all 0.3s ease;
 }
 
@@ -110,15 +111,6 @@
   background-color: #6c31a7;
 }
 
-.modalButtons .sendBtn {
-  background-color: transparent;
-  color: #e0e0e0;
-  border: 1px solid #ffffff70;
-}
-
-.modalButtons .sendBtn:hover {
-  background-color: #28213c;
-}
 
 .modalOverlay {
   position: fixed;
