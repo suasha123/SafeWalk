@@ -225,7 +225,7 @@ export const SafeWalk = () => {
       const result = await storepathinBackend(decoded);
       const m = await result.json();
       if (result.ok) {
-        navigate(`/safe-walk?walkid=${m._id}`);
+        navigate(`/safe-walk?walkid=${m.id}`);
         //setRoutePolyline(decoded);
       } else {
         enqueueSnackbar(m.msg, { variant: "error" });
