@@ -7,26 +7,29 @@ const GroupModal = require("../database/model/groupmodel");
 const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
 const parser = multer({ storage });
-router.post('/fetchedpath', async (req,res)=>{
-  if(!req.isAuthenticated()){
-    return res.status(403).json({msg : "Unauthorized"});
+router.post("/fetchedpath", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Unauthorized" });
   }
   const payload = req.body;
-  console.log(payload);
   const userid = req.session.passport.user;
-  if(!payload){
+  if (!payload) {
     console.log("Payload not recieved");
-    return res.status(400).json({msg : "No payload"});
+    return res.status(400).json({ msg: "No payload" });
   }
-  const doc = await Track.create({
-    userid,
-    src : payload.src,
-    dest : payload.dest,
-    path : payload.path,
-    status : "pending"
-  })
-  return res.status(200).json(doc);
-})
+  try {
+     await Track.create({
+      userid,
+      src: payload.src,
+      dest: payload.des,
+      path: payload.path,
+      status: "pending",
+    });
+    return res.status(200).json({ msg: "Path Fetched success" });
+  } catch (err) {
+    return res.status(500).json({msg : "Server Error"});
+  }
+});
 router.post("/report", async (req, res) => {
   const payload = req.body;
 
@@ -46,7 +49,7 @@ router.post("/report", async (req, res) => {
       lat: payload.location.lat,
       long: payload.location.lng,
       timeofReport: payload.datetime,
-      incidenttype : payload.type, 
+      incidenttype: payload.type,
     });
     return res.status(200).json({ msg: "Uploaded Data" });
   } catch (err) {

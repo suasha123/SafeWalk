@@ -74,7 +74,7 @@ export const SafeWalk = () => {
   const [trackedPath, setTrackedPath] = useState(null);
   const trackingIntervalRef = useRef(null);
   const [trackingButton, setTrackingButton] = useState(true);
-  const [sourceQuery, setSourceQuery] = useState("");
+  //const [sourceQuery, setSourceQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
   //const [sourceResults, setSourceResults] = useState([]);
   const [updatingLoc, setUpdatingLoc] = useState(false);
@@ -125,7 +125,7 @@ export const SafeWalk = () => {
     return () => animation.cancel();
   }, [loading]);
 
-  useEffect(() => {
+  {/*useEffect(() => {
     const controller = new AbortController();
     const fetchResults = async (query, setter) => {
       if (!query) return setter([]);
@@ -150,7 +150,7 @@ export const SafeWalk = () => {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [sourceQuery]);
+  }, [sourceQuery]);*/}
 
   useEffect(() => {
     const controller = new AbortController();
@@ -189,11 +189,16 @@ export const SafeWalk = () => {
       );
       const data = await res.json();
       const decoded = polyline.decode(data.routes[0].geometry);
-      console.log(`decoded hai ${decoded}`);
-      await storepathinBackend(decoded);
-      setRoutePolyline(decoded);
+      const result = await storepathinBackend(decoded);
+      const m = await result.json();
+      if(result.ok){
+          setRoutePolyline(decoded);
+      }
+      else{
+        enqueueSnackbar(m.msg , {variant : "error"});
+      }
     } catch (err) {
-      console.error("Error fetching path:", err);
+          enqueueSnackbar("Error occured" , {variant : "error"});
     }
   };
   const storepathinBackend = async(path)=>{
@@ -210,10 +215,10 @@ export const SafeWalk = () => {
       credentials : "include",
       body : JSON.stringify(payload)
      })
-     console.log(response);
+     return response;
     }
     catch(err){
-      console.log(err);
+      enqueueSnackbar("Error Occured" , {variant : "error"})
     }
 
   }
