@@ -68,6 +68,7 @@ const FitMapToRoute = ({ polylineCoords }) => {
 export const SafeWalk = () => {
   const [routePolyline, setRoutePolyline] = useState(null);
   const { loading, isLoggedIn } = useAuth();
+  const [showMapOverlay, setShowMapOverlay] = useState(true);
   const [pos, setLoc] = useState(null);
   const [loadingg, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -109,11 +110,11 @@ export const SafeWalk = () => {
   };
 
   useEffect(() => {
+    let intervaltwo;
     const fetchData = async () => {
       const walkid = searchParams.get("walkid");
       if (!walkid) {
         const response = await isActiveSession();
-
         if (response && response.status === 200) {
           const res = await response.json();
           if (res.id) {
@@ -122,24 +123,29 @@ export const SafeWalk = () => {
             return;
           }
         }
-        if (response && response.status !== 500) {
-          fetchMyLoc(); // ✅ No active session, just fetch current location
-        } else {
+        if (response && response.status == 500) {
           enqueueSnackbar("Please Try Later", { variant: "warning" });
           navigate("/");
         }
+        setShowMapOverlay(false);
         return;
       }
       if (walkid) {
         await fetchStoredPathFromBackend(walkid);
         setLoading(false);
+        intervaltwo = setTimeout(() => {
+          setShowMapOverlay(false);
+        }, 2000);
       }
     };
 
     fetchData();
+    fetchMyLoc();
 
     const interval = setInterval(() => setIndex((i) => i + 1), 2000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval), clearTimeout(intervaltwo);
+    };
   }, [searchParams]);
 
   useEffect(() => {
@@ -256,6 +262,7 @@ export const SafeWalk = () => {
   const findPath = async () => {
     if (!sourceLoc || !destLoc) return;
     try {
+      setShowMapOverlay(true);
       const res = await fetch(
         `https://safewalk-xbkj.onrender.com/search/findPath?src=${sourceLoc.join(
           ","
@@ -267,7 +274,9 @@ export const SafeWalk = () => {
       const m = await result.json();
       if (result.ok) {
         navigate(`/safe-walk?walkid=${m.id}`);
-        //setRoutePolyline(decoded);
+        setTimeout(() => {
+          setShowMapOverlay(false);
+        }, 2000);
       } else {
         enqueueSnackbar(m.msg, { variant: "error" });
       }
@@ -275,6 +284,7 @@ export const SafeWalk = () => {
       enqueueSnackbar("Error occured", { variant: "error" });
     }
   };
+
   const storepathinBackend = async (path) => {
     if (!path) {
       return;
@@ -334,9 +344,12 @@ export const SafeWalk = () => {
   };
   const exitWalk = async () => {
     try {
-      const response = await fetch("https://safewalk-xbkj.onrender.com/api/exitWalk", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/exitWalk",
+        {
+          credentials: "include",
+        }
+      );
       if (response.ok) {
         if (showResumeModal) {
           setShowResumeModal(false);
@@ -344,13 +357,14 @@ export const SafeWalk = () => {
         if (resumeWalkId) {
           setActiveSessionId(null);
         }
+        fetchMyLoc();
         setLoading(false);
+        setTrackedPath(null);
         setSourceLoc(null);
         setDesMarker(null);
         setSourceMarker(null);
         setDestLoc(null);
         setRoutePolyline(null);
-        fetchMyLoc();
         navigate("/safe-walk");
       } else {
         const ms = await response.json();
@@ -366,52 +380,62 @@ export const SafeWalk = () => {
   return (
     <>
       <NavBar />
-      {!loading && (
-        <div className="startButtonDiv">
-          {searchParams.get("walkid") || resumeWalkId ? (
-            <div
-              className="startButton exitButton"
-              onClick={() => {
-                exitWalk();
-              }}
-            >
-              <RxExit style={{ fontSize: "20px", marginRight: "8px" }} />
-              <p>Exit Walk</p>
-            </div>
-          ) : (
-            <div
-              className="startButton"
-              disabled={startWalkButton}
-              onClick={async () => {
-                setWalkButton(true);
-                if (resumeWalkId) {
-                  setShowResumeModal(true);
-                } else {
-                  const response = await isActiveSession();
-                  if (response.ok) {
-                    const result = await response.json();
-                    setActiveSessionId(result.id);
+
+      <div className="startButtonDiv">
+        {showMapOverlay ? (
+          <div className="spinner-container">
+            <div className="spinner-circle loadd" />
+          </div>
+        ) : (
+          <>
+            {searchParams.get("walkid") || resumeWalkId ? (
+              <div
+                className="startButton exitButton"
+                onClick={() => {
+                  setShowMapOverlay(true);
+                  exitWalk();
+                }}
+              >
+                <RxExit style={{ fontSize: "20px", marginRight: "8px" }} />
+                <p>Exit Walk</p>
+              </div>
+            ) : (
+              <div
+                className="startButton"
+                disabled={startWalkButton}
+                onClick={async () => {
+                  setWalkButton(true);
+                  if (resumeWalkId) {
                     setShowResumeModal(true);
                   } else {
-                    setShowSafeWalkModal(true);
+                    const response = await isActiveSession();
+                    if (response.ok) {
+                      const result = await response.json();
+                      setActiveSessionId(result.id);
+                      setShowResumeModal(true);
+                    } else {
+                      setShowSafeWalkModal(true);
+                    }
                   }
-                }
-              }}
-            >
-              <FaWalking style={{ fontSize: "25px" }} />
-              <p>Start safeWalk</p>
-            </div>
-          )}
+                }}
+              >
+                <FaWalking style={{ fontSize: "25px" }} />
+                <p>Start safeWalk</p>
+              </div>
+            )}
 
-          <div
-            className="startButton buttontwo"
-            onClick={() => navigate("/report-area")}
-          >
-            <TbMessageReport style={{ fontSize: "25px", marginRight: "3px" }} />
-            <p>Report Area</p>
-          </div>
-        </div>
-      )}
+            <div
+              className="startButton buttontwo"
+              onClick={() => navigate("/report-area")}
+            >
+              <TbMessageReport
+                style={{ fontSize: "25px", marginRight: "3px" }}
+              />
+              <p>Report Area</p>
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="maincontainer">
         {loadingg ? (
@@ -425,6 +449,17 @@ export const SafeWalk = () => {
           </div>
         ) : (
           <Fragment>
+            {showMapOverlay && (
+              <div className="map-loading-overlay">
+                <div className="map-loading-box">
+                  <div className="spinner-container">
+                    <div className="spinner-circle load" />
+                  </div>
+                  <p>Processing...</p>
+                </div>
+              </div>
+            )}
+
             <MapContainer
               center={pos}
               zoom={13}
@@ -461,19 +496,20 @@ export const SafeWalk = () => {
                 <Polyline positions={trackedPath} color="#802cf4" weight={5} />
               )}
             </MapContainer>
-            {!loadingg && (
+            {!loadingg && !showMapOverlay && (
               <div className="floating-buttons">
                 {trackingButton && (
                   <button
                     className="floating-btn"
                     onClick={() => {
-                      if (!sourceLoc || !destLoc) {
+                      if (searchParams.get("walkid") || resumeWalkId) {
+                        handleTracking();
+                      } else {
                         enqueueSnackbar("Start SafeWalk !", {
                           variant: "warning",
                         });
                         return;
                       }
-                      handleTracking();
                       setTrackingButton(false);
                     }}
                   >
@@ -519,15 +555,20 @@ export const SafeWalk = () => {
                     setShowResumeModal(false);
                     return;
                   }
+
+                  navigate(`/safe-walk?walkid=${resumeWalkId}`);
                   setShowResumeModal(false);
-                  window.location.href = `/safe-walk?walkid=${resumeWalkId}`;
                 }}
               >
                 Resume Walk
               </button>
-              <button onClick={()=>{
-                exitWalk();
-              }}>Exit Walk</button>
+              <button
+                onClick={() => {
+                  exitWalk();
+                }}
+              >
+                Exit Walk
+              </button>
             </div>
           </div>
         </div>
