@@ -210,6 +210,7 @@ export const SafeWalk = () => {
         setSourceMarker(data.src);
         setDesMarker(data.dest);
         setRoutePolyline(data.path);
+           setLoc(data.src);
       } else {
         enqueueSnackbar(data.msg || "Something went wrong", {
           variant: "error",
