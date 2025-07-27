@@ -21,6 +21,7 @@ import { useAuth } from "./AuthContext";
 import { NavBar } from "./Navbar";
 import { SplashScreen } from "./SplashScreen";
 import { FlyToLocation } from "./FlyTo";
+import { useSearchParams } from "react-router-dom";
 import { FaWalking } from "react-icons/fa";
 import { TbMessageReport } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
@@ -87,6 +88,7 @@ export const SafeWalk = () => {
   const [desMarker, setDesMarker] = useState(null);
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
+  const searchParams = useSearchParams();
   const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -103,7 +105,12 @@ export const SafeWalk = () => {
   };
 
   useEffect(() => {
-    fetchMyLoc();
+    const walkid = searchParams.get("walkid");
+    if (walkid) {
+      fetchStoredPathFromBackend(walkid);
+    } else {
+      fetchMyLoc();
+    }
     const interval = setInterval(() => setIndex((i) => i + 1), 2000);
     return () => clearInterval(interval);
   }, []);
@@ -125,7 +132,8 @@ export const SafeWalk = () => {
     return () => animation.cancel();
   }, [loading]);
 
-  {/*useEffect(() => {
+  {
+    /*useEffect(() => {
     const controller = new AbortController();
     const fetchResults = async (query, setter) => {
       if (!query) return setter([]);
@@ -150,7 +158,8 @@ export const SafeWalk = () => {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [sourceQuery]);*/}
+  }, [sourceQuery]);*/
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -178,6 +187,31 @@ export const SafeWalk = () => {
       controller.abort();
     };
   }, [destinationQuery]);
+  const fetchStoredPathFromBackend = async (id) => {
+    try {
+      const response = await fetch(
+        `https://safewalk-xbkj.onrender.com/search/path/${id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        setSourceMarker(data.src);
+        setDesMarker(data.dest);
+        setRoutePolyline(data.path);
+        
+      } else {
+        enqueueSnackbar(data.msg || "Something went wrong", {
+          variant: "error",
+        });
+      }
+    } catch (err) {
+      enqueueSnackbar("Error fetching path", { variant: "error" });
+    }
+  };
 
   const findPath = async () => {
     if (!sourceLoc || !destLoc) return;
@@ -191,37 +225,38 @@ export const SafeWalk = () => {
       const decoded = polyline.decode(data.routes[0].geometry);
       const result = await storepathinBackend(decoded);
       const m = await result.json();
-      if(result.ok){
-          setRoutePolyline(decoded);
-      }
-      else{
-        enqueueSnackbar(m.msg , {variant : "error"});
+      if (result.ok) {
+        navigate(`/safe-walk/walkid=${m._id}`);
+        //setRoutePolyline(decoded);
+      } else {
+        enqueueSnackbar(m.msg, { variant: "error" });
       }
     } catch (err) {
-          enqueueSnackbar("Error occured" , {variant : "error"});
+      enqueueSnackbar("Error occured", { variant: "error" });
     }
   };
-  const storepathinBackend = async(path)=>{
-    if(!path){
-      return ;
+  const storepathinBackend = async (path) => {
+    if (!path) {
+      return;
     }
-    try{
-      const payload = {src : sourceLoc , des : destLoc  , path};
-     const response = await fetch(`https://safewalk-xbkj.onrender.com/upload/fetchedpath`,{
-      method : 'POST' ,
-      headers : {
-        'Content-Type' : 'application/json'
-      },
-      credentials : "include",
-      body : JSON.stringify(payload)
-     })
-     return response;
+    try {
+      const payload = { src: sourceLoc, des: destLoc, path };
+      const response = await fetch(
+        `https://safewalk-xbkj.onrender.com/upload/fetchedpath`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        }
+      );
+      return response;
+    } catch (err) {
+      enqueueSnackbar("Error Occured", { variant: "error" });
     }
-    catch(err){
-      enqueueSnackbar("Error Occured" , {variant : "error"})
-    }
-
-  }
+  };
   const handleTracking = () => {
     trackingIntervalRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -416,9 +451,9 @@ export const SafeWalk = () => {
             <div
               className="useCurrentLocation"
               onClick={() => {
-                if(updatingLoc){
-                  enqueueSnackbar("Fetching Location" , {variant : "warning"})
-                  return
+                if (updatingLoc) {
+                  enqueueSnackbar("Fetching Location", { variant: "warning" });
+                  return;
                 }
                 setUpdatingLoc(true);
                 navigator.geolocation.getCurrentPosition((pos) => {
@@ -477,12 +512,12 @@ export const SafeWalk = () => {
                   setRoutePolyline(null);
                   setLoc(null);
                   await findPath();
-                  setSourceMarker(sourceLoc);
-                  setDesMarker(destLoc);
-                  setShowSafeWalkModal(false);
-                  setLoadingR(false);
+                  //setSourceMarker(sourceLoc);
+                  //setDesMarker(destLoc);
                   setSource("");
                   setDestination("");
+                  setShowSafeWalkModal(false);
+                  setLoadingR(false);
                 }}
               >
                 {loadingR ? "Fetching Route" : "Start SafeWalk"}

@@ -18,14 +18,14 @@ router.post("/fetchedpath", async (req, res) => {
     return res.status(400).json({ msg: "No payload" });
   }
   try {
-     await Track.create({
+    const doc =  await Track.create({
       userid,
       src: payload.src,
       dest: payload.des,
       path: payload.path,
       status: "pending",
     });
-    return res.status(200).json({ msg: "Path Fetched success" });
+    return res.status(200).json({ id : doc._id });
   } catch (err) {
     return res.status(500).json({msg : "Server Error"});
   }
