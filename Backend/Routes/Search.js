@@ -1,7 +1,26 @@
 const express = require("express");
 const router = express.Router();
 require("dotenv").config();
-const Track = require("../database/model/TrackingModel")
+const Track = require("../database/model/TrackingModel");
+router.get("/activesession", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log In again" });
+  }
+  try{
+  const userId = req.session.passport.user;
+  const isActiveSession = await Track.findOne({
+    userid: userId,
+  });
+  if (!isActiveSession) {
+    return res.status(404).json({ msg: "No active session found" });
+  }
+
+  return res.status(200).json({ id: isActiveSession._id });
+}
+catch(err){
+  return res.status(500).json({msg : "Error occured"});
+}
+});
 router.get("/path/:id", async (req, res) => {
   try {
     const walk = await Track.findById(req.params.id);

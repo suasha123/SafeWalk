@@ -7,21 +7,21 @@ const TrackSchema = new mongoose.Schema({
     required: true,
   },
   src: {
-    type: [Number], // [longitude, latitude]
+    type: [Number], 
     required: true,
   },
   dest: {
-    type: [Number], // [longitude, latitude]
+    type: [Number], 
     required: true,
   },
   path: {
-    type: [[Number]], // Array of [lng, lat]
+    type: [[Number]], 
     required: true,
   },
   lastindex: {
     type: Number,
     required: true,
-    default: -1, // -1 means tracking not started yet
+    default: -1, 
   },
   status: {
     type: String,
@@ -34,7 +34,7 @@ const TrackSchema = new mongoose.Schema({
   },
   expiresAt: {
     type: Date,
-    default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours later
+    default: () => new Date(Date.now() + 24 * 60 * 60 * 1000),
   },
 });
 

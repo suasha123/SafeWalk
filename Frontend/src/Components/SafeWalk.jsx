@@ -76,6 +76,8 @@ export const SafeWalk = () => {
   const trackingIntervalRef = useRef(null);
   const [trackingButton, setTrackingButton] = useState(true);
   //const [sourceQuery, setSourceQuery] = useState("");
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [resumeWalkId, setActiveSessionId] = useState(null);
   const [destinationQuery, setDestinationQuery] = useState("");
   //const [sourceResults, setSourceResults] = useState([]);
   const [updatingLoc, setUpdatingLoc] = useState(false);
@@ -105,23 +107,38 @@ export const SafeWalk = () => {
   };
 
   useEffect(() => {
-  const fetchData = async () => {
-    const walkid = searchParams.get("walkid");
+    const fetchData = async () => {
+      const walkid = searchParams.get("walkid");
+      if (!walkid) {
+        const response = await isActiveSession();
 
-    if (walkid) {
-      await fetchStoredPathFromBackend(walkid);
-      setLoading(false);
-    } else {
-      fetchMyLoc();
-    }
-  };
+        if (response && response.status === 200) {
+          const res = await response.json();
+          if (res.id) {
+            setShowResumeModal(true);
+            setActiveSessionId(res.id);
+            return;
+          }
+        }
+        if (response && response.status !== 500) {
+          fetchMyLoc(); // ✅ No active session, just fetch current location
+        } else {
+          enqueueSnackbar("Please Try Later", { variant: "warning" });
+          navigate("/");
+        }
+        return;
+      }
+      if (walkid) {
+        await fetchStoredPathFromBackend(walkid);
+        setLoading(false);
+      }
+    };
 
-  fetchData(); // Call the async function
+    fetchData();
 
-  const interval = setInterval(() => setIndex((i) => i + 1), 2000);
-  return () => clearInterval(interval);
-}, [searchParams]);
-
+    const interval = setInterval(() => setIndex((i) => i + 1), 2000);
+    return () => clearInterval(interval);
+  }, [searchParams]);
 
   useEffect(() => {
     if (pos) setLoading(false);
@@ -139,6 +156,19 @@ export const SafeWalk = () => {
     });
     return () => animation.cancel();
   }, [loading]);
+  const isActiveSession = async () => {
+    try {
+      const response = await fetch(
+        "https://safewalk-xbkj.onrender.com/search/activesession",
+        {
+          credentials: "include",
+        }
+      );
+      return response;
+    } catch (err) {
+      enqueueSnackbar("Error occured", { variant: "error" });
+    }
+  };
 
   {
     /*useEffect(() => {
@@ -210,7 +240,7 @@ export const SafeWalk = () => {
         setSourceMarker(data.src);
         setDesMarker(data.dest);
         setRoutePolyline(data.path);
-           setLoc(data.src);
+        setLoc(data.src);
       } else {
         enqueueSnackbar(data.msg || "Something went wrong", {
           variant: "error",
@@ -404,8 +434,7 @@ export const SafeWalk = () => {
                 <button
                   className="floating-btn danger"
                   onClick={() => {
-                    // Add logic to toggle danger zones
-                    alert("Toggled Danger Zones");
+                    alert("Toggled Danger Zone");
                   }}
                 >
                   <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
@@ -415,6 +444,22 @@ export const SafeWalk = () => {
           </Fragment>
         )}
       </div>
+      {showResumeModal && (
+        <Modal onClose={() => setShowResumeModal(false)}>
+          <h2>Resume your last SafeWalk?</h2>
+          <p>You had an active walk. Do you want to continue?</p>
+          <button
+            onClick={() => {
+              setShowResumeModal(false);
+              navigate(`/safe-walk?walkid=${resumeWalkId}`);
+              setLoading(false);
+            }}
+          >
+            Resume Walk
+          </button>
+          <button>Start New Walk</button>
+        </Modal>
+      )}
 
       {showSafeWalkModal && (
         <div className="modalOverlay">
