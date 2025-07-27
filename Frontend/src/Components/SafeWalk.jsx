@@ -106,14 +106,16 @@ export const SafeWalk = () => {
 
   useEffect(() => {
     const walkid = searchParams.get("walkid");
+
     if (walkid) {
       fetchStoredPathFromBackend(walkid);
     } else {
       fetchMyLoc();
     }
+
     const interval = setInterval(() => setIndex((i) => i + 1), 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (pos) setLoading(false);
