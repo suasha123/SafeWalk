@@ -10,7 +10,26 @@ const { nanoid } = require("nanoid");
 const mongoose = require("mongoose");
 const GroupChatModel = require("../database/model/GroupChatModel");
 const ReportModel = require("../database/model/ReportModel");
+const Track = require("../database/model/TrackingModel")
 const parser = multer({ storage });
+router.get("/exitWalk", async (req, res) => {
+  if(!req.isAuthenticated()){
+    return res.status(403).json({msg : "Log in again"});
+  }
+  const userId = req.session.passport.user;
+  console.log(userId)
+  if(!userId){
+    return res.status(404).json({msg : "User Not found"});
+  }
+  try{
+     await Track.deleteOne({userid : userId});
+    return res.status(200).json({msg : "Success"});
+  }
+  catch(err){
+    console.log(err);
+    return res.status(500).json({msg : "Server Error"});
+  }
+});
 router.get("/getReportsByLocation", async (req, res) => {
   const { lat, long } = req.query;
 

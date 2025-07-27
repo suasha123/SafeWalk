@@ -29,6 +29,7 @@ import { FaRoute, FaS } from "react-icons/fa6";
 import { GiDeathZone } from "react-icons/gi";
 import { MdStopCircle } from "react-icons/md";
 import * as turf from "@turf/turf";
+import { RxExit } from "react-icons/rx";
 import { point, lineString, nearestPointOnLine } from "@turf/turf";
 import { enqueueSnackbar } from "notistack";
 delete L.Icon.Default.prototype._getIconUrl;
@@ -74,7 +75,7 @@ export const SafeWalk = () => {
   const navigate = useNavigate();
   const [trackedPath, setTrackedPath] = useState(null);
   const trackingIntervalRef = useRef(null);
-  const [startWalkButton , setWalkButton] = useState(false);
+  const [startWalkButton, setWalkButton] = useState(false);
   const [trackingButton, setTrackingButton] = useState(true);
   //const [sourceQuery, setSourceQuery] = useState("");
   const [showResumeModal, setShowResumeModal] = useState(false);
@@ -331,45 +332,79 @@ export const SafeWalk = () => {
 
     trackingIntervalRef.current = null;
   };
-
+  const exitWalk = async () => {
+    try {
+      const response = await fetch("/api/exitWalk", {
+        credentials: "include",
+      });
+      if (response.ok) {
+        if (showResumeModal) {
+          setShowResumeModal(false);
+        }
+        if (resumeWalkId) {
+          setActiveSessionId(null);
+        }
+        navigate("/safe-walk");
+      } else {
+        const ms = await response.json();
+        enqueueSnackbar(ms.msg, { variant: "error" });
+      }
+    } catch (err) {
+      enqueueSnackbar("Error occured", { variant: "error" });
+    }
+  };
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
 
   return (
     <>
       <NavBar />
-      <div className="startButtonDiv">
-        <div
-          className="startButton"
-          disabled = {startWalkButton}
-          onClick={async () => {
-            setWalkButton(true)
-            if(resumeWalkId){
-              setShowResumeModal(true);
-            }
-            else{
-            const resposne = await isActiveSession();
-            if (resposne.ok) {
-              const result = await resposne.json();
-              setActiveSessionId(result.id);
-              setShowResumeModal(true);
-            } else {
-              setShowSafeWalkModal(true);
-            }
-            }
-          }}
-        >
-          <FaWalking style={{ fontSize: "25px" }} />
-          <p>Start safeWalk</p>
+      {!loading && (
+        <div className="startButtonDiv">
+          {searchParams.get("walkid") || resumeWalkId ? (
+            <div
+              className="startButton exitButton"
+              onClick={() => {
+                exitWalk();
+              }}
+            >
+              <RxExit style={{ fontSize: "20px", marginRight: "8px" }} />
+              <p>Exit Walk</p>
+            </div>
+          ) : (
+            <div
+              className="startButton"
+              disabled={startWalkButton}
+              onClick={async () => {
+                setWalkButton(true);
+                if (resumeWalkId) {
+                  setShowResumeModal(true);
+                } else {
+                  const response = await isActiveSession();
+                  if (response.ok) {
+                    const result = await response.json();
+                    setActiveSessionId(result.id);
+                    setShowResumeModal(true);
+                  } else {
+                    setShowSafeWalkModal(true);
+                  }
+                }
+              }}
+            >
+              <FaWalking style={{ fontSize: "25px" }} />
+              <p>Start safeWalk</p>
+            </div>
+          )}
+
+          <div
+            className="startButton buttontwo"
+            onClick={() => navigate("/report-area")}
+          >
+            <TbMessageReport style={{ fontSize: "25px", marginRight: "3px" }} />
+            <p>Report Area</p>
+          </div>
         </div>
-        <div
-          className="startButton buttontwo"
-          onClick={() => navigate("/report-area")}
-        >
-          <TbMessageReport style={{ fontSize: "25px", marginRight: "3px" }} />
-          <p>Report Area</p>
-        </div>
-      </div>
+      )}
 
       <div className="maincontainer">
         {loadingg ? (
@@ -472,7 +507,7 @@ export const SafeWalk = () => {
             <div className="button-group">
               <button
                 onClick={() => {
-                  if(searchParams.get("walkid")){
+                  if (searchParams.get("walkid")) {
                     setWalkButton(false);
                     setShowResumeModal(false);
                     return;
@@ -483,7 +518,9 @@ export const SafeWalk = () => {
               >
                 Resume Walk
               </button>
-              <button>Exit Walk</button>
+              <button onClick={()=>{
+                exitWalk();
+              }}>Exit Walk</button>
             </div>
           </div>
         </div>
@@ -495,7 +532,10 @@ export const SafeWalk = () => {
             <button
               className="modalClose"
               disabled={loadingR}
-              onClick={() =>{ setWalkButton(false) ; setShowSafeWalkModal(false)}}
+              onClick={() => {
+                setWalkButton(false);
+                setShowSafeWalkModal(false);
+              }}
             >
               ×
             </button>

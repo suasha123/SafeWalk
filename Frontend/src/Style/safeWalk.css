@@ -32,6 +32,7 @@
     transition: all 0.5s ease;
     &:hover{
         background-color: #28213c;
+        scale: 1.1
     }
 }
 @media(max-width : 768px){
@@ -383,5 +384,13 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+.exitButton{
+  background-color: #ef4444;
+  transition: all 0.5s ease;
+  &:hover{
+    background-color: #dc2626;
+    scale: 1.1;
   }
 }
