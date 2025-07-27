@@ -74,6 +74,7 @@ export const SafeWalk = () => {
   const navigate = useNavigate();
   const [trackedPath, setTrackedPath] = useState(null);
   const trackingIntervalRef = useRef(null);
+  const [startWalkButton , setWalkButton] = useState(false);
   const [trackingButton, setTrackingButton] = useState(true);
   //const [sourceQuery, setSourceQuery] = useState("");
   const [showResumeModal, setShowResumeModal] = useState(false);
@@ -338,7 +339,26 @@ export const SafeWalk = () => {
     <>
       <NavBar />
       <div className="startButtonDiv">
-        <div className="startButton" onClick={() => setShowSafeWalkModal(true)}>
+        <div
+          className="startButton"
+          disabled = {startWalkButton}
+          onClick={async () => {
+            setWalkButton(true)
+            if(resumeWalkId){
+              setShowResumeModal(true);
+            }
+            else{
+            const resposne = await isActiveSession();
+            if (resposne.ok) {
+              const result = await resposne.json();
+              setActiveSessionId(result.id);
+              setShowResumeModal(true);
+            } else {
+              setShowSafeWalkModal(true);
+            }
+            }
+          }}
+        >
           <FaWalking style={{ fontSize: "25px" }} />
           <p>Start safeWalk</p>
         </div>
@@ -445,20 +465,28 @@ export const SafeWalk = () => {
         )}
       </div>
       {showResumeModal && (
-        <Modal onClose={() => setShowResumeModal(false)}>
-          <h2>Resume your last SafeWalk?</h2>
-          <p>You had an active walk. Do you want to continue?</p>
-          <button
-            onClick={() => {
-              setShowResumeModal(false);
-              navigate(`/safe-walk?walkid=${resumeWalkId}`);
-              setLoading(false);
-            }}
-          >
-            Resume Walk
-          </button>
-          <button>Start New Walk</button>
-        </Modal>
+        <div className="modal-overlay">
+          <div className="resume-modal">
+            <h2>Resume your last SafeWalk?</h2>
+            <p>You had an active walk. Do you want to continue?</p>
+            <div className="button-group">
+              <button
+                onClick={() => {
+                  if(searchParams.get("walkid")){
+                    setWalkButton(false);
+                    setShowResumeModal(false);
+                    return;
+                  }
+                  setShowResumeModal(false);
+                  window.location.href = `/safe-walk?walkid=${resumeWalkId}`;
+                }}
+              >
+                Resume Walk
+              </button>
+              <button>Exit Walk</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showSafeWalkModal && (
@@ -467,7 +495,7 @@ export const SafeWalk = () => {
             <button
               className="modalClose"
               disabled={loadingR}
-              onClick={() => setShowSafeWalkModal(false)}
+              onClick={() =>{ setWalkButton(false) ; setShowSafeWalkModal(false)}}
             >
               ×
             </button>
@@ -569,6 +597,7 @@ export const SafeWalk = () => {
                   //setDesMarker(destLoc);
                   setSource("");
                   setDestination("");
+                  setWalkButton(false);
                   setShowSafeWalkModal(false);
                   setLoadingR(false);
                 }}

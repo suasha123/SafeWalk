@@ -304,3 +304,84 @@
     padding: 0.5rem;
   }
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.resume-modal {
+  background-color: #141221;
+  border: 2px solid #00ff88;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px 2px #00ff88;
+  max-width: 400px;
+  width: 90%;
+  color: #ffffff;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.resume-modal h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.resume-modal p {
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.button-group button {
+  padding: 10px 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.button-group button:first-child {
+  background-color: #00ff88;
+  color: #000;
+}
+
+.button-group button:first-child:hover {
+  background-color: #14ff9e;
+  box-shadow: 0 0 10px #00ff88;
+}
+
+.button-group button:last-child {
+  background-color: transparent;
+  color: #00ff88;
+  border: 1px solid #00ff88;
+}
+
+.button-group button:last-child:hover {
+  background-color: #00ff88;
+  color: #000;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
