@@ -334,7 +334,7 @@ export const SafeWalk = () => {
   };
   const exitWalk = async () => {
     try {
-      const response = await fetch("/api/exitWalk", {
+      const response = await fetch("https://safewalk-xbkj.onrender.com/api/exitWalk", {
         credentials: "include",
       });
       if (response.ok) {
@@ -344,6 +344,13 @@ export const SafeWalk = () => {
         if (resumeWalkId) {
           setActiveSessionId(null);
         }
+        setLoading(false);
+        setSourceLoc(null);
+        setDesMarker(null);
+        setSourceMarker(null);
+        setDestLoc(null);
+        setRoutePolyline(null);
+        fetchMyLoc();
         navigate("/safe-walk");
       } else {
         const ms = await response.json();
