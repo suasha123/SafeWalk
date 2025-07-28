@@ -191,7 +191,6 @@ export const SafeWalk = () => {
       !trackingIntervalRef.current &&
       user?.id
     ) {
-      console.log("✅ routePolyline ready, starting handleTracking");
       handleTracking();
       setTrackingStatus("tracking");
     }
@@ -201,7 +200,6 @@ export const SafeWalk = () => {
       if (trackingIntervalRef.current) {
         navigator.geolocation.clearWatch(trackingIntervalRef.current);
         trackingIntervalRef.current = null;
-        console.log("✅ Cleared geolocation tracking on unmount");
       }
     };
   }, []);
@@ -311,6 +309,7 @@ export const SafeWalk = () => {
         enqueueSnackbar(data.msg || "Something went wrong", {
           variant: "error",
         });
+        navigate("/");
       }
     } catch (err) {
       enqueueSnackbar("Error fetching path", { variant: "error" });
