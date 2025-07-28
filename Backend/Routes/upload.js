@@ -23,7 +23,7 @@ router.post("/trackedPath", async (req, res) => {
       return res.status(403).json({ msg: "No walk Found" });
     }
     const existing = await RealTrackingModel.findOne({
-      userid: curruserid
+      userid: curruserid,
       status: "active",
     });
     if (existing) {
