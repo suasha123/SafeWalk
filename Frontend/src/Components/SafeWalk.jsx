@@ -295,13 +295,16 @@ export const SafeWalk = () => {
           [data.lat, data.long],
         ];
         setTrackedPath(covered);
+        setShowMapOverlay(false);
       } else {
         enqueueSnackbar(data.msg || "Something went wrong", {
           variant: "error",
         });
+        navigate("/");
       }
     } catch (err) {
       enqueueSnackbar("Error in Tracing", { variant: "error" });
+      navigate("/");
     }
   };
 
@@ -366,7 +369,7 @@ export const SafeWalk = () => {
       },
       (err) => console.error(err),
       {
-        enableHighAccuracy: true,
+        enableHighAccuracy: false,
         maximumAge: 1000,
         timeout: 10000,
       }

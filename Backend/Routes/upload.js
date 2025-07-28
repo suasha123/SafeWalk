@@ -28,7 +28,7 @@ router.post("/trackedPath", async (req, res) => {
     lastindex : index,
     userid : curruserid,
     trackingid : safeWalk._id,
-    mode : "active"
+    status : "active"
   })
   return res.status(200).json({id : doc._id});
 }
