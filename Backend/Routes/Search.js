@@ -44,7 +44,7 @@ router.get("/cpath/:id", async (req, res) => {
     if (!Trackingexist) {
       return res.status(404).json({ msg: "No Tracking Found" });
     }
-    if (Trackingexist._id !== trackid) {
+    if (Trackingexist._id.toString() !== trackid) {
       return res.status(403).json({ msg: "Unauthorized" });
     }
     const Fpath = await TrackingModel.findOne({ userid: userId });
