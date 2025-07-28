@@ -6,7 +6,7 @@ import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
 import { GroupInfoOverlay } from "./GroupInfo";
 import { useNavigate } from "react-router-dom";
-const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
+const ChatWindow = ({ selectedUser, onBack, loadGroups }) => {
   const { socket, user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
   const [rawMessages, setRawMessages] = useState([]);
@@ -53,7 +53,7 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
     setNewMessage("");
     setTimeout(() => {
       document.querySelector(".chat-input-box input")?.focus();
-    },10);
+    }, 10);
   };
 
   useEffect(() => {
@@ -163,6 +163,29 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
     inputBox.addEventListener("focus", handleFocus);
     return () => inputBox.removeEventListener("focus", handleFocus);
   }, []);
+  const renderMessageWithLinks = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, i) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="message-link"
+          >
+            {part}
+          </a>
+        );
+      } else {
+        return <span key={i}>{part}</span>;
+      }
+    });
+  };
 
   const renderAvatar = (source, fallbackChar) => {
     return source && source.trim() !== "" ? (
@@ -194,7 +217,9 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
             onClick={() => setgroupInfo(!groupInfo)}
             className="chat-header-content"
           >
-            <div className="chat-title">{selectedUser.name}</div>
+            <div className="chat-title">
+              {selectedUser.name || selectedUser.username}
+            </div>
 
             {isGroupChat && (
               <div className="group-members-scroll">
@@ -238,7 +263,9 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
                       )}
                     </div>
                   )}
-                  <div className="message-bubble">{msg.message}</div>
+                  <div className="message-bubble">
+                    {renderMessageWithLinks(msg.message)}
+                  </div>
                   {msg.fromSelf && (
                     <div className="avatar self-avatar">
                       {renderAvatar(
@@ -271,7 +298,7 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
         <GroupInfoOverlay
           selectedUser={selectedUser}
           onClose={() => setgroupInfo(false)}
-           onGroupUpdated={loadGroups}
+          onGroupUpdated={loadGroups}
           onLeaveGroup={async () => {
             const res = await fetch(
               "https://safewalk-xbkj.onrender.com/api/leavegroup",
@@ -289,9 +316,9 @@ const ChatWindow = ({ selectedUser, onBack , loadGroups}) => {
               loadGroups();
               navigate("/chat/groups");
             } else {
-              enqueueSnackbar(body.msg , {variant : "warning"});
+              enqueueSnackbar(body.msg, { variant: "warning" });
               setgroupInfo(false);
-              onBack?.(); 
+              onBack?.();
             }
           }}
         />

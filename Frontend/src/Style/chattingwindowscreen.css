@@ -649,3 +649,8 @@ body {
   background-color: #674080 !important; /* Different shade to highlight */
   border: 2px dashed yellow !important;
 }
+.message-link {
+  color: #ffb2c3;
+  text-decoration: underline;
+  word-break: break-word;
+}

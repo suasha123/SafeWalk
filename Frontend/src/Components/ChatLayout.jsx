@@ -282,7 +282,7 @@ const ChatLayout = () => {
                         )}
                       </div>
                       <div className="contact-info-wrapper">
-                        <div className="contact-name">{item.name}</div>
+                        <div className="contact-name">{item.name || item.username}</div>
                         {isSearching && !isAdded && selectedTab === "chats" && (
                           <AddToChatButton contact={item} onAdded={loadContacts} />
                         )}
