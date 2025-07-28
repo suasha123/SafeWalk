@@ -79,6 +79,7 @@ export const SafeWalk = () => {
   const navigate = useNavigate();
   const [trackedPath, setTrackedPath] = useState(null);
   const trackingIntervalRef = useRef(null);
+  const hasStartedTracking = useRef(false);
   const [startWalkButton, setWalkButton] = useState(false);
   const [trackingButton, setTrackingButton] = useState(true);
   //const [sourceQuery, setSourceQuery] = useState("");
@@ -96,7 +97,6 @@ export const SafeWalk = () => {
   const [desMarker, setDesMarker] = useState(null);
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
-  const hasStartedTracking = useRef(false);
   const [searchParams] = useSearchParams();
   const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
@@ -119,28 +119,7 @@ export const SafeWalk = () => {
     const fetchData = async () => {
       const walkid = searchParams.get("walkid");
       const trackingid = searchParams.get("trackid");
-      if (!walkid || !trackingid) {
-        const response = await isActiveSession();
-        if (response && response.status === 200) {
-          const res = await response.json();
-          if (res.trackedid) {
-            navigate(`//safe-walk?trackid=${res.trackedid}`);
-            return;
-          }
-          if (res.id && !res.trackedid) {
-            setShowResumeModal(true);
-            setActiveSessionId(res.id);
-            return;
-          }
-        }
-        if (response && response.status == 500) {
-          enqueueSnackbar("Please Try Later", { variant: "warning" });
-          navigate("/");
-        }
-        setShowMapOverlay(false);
-        return;
-      }
-      if (trackingid) {
+      if (trackingid !== null) {
         await fetchTrackedPathFrombackend(trackingid);
         setLoading(false);
         return;
@@ -151,6 +130,29 @@ export const SafeWalk = () => {
         intervaltwo = setTimeout(() => {
           setShowMapOverlay(false);
         }, 2000);
+        return;
+      }
+      if (!trackingid || !walkid) {
+        const response = await isActiveSession();
+        if (response && response.status === 200) {
+          const res = await response.json();
+          if (res.trackedid !== null) {
+            navigate(`/safe-walk?trackid=${res.trackedid}`);
+            return;
+          }
+          if (res.id) {
+            setShowResumeModal(true);
+            setActiveSessionId(res.id);
+            console.log(resumeWalkId);
+            return;
+          }
+        }
+        if (response && response.status == 500) {
+          enqueueSnackbar("Please Try Later", { variant: "warning" });
+          navigate("/");
+        }
+        setShowMapOverlay(false);
+        return;
       }
     };
 
@@ -287,9 +289,9 @@ export const SafeWalk = () => {
         setSourceMarker(data.src);
         setDesMarker(data.dest);
         setRoutePolyline(data.path);
-        setLoc([nearestLat, nearestLng]);
+        setLoc([data.lat, data.long]);
         const covered = [
-          ...routePolyline.slice(0, data.index + 1),
+          ...data.path.slice(0, data.index + 1),
           [data.lat, data.long],
         ];
         setTrackedPath(covered);
@@ -302,6 +304,7 @@ export const SafeWalk = () => {
       enqueueSnackbar("Error in Tracing", { variant: "error" });
     }
   };
+
   const findPath = async () => {
     if (!sourceLoc || !destLoc) return;
     try {
@@ -351,6 +354,11 @@ export const SafeWalk = () => {
     }
   };
   const handleTracking = () => {
+    if (!routePolyline || routePolyline.length === 0) {
+      enqueueSnackbar("Route not loaded yet", { variant: "warning" });
+      return;
+    }
+
     trackingIntervalRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
@@ -364,32 +372,39 @@ export const SafeWalk = () => {
       }
     );
   };
+
   const updateTrackedPath = async (currentPos) => {
-    if (!routePolyline) return;
+    if (!routePolyline || routePolyline.length === 0) {
+      enqueueSnackbar("Route not ready", { variant: "error" });
+      return;
+    }
+
     const routeLine = lineString(routePolyline.map(([lat, lng]) => [lng, lat]));
     const userPoint = point([currentPos[1], currentPos[0]]);
     const snapped = nearestPointOnLine(routeLine, userPoint);
+
+    if (!snapped || !snapped.geometry || !snapped.properties) {
+      enqueueSnackbar("Unable to find nearest route point", {
+        variant: "warning",
+      });
+      return;
+    }
+
     const nearestLat = snapped.geometry.coordinates[1];
     const nearestLng = snapped.geometry.coordinates[0];
     const index = snapped.properties.index;
-    //backend ka code likhenege first store then update the resposne form backend
+
     if (!hasStartedTracking.current) {
       const res = await storeTrackedPath(nearestLat, nearestLng, index);
-      if (res.ok) {
-        {
-          /*[nearestLat, nearestLng]);
-      const covered = [
-        ...routePolyline.slice(0, index + 1),
-        [nearestLat, nearestLng],
-      ];
-      setTrackedPath(covered);*/
-        }
+      if (res && res.ok) {
         const result = await res.json();
         const track = result.id;
         navigate(`/safe-walk?trackid=${track.id}`);
-        hasTrackingStarted.current = true;
+        hasStartedTracking.current = true; 
+        setTrackingButton(false); 
       } else {
         enqueueSnackbar("Unable to track", { variant: "warning" });
+        return;
       }
     } else {
       const response = await updateCurrPath(nearestLat, nearestLng, index);
@@ -407,6 +422,7 @@ export const SafeWalk = () => {
       }
     }
   };
+
   const updateCurrPath = async (nearestLat, nearestLng, index) => {
     if (!nearestLat || !nearestLng || !index) {
       enqueueSnackbar("Error Occured", { variant: "error" });
@@ -629,6 +645,7 @@ export const SafeWalk = () => {
                     className="floating-btn"
                     onClick={() => {
                       if (searchParams.get("walkid") || resumeWalkId) {
+                        console.log("Function Callled");
                         handleTracking();
                       } else {
                         enqueueSnackbar("Start SafeWalk !", {
@@ -636,7 +653,6 @@ export const SafeWalk = () => {
                         });
                         return;
                       }
-                      setTrackingButton(false);
                     }}
                   >
                     <FaRoute size={"25px"} color="#ffffffff" /> Start Tracking
