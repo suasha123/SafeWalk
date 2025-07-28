@@ -35,6 +35,7 @@ import { RxExit } from "react-icons/rx";
 import { point, lineString, nearestPointOnLine } from "@turf/turf";
 import { enqueueSnackbar } from "notistack";
 import { Backgroundcover } from "./bgcover";
+import { useLocation } from "react-router-dom";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -101,6 +102,17 @@ export const SafeWalk = () => {
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+
+  useEffect(() => {
+    return () => {
+      if (trackingIntervalRef.current) {
+        navigator.geolocation.clearWatch(trackingIntervalRef.current);
+        trackingIntervalRef.current = null;
+        console.log("✅ Cleared geolocation tracking on route change");
+      }
+    };
+  }, [location.pathname]);
   const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -124,7 +136,6 @@ export const SafeWalk = () => {
       const trackingid = searchParams.get("trackid");
       if (trackingid !== null) {
         await fetchTrackedPathFrombackend(trackingid);
-        handleTracking();
         setTrackingStatus("tracking");
         setLoading(false);
         return;
@@ -171,6 +182,28 @@ export const SafeWalk = () => {
       clearInterval(interval), clearTimeout(intervaltwo);
     };
   }, [searchParams]);
+  useEffect(() => {
+    if (
+      trackingStatus === "tracking" &&
+      routePolyline &&
+      routePolyline.length > 0 &&
+      !trackingIntervalRef.current &&
+      user?.id
+    ) {
+      console.log("✅ routePolyline ready, starting handleTracking");
+      handleTracking();
+       setTrackingStatus("tracking");
+    }
+  }, [trackingStatus, routePolyline, user]);
+  useEffect(() => {
+    return () => {
+      if (trackingIntervalRef.current) {
+        navigator.geolocation.clearWatch(trackingIntervalRef.current);
+        trackingIntervalRef.current = null;
+        console.log("✅ Cleared geolocation tracking on unmount");
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (pos) setLoading(false);
@@ -365,11 +398,6 @@ export const SafeWalk = () => {
   };
   const handleTracking = async () => {
     console.log("called");
-    if (!routePolyline || routePolyline.length === 0) {
-      enqueueSnackbar("Route not loaded yet", { variant: "warning" });
-      return;
-    }
-
     setTrackingStatus("processing");
     if (trackingIntervalRef.current) return;
     trackingIntervalRef.current = navigator.geolocation.watchPosition(
@@ -400,7 +428,6 @@ export const SafeWalk = () => {
       enqueueSnackbar("Route not ready", { variant: "error" });
       return;
     }
-
     const routeLine = lineString(routePolyline.map(([lat, lng]) => [lng, lat]));
     const userPoint = point([currentPos[1], currentPos[0]]);
     const snapped = nearestPointOnLine(routeLine, userPoint);
@@ -425,7 +452,6 @@ export const SafeWalk = () => {
       if (searchParams.get("trackid")) {
         hasStartedTracking.current = true;
         setTrackingButton(false);
-        
       }
       const res = await storeTrackedPath(nearestLat, nearestLng, index);
       if (res && res.ok) {
@@ -435,6 +461,9 @@ export const SafeWalk = () => {
         hasStartedTracking.current = true;
         setTrackingButton(false);
       } else {
+        if (res.status === 409) {
+          return;
+        }
         enqueueSnackbar("Unable to track", { variant: "warning" });
         return;
       }
