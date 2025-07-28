@@ -375,29 +375,27 @@ export const SafeWalk = () => {
 
     setTrackingStatus("processing");
     if (trackingIntervalRef.current) return;
-    trackingIntervalRef.current = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude, longitude } = pos.coords;
-          console.log(latitude);
-          console.log(longitude);
-          await updateTrackedPath([latitude, longitude]);
-          if (!hasStartedTracking.current) {
-            setTrackingStatus("tracking");
-          }
-        },
-        (err) => {
-          console.error("Polling error:", err);
-          enqueueSnackbar("Location fetch failed", { variant: "error" });
-          setTrackingStatus("idle");
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
+    trackingIntervalRef.current = navigator.geolocation.watchPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        console.log(latitude);
+        console.log(longitude);
+        await updateTrackedPath([latitude, longitude]);
+        if (!hasStartedTracking.current) {
+          setTrackingStatus("tracking");
         }
-      );
-    }, 3000);
+      },
+      (err) => {
+        console.error("Polling error:", err);
+        enqueueSnackbar("Location fetch failed", { variant: "error" });
+        setTrackingStatus("idle");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const updateTrackedPath = async (currentPos) => {
@@ -531,7 +529,8 @@ export const SafeWalk = () => {
         setDesMarker(null);
         setSourceMarker(null);
         setDestLoc(null);
-        setRoutePolyline(null); 
+        setRoutePolyline(null);
+        trackingIntervalRef.current = null;
         navigate("/safe-walk");
         fetchMyLoc();
         setLoading(false);
@@ -562,7 +561,9 @@ export const SafeWalk = () => {
           </div>
         ) : (
           <>
-            {searchParams.get("walkid") || resumeWalkId || searchParams.get("trackid")? (
+            {searchParams.get("walkid") ||
+            resumeWalkId ||
+            searchParams.get("trackid") ? (
               <div
                 className="startButton exitButton"
                 onClick={() => {
