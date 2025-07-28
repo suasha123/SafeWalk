@@ -18,6 +18,7 @@ import { IoEyeOutline } from "react-icons/io5";
 import { useMapEvent } from "react-leaflet";
 import { MdMyLocation } from "react-icons/md";
 import { TbReport } from "react-icons/tb";
+import { Backgroundcover } from "./bgcover";
 import "aos/dist/aos.css";
 import Aos from "aos";
 import { enqueueSnackbar } from "notistack";
@@ -272,7 +273,7 @@ export const Report = () => {
     return null;
   };
   if (loading) return <SplashScreen />;
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <Backgroundcover  />;
   return (
     <>
       <NavBar />

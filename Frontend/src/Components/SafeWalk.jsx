@@ -34,6 +34,7 @@ import * as turf from "@turf/turf";
 import { RxExit } from "react-icons/rx";
 import { point, lineString, nearestPointOnLine } from "@turf/turf";
 import { enqueueSnackbar } from "notistack";
+import { Backgroundcover } from "./bgcover";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -383,7 +384,7 @@ export const SafeWalk = () => {
     }
   }, [loading, isLoggedIn, navigate]);
   if (loading) return <SplashScreen />;
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <Backgroundcover  />;
 
   return (
     <>
