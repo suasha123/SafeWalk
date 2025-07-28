@@ -6,7 +6,36 @@ const usermodel = require("../database/model/usermodel");
 const GroupModal = require("../database/model/groupmodel");
 const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
+const  RealTrack = require("../database/model/RealTrackingModel");
 const parser = multer({ storage });
+router.post("/trackedPath", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log In again" });
+  }
+  try{
+  const curruserid = req.session.passport.user;
+  const { nearestLat, nearestLng, index, userid } = req.body;
+  if (curruserid !== userid) {
+    return res.status(403).json({ msg: "Unauthorized" });
+  }
+  const safeWalk = await Track.findOne({userid : curruserid});
+  if(!safeWalk){
+    return res.status(403).json({ msg: "No walk Found" });
+  }
+  const doc = await RealTrack.create({
+    nearestlat : nearestLat,
+    nearestLong : nearestLng,
+    lastindex : index,
+    userid : curruserid,
+    trackingid : safeWalk._id
+  })
+  return res.status(200).json({id : doc._id});
+}
+catch(err){
+  return res.status(500).json({msg : "Server Error"});
+}
+
+});
 router.post("/fetchedpath", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(403).json({ msg: "Unauthorized" });
@@ -18,16 +47,16 @@ router.post("/fetchedpath", async (req, res) => {
     return res.status(400).json({ msg: "No payload" });
   }
   try {
-    const doc =  await Track.create({
+    const doc = await Track.create({
       userid,
       src: payload.src,
       dest: payload.des,
       path: payload.path,
       status: "pending",
     });
-    return res.status(200).json({ id : doc._id });
+    return res.status(200).json({ id: doc._id });
   } catch (err) {
-    return res.status(500).json({msg : "Server Error"});
+    return res.status(500).json({ msg: "Server Error" });
   }
 });
 router.post("/report", async (req, res) => {

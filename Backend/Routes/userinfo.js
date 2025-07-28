@@ -10,24 +10,60 @@ const { nanoid } = require("nanoid");
 const mongoose = require("mongoose");
 const GroupChatModel = require("../database/model/GroupChatModel");
 const ReportModel = require("../database/model/ReportModel");
-const Track = require("../database/model/TrackingModel")
+const Track = require("../database/model/TrackingModel");
+const RealTrack = require("../database/model/RealTrackingModel");
 const parser = multer({ storage });
+router.post("/updatePath", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log in again" });
+  }
+
+  try {
+    const { nearestLat, nearestLng, index, userid } = req.body;
+    const curruserId = req.session.passport.user;
+
+    if (curruserId !== userid) {
+      return res.status(403).json({ msg: "Unauthorized" });
+    }
+
+    const updated = await RealTrack.findOneAndUpdate(
+      { userid: curruserId },
+      {
+        $set: {
+          nearestlat: nearestLat,
+          nearestLong: nearestLng,
+          lastindex: index,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ msg: "Tracking session not found" });
+    }
+
+    return res.status(200).json({ msg: "Tracking data updated" });
+  } catch (error) {
+    console.error("UpdatePath Error:", error);
+    return res.status(500).json({ msg: "Server error" });
+  }
+});
+
 router.get("/exitWalk", async (req, res) => {
-  if(!req.isAuthenticated()){
-    return res.status(403).json({msg : "Log in again"});
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log in again" });
   }
   const userId = req.session.passport.user;
-  console.log(userId)
-  if(!userId){
-    return res.status(404).json({msg : "User Not found"});
+  console.log(userId);
+  if (!userId) {
+    return res.status(404).json({ msg: "User Not found" });
   }
-  try{
-     await Track.deleteOne({userid : userId});
-    return res.status(200).json({msg : "Success"});
-  }
-  catch(err){
+  try {
+    await Track.deleteOne({ userid: userId });
+    return res.status(200).json({ msg: "Success" });
+  } catch (err) {
     console.log(err);
-    return res.status(500).json({msg : "Server Error"});
+    return res.status(500).json({ msg: "Server Error" });
   }
 });
 router.get("/getReportsByLocation", async (req, res) => {

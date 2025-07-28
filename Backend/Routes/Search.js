@@ -2,24 +2,62 @@ const express = require("express");
 const router = express.Router();
 require("dotenv").config();
 const Track = require("../database/model/TrackingModel");
+const RealTrackingModel = require("../database/model/RealTrackingModel");
+const TrackingModel = require("../database/model/TrackingModel");
 router.get("/activesession", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(403).json({ msg: "Log In again" });
   }
-  try{
-  const userId = req.session.passport.user;
-  const isActiveSession = await Track.findOne({
-    userid: userId,
-  });
-  if (!isActiveSession) {
-    return res.status(404).json({ msg: "No active session found" });
+  try {
+    const userId = req.session.passport.user;
+    const isActiveSession = await Track.findOne({
+      userid: userId,
+    });
+    if (!isActiveSession) {
+      return res.status(404).json({ msg: "No active session found" });
+    }
+    const trackingid = await RealTrackingModel.findOne({ userid: userId });
+    return res
+      .status(200)
+      .json({
+        id: isActiveSession._id,
+        trackedid:
+          trackingid && trackingid.status === "active" ? trackingid?._id : null,
+      });
+  } catch (err) {
+    return res.status(500).json({ msg: "Error occured" });
   }
-
-  return res.status(200).json({ id: isActiveSession._id });
-}
-catch(err){
-  return res.status(500).json({msg : "Error occured"});
-}
+});
+router.get("/cpath/:id", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log In again" });
+  }
+  const trackid = req.params.id;
+  if (!trackid) {
+    return res.status(404).json({ msg: "Not Found" });
+  }
+  try {
+    const userId = req.session.passport.user;
+    const Trackingexist = await RealTrackingModel.findOne({ userid: userId });
+    if (!Trackingexist) {
+      return res.status(404).json({ msg: "No Tracking Found" });
+    }
+    if (Trackingexist._id !== trackid) {
+      return res.status(403).json({ msg: "Unauthorized" });
+    }
+    const Fpath = await TrackingModel.findOne({ userid: userId });
+    const fullPath = Fpath.path;
+    return res.status(200).json({
+      index: Trackingexist.lastindex,
+      lat: Trackingexist.nearestlat,
+      long: Trackingexist.nearestLong,
+      src: Fpath.src,
+      dest: Fpath.dest,
+      path: fullPath,
+    });
+  } catch (err) {
+    res.status(500).json({ msg: "Error occured" });
+  }
 });
 router.get("/path/:id", async (req, res) => {
   try {

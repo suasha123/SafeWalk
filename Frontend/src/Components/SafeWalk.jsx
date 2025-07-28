@@ -70,7 +70,7 @@ const FitMapToRoute = ({ polylineCoords }) => {
 
 export const SafeWalk = () => {
   const [routePolyline, setRoutePolyline] = useState(null);
-  const { loading, isLoggedIn } = useAuth();
+  const { loading, isLoggedIn, user } = useAuth();
   const [showMapOverlay, setShowMapOverlay] = useState(true);
   const [pos, setLoc] = useState(null);
   const [loadingg, setLoading] = useState(true);
@@ -96,6 +96,7 @@ export const SafeWalk = () => {
   const [desMarker, setDesMarker] = useState(null);
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
+  const hasStartedTracking = useRef(false);
   const [searchParams] = useSearchParams();
   const fetchMyLoc = () => {
     navigator.geolocation.getCurrentPosition(
@@ -117,11 +118,16 @@ export const SafeWalk = () => {
     let intervaltwo;
     const fetchData = async () => {
       const walkid = searchParams.get("walkid");
-      if (!walkid) {
+      const trackingid = searchParams.get("trackid");
+      if (!walkid || !trackingid) {
         const response = await isActiveSession();
         if (response && response.status === 200) {
           const res = await response.json();
-          if (res.id) {
+          if (res.trackedid) {
+            navigate(`//safe-walk?trackid=${res.trackedid}`);
+            return;
+          }
+          if (res.id && !res.trackedid) {
             setShowResumeModal(true);
             setActiveSessionId(res.id);
             return;
@@ -132,6 +138,11 @@ export const SafeWalk = () => {
           navigate("/");
         }
         setShowMapOverlay(false);
+        return;
+      }
+      if (trackingid) {
+        await fetchTrackedPathFrombackend(trackingid);
+        setLoading(false);
         return;
       }
       if (walkid) {
@@ -262,7 +273,35 @@ export const SafeWalk = () => {
       enqueueSnackbar("Error fetching path", { variant: "error" });
     }
   };
-
+  const fetchTrackedPathFrombackend = async (id) => {
+    try {
+      const response = await fetch(
+        `https://safewalk-xbkj.onrender.com/search/cpath/${id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setSourceMarker(data.src);
+        setDesMarker(data.dest);
+        setRoutePolyline(data.path);
+        setLoc([nearestLat, nearestLng]);
+        const covered = [
+          ...routePolyline.slice(0, data.index + 1),
+          [data.lat, data.long],
+        ];
+        setTrackedPath(covered);
+      } else {
+        enqueueSnackbar(data.msg || "Something went wrong", {
+          variant: "error",
+        });
+      }
+    } catch (err) {
+      enqueueSnackbar("Error in Tracing", { variant: "error" });
+    }
+  };
   const findPath = async () => {
     if (!sourceLoc || !destLoc) return;
     try {
@@ -325,21 +364,96 @@ export const SafeWalk = () => {
       }
     );
   };
-  const updateTrackedPath = (currentPos) => {
+  const updateTrackedPath = async (currentPos) => {
     if (!routePolyline) return;
     const routeLine = lineString(routePolyline.map(([lat, lng]) => [lng, lat]));
     const userPoint = point([currentPos[1], currentPos[0]]);
     const snapped = nearestPointOnLine(routeLine, userPoint);
     const nearestLat = snapped.geometry.coordinates[1];
     const nearestLng = snapped.geometry.coordinates[0];
-    //backend ka code likhenege first store then update the resposne form backend
-    setLoc([nearestLat, nearestLng]);
     const index = snapped.properties.index;
-    const covered = [
-      ...routePolyline.slice(0, index + 1),
-      [nearestLat, nearestLng],
-    ];
-    setTrackedPath(covered);
+    //backend ka code likhenege first store then update the resposne form backend
+    if (!hasStartedTracking.current) {
+      const res = await storeTrackedPath(nearestLat, nearestLng, index);
+      if (res.ok) {
+        {
+          /*[nearestLat, nearestLng]);
+      const covered = [
+        ...routePolyline.slice(0, index + 1),
+        [nearestLat, nearestLng],
+      ];
+      setTrackedPath(covered);*/
+        }
+        const result = await res.json();
+        const track = result.id;
+        navigate(`/safe-walk?trackid=${track.id}`);
+        hasTrackingStarted.current = true;
+      } else {
+        enqueueSnackbar("Unable to track", { variant: "warning" });
+      }
+    } else {
+      const response = await updateCurrPath(nearestLat, nearestLng, index);
+      if (response.ok) {
+        setLoc([nearestLat, nearestLng]);
+        const covered = [
+          ...routePolyline.slice(0, index + 1),
+          [nearestLat, nearestLng],
+        ];
+        setTrackedPath(covered);
+      } else {
+        const result = await response.json();
+        const ms = result.msg;
+        enqueueSnackbar(ms, { variant: "error" });
+      }
+    }
+  };
+  const updateCurrPath = async (nearestLat, nearestLng, index) => {
+    if (!nearestLat || !nearestLng || !index) {
+      enqueueSnackbar("Error Occured", { variant: "error" });
+      return;
+    }
+    const payload = { nearestLat, nearestLng, index, userid: user.id };
+    console.log(payload);
+    try {
+      const response = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/updatePath",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          credentials: "include",
+        }
+      );
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const storeTrackedPath = async (nearestLat, nearestLng, index) => {
+    if (!nearestLat || !nearestLng || !index) {
+      enqueueSnackbar("Error Occured", { variant: "error" });
+      return;
+    }
+    const payload = { nearestLat, nearestLng, index, userid: user.id };
+    console.log(payload);
+    try {
+      const response = await fetch(
+        "https://safewalk-xbkj.onrender.com/upload/trackedPath",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          credentials: "include",
+        }
+      );
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
   };
   const stopTracking = () => {
     navigator.geolocation.clearWatch(trackingIntervalRef.current);
@@ -384,7 +498,7 @@ export const SafeWalk = () => {
     }
   }, [loading, isLoggedIn, navigate]);
   if (loading) return <SplashScreen />;
-  if (!isLoggedIn) return <Backgroundcover  />;
+  if (!isLoggedIn) return <Backgroundcover />;
 
   return (
     <>

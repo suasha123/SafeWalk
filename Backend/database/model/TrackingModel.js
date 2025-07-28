@@ -18,16 +18,6 @@ const TrackSchema = new mongoose.Schema({
     type: [[Number]], 
     required: true,
   },
-  lastindex: {
-    type: Number,
-    required: true,
-    default: -1, 
-  },
-  status: {
-    type: String,
-    enum: ["pending", "active", "completed"],
-    default: "pending",
-  },
   createdAt: {
     type: Date,
     default: Date.now,
