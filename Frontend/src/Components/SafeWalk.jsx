@@ -20,6 +20,8 @@ import "../Style/safeWalk.css";
 import { useAuth } from "./AuthContext";
 import { NavBar } from "./Navbar";
 import { SplashScreen } from "./SplashScreen";
+import "aos/dist/aos.css";
+import Aos from "aos";
 import { FlyToLocation } from "./FlyTo";
 import { useSearchParams } from "react-router-dom";
 import { FaWalking } from "react-icons/fa";
@@ -110,6 +112,7 @@ export const SafeWalk = () => {
   };
 
   useEffect(() => {
+    Aos.init({ once: true });
     let intervaltwo;
     const fetchData = async () => {
       const walkid = searchParams.get("walkid");
@@ -374,6 +377,11 @@ export const SafeWalk = () => {
       enqueueSnackbar("Error occured", { variant: "error" });
     }
   };
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      navigate("/");
+    }
+  }, [loading, isLoggedIn, navigate]);
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return null;
 
@@ -500,6 +508,9 @@ export const SafeWalk = () => {
               <div className="floating-buttons">
                 {trackingButton && (
                   <button
+                    data-aos="fade-down"
+                    data-aos-duration="500"
+                    data-aos-easing="ease"
                     className="floating-btn"
                     onClick={() => {
                       if (searchParams.get("walkid") || resumeWalkId) {
@@ -518,6 +529,9 @@ export const SafeWalk = () => {
                 )}
                 {!trackingButton && (
                   <button
+                    data-aos="fade-down"
+                    data-aos-duration="500"
+                    data-aos-easing="ease"
                     className="floating-btn stop"
                     onClick={() => {
                       stopTracking();
@@ -530,6 +544,9 @@ export const SafeWalk = () => {
                 )}
 
                 <button
+                  data-aos="fade-down"
+                  data-aos-duration="500"
+                  data-aos-easing="ease"
                   className="floating-btn danger"
                   onClick={() => {
                     alert("Toggled Danger Zones");
