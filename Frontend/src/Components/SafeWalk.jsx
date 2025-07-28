@@ -399,7 +399,7 @@ export const SafeWalk = () => {
       if (res && res.ok) {
         const result = await res.json();
         const track = result.id;
-        navigate(`/safe-walk?trackid=${track.id}`);
+        navigate(`/safe-walk?trackid=${track}`);
         hasStartedTracking.current = true; 
         setTrackingButton(false); 
       } else {
