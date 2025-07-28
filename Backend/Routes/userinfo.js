@@ -12,6 +12,7 @@ const GroupChatModel = require("../database/model/GroupChatModel");
 const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
 const RealTrack = require("../database/model/RealTrackingModel");
+const RealTrackingModel = require("../database/model/RealTrackingModel");
 const parser = multer({ storage });
 router.post("/updatePath", async (req, res) => {
   if (!req.isAuthenticated()) {
@@ -60,6 +61,7 @@ router.get("/exitWalk", async (req, res) => {
   }
   try {
     await Track.deleteOne({ userid: userId });
+    await RealTrackingModel.findOneAndDelete({userid : userId});
     return res.status(200).json({ msg: "Success" });
   } catch (err) {
     console.log(err);

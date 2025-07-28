@@ -469,3 +469,13 @@
   position: relative;
   top: 5px;
 }
+.spinner-circle.small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid #0d63f8;
+}
+.floating-btn.processing {
+  background-color: #666;
+  pointer-events: none;
+}

@@ -69,6 +69,9 @@ const FitMapToRoute = ({ polylineCoords }) => {
 };
 
 export const SafeWalk = () => {
+  const [trackingStatus, setTrackingStatus] = useState("idle");
+  // "idle" | "processing" | "tracking"
+
   const [routePolyline, setRoutePolyline] = useState(null);
   const { loading, isLoggedIn, user } = useAuth();
   const [showMapOverlay, setShowMapOverlay] = useState(true);
@@ -121,6 +124,7 @@ export const SafeWalk = () => {
       const trackingid = searchParams.get("trackid");
       if (trackingid !== null) {
         await fetchTrackedPathFrombackend(trackingid);
+        setTrackingStatus("tracking");
         setLoading(false);
         return;
       }
@@ -138,8 +142,10 @@ export const SafeWalk = () => {
           const res = await response.json();
           if (res.trackedid !== null) {
             navigate(`/safe-walk?trackid=${res.trackedid}`);
+            setTrackingStatus("tracking");
             return;
           }
+
           if (res.id) {
             setShowResumeModal(true);
             setActiveSessionId(res.id);
@@ -164,6 +170,11 @@ export const SafeWalk = () => {
       clearInterval(interval), clearTimeout(intervaltwo);
     };
   }, [searchParams]);
+  useEffect(() => {
+    if (trackingStatus === "tracking" && !trackingIntervalRef.current) {
+      handleTracking();
+    }
+  }, [trackingStatus]);
 
   useEffect(() => {
     if (pos) setLoading(false);
@@ -356,25 +367,37 @@ export const SafeWalk = () => {
       enqueueSnackbar("Error Occured", { variant: "error" });
     }
   };
-  const handleTracking = () => {
+  const handleTracking = async () => {
     if (!routePolyline || routePolyline.length === 0) {
       enqueueSnackbar("Route not loaded yet", { variant: "warning" });
       return;
     }
 
-    trackingIntervalRef.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        console.log(`new pod ${(pos.coords.latitude, pos.coords.longitude)}`);
-        const { latitude, longitude } = pos.coords;
-        updateTrackedPath([latitude, longitude]);
-      },
-      (err) => console.error(err),
-      {
-        enableHighAccuracy: false,
-        maximumAge: 1000,
-        timeout: 20000,
-      }
-    );
+    setTrackingStatus("processing");
+    if (trackingIntervalRef.current) return;
+    trackingIntervalRef.current = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          console.log(latitude);
+          console.log(longitude);
+          await updateTrackedPath([latitude, longitude]);
+          if (!hasStartedTracking.current) {
+            setTrackingStatus("tracking");
+          }
+        },
+        (err) => {
+          console.error("Polling error:", err);
+          enqueueSnackbar("Location fetch failed", { variant: "error" });
+          setTrackingStatus("idle");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    }, 3000);
   };
 
   const updateTrackedPath = async (currentPos) => {
@@ -404,7 +427,11 @@ export const SafeWalk = () => {
       userId: user?.id,
     });
     if (!hasStartedTracking.current) {
-      console.log("yha pe phuch");
+      if (searchParams.get("trackid")) {
+        hasStartedTracking.current = true;
+        setTrackingButton(false);
+        return;
+      }
       const res = await storeTrackedPath(nearestLat, nearestLng, index);
       if (res && res.ok) {
         const result = await res.json();
@@ -435,10 +462,6 @@ export const SafeWalk = () => {
   };
 
   const updateCurrPath = async (nearestLat, nearestLng, index) => {
-    if (!nearestLat || !nearestLng || !index) {
-      enqueueSnackbar("Error Occured", { variant: "error" });
-      return;
-    }
     const payload = { nearestLat, nearestLng, index, userid: user.id };
     console.log(payload);
     try {
@@ -460,12 +483,8 @@ export const SafeWalk = () => {
   };
   const storeTrackedPath = async (nearestLat, nearestLng, index) => {
     console.log("hi");
-    if (!nearestLat || !nearestLng || !index) {
-      enqueueSnackbar("Error Occured", { variant: "error" });
-      return;
-    }
     const payload = { nearestLat, nearestLng, index, userid: user.id };
-    console.log(payload);
+    console.log("payload hai " + payload);
     try {
       const response = await fetch(
         "https://safewalk-xbkj.onrender.com/upload/trackedPath",
@@ -484,10 +503,14 @@ export const SafeWalk = () => {
     }
   };
   const stopTracking = () => {
-    navigator.geolocation.clearWatch(trackingIntervalRef.current);
-
-    trackingIntervalRef.current = null;
+    if (trackingIntervalRef.current) {
+      clearInterval(trackingIntervalRef.current);
+      trackingIntervalRef.current = null;
+      setTrackingStatus("idle");
+      hasStartedTracking.current = false;
+    }
   };
+
   const exitWalk = async () => {
     try {
       const response = await fetch(
@@ -503,15 +526,15 @@ export const SafeWalk = () => {
         if (resumeWalkId) {
           setActiveSessionId(null);
         }
-        fetchMyLoc();
-        setLoading(false);
         setTrackedPath(null);
         setSourceLoc(null);
         setDesMarker(null);
         setSourceMarker(null);
         setDestLoc(null);
-        setRoutePolyline(null);
+        setRoutePolyline(null); 
         navigate("/safe-walk");
+        fetchMyLoc();
+        setLoading(false);
       } else {
         const ms = await response.json();
         enqueueSnackbar(ms.msg, { variant: "error" });
@@ -539,7 +562,7 @@ export const SafeWalk = () => {
           </div>
         ) : (
           <>
-            {searchParams.get("walkid") || resumeWalkId ? (
+            {searchParams.get("walkid") || resumeWalkId || searchParams.get("trackid")? (
               <div
                 className="startButton exitButton"
                 onClick={() => {
@@ -649,38 +672,21 @@ export const SafeWalk = () => {
             </MapContainer>
             {!loadingg && !showMapOverlay && (
               <div className="floating-buttons">
-                {trackingButton && (
-                  <button
-                    data-aos="fade-down"
-                    data-aos-duration="500"
-                    data-aos-easing="ease"
-                    className="floating-btn"
-                    onClick={() => {
-                      if (searchParams.get("walkid") || resumeWalkId) {
-                        console.log("Function Callled");
-                        handleTracking();
-                      } else {
-                        enqueueSnackbar("Start SafeWalk !", {
-                          variant: "warning",
-                        });
-                        return;
-                      }
-                    }}
-                  >
-                    <FaRoute size={"25px"} color="#ffffffff" /> Start Tracking
+                {trackingStatus === "idle" && (
+                  <button className="floating-btn" onClick={handleTracking}>
+                    <FaRoute size={"25px"} color="#ffffffff" />
+                    Start Tracking
                   </button>
                 )}
-                {!trackingButton && (
-                  <button
-                    data-aos="fade-down"
-                    data-aos-duration="500"
-                    data-aos-easing="ease"
-                    className="floating-btn stop"
-                    onClick={() => {
-                      stopTracking();
-                      setTrackingButton(true);
-                    }}
-                  >
+
+                {trackingStatus === "processing" && (
+                  <button className="floating-btn processing" disabled>
+                    <div className="spinner-circle small" /> Processing...
+                  </button>
+                )}
+
+                {trackingStatus === "tracking" && (
+                  <button className="floating-btn stop" onClick={stopTracking}>
                     <MdStopCircle fontSize={"25px"} />
                     Stop Tracking
                   </button>
