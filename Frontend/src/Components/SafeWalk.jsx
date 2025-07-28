@@ -36,6 +36,7 @@ import { point, lineString, nearestPointOnLine } from "@turf/turf";
 import { enqueueSnackbar } from "notistack";
 import { Backgroundcover } from "./bgcover";
 import { useLocation } from "react-router-dom";
+import { FaUserGroup } from "react-icons/fa6";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -192,7 +193,7 @@ export const SafeWalk = () => {
     ) {
       console.log("✅ routePolyline ready, starting handleTracking");
       handleTracking();
-       setTrackingStatus("tracking");
+      setTrackingStatus("tracking");
     }
   }, [trackingStatus, routePolyline, user]);
   useEffect(() => {
@@ -397,6 +398,10 @@ export const SafeWalk = () => {
     }
   };
   const handleTracking = async () => {
+    if (!searchParams.get("walkid") && !searchParams.get("trackid")) {
+      enqueueSnackbar("Start SafeWalk", { variant: "warning" });
+      return;
+    }
     console.log("called");
     setTrackingStatus("processing");
     if (trackingIntervalRef.current) return;
@@ -536,13 +541,14 @@ export const SafeWalk = () => {
         }
       );
       if (response.ok) {
-        if (showResumeModal) {
-          setShowResumeModal(false);
-        }
-        if (resumeWalkId) {
-          setActiveSessionId(null);
-        }
-        setTrackedPath(null);
+        // if (showResumeModal) {
+        //  setShowResumeModal(false);
+        // }
+        //if (resumeWalkId) {
+        //  setActiveSessionId(null);
+        //}
+        {
+          /*  setTrackedPath(null);
         setSourceLoc(null);
         setDesMarker(null);
         setSourceMarker(null);
@@ -553,10 +559,11 @@ export const SafeWalk = () => {
         hasStartedTracking.current = false;
         setTrackingButton(true);
 
-        // ✅ Navigate to /safe-walk WITHOUT query params to avoid reuse of old session
         navigate("/safe-walk", { replace: true });
         fetchMyLoc();
-        setLoading(false);
+        setLoading(false);*/
+        }
+        window.location.href = "/safe-walk";
       } else {
         const ms = await response.json();
         enqueueSnackbar(ms.msg, { variant: "error" });
@@ -720,10 +727,10 @@ export const SafeWalk = () => {
                     data-aos="fade-down"
                     data-aos-duration="500"
                     data-aos-easing="ease"
-                    className="floating-btn"
+                    className="floating-btn grp"
                     onClick={() => alert("Sending to Group & Chats")}
                   >
-                    🚀 Send to Group & Chats
+                    <FaUserGroup  size={"20px"}/> Send to Group & Chats
                   </button>
                 )}
 

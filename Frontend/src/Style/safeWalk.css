@@ -300,12 +300,13 @@
 
 }
 
-@media(max-width : 400px) {
+@media(max-width : 480px) {
   .floating-buttons {
     display: flex;
     flex-direction: column;
     position: absolute;
     bottom: 30px;
+    gap : 13px;
     width: 100%;
   }
 
@@ -317,7 +318,11 @@
     padding: 0.5rem;
   }
 }
-
+.grp{
+  height: 43px;
+  position: relative;
+  top : 3px;
+}
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -474,8 +479,12 @@
   height: 16px;
   border: 2px solid #fff;
   border-top: 2px solid #0d63f8;
+  position: relative;
+  top: 4px;
 }
 .floating-btn.processing {
   background-color: #666;
   pointer-events: none;
+  justify-content: center;
+  align-items: center;
 }
