@@ -425,7 +425,7 @@ export const SafeWalk = () => {
       if (searchParams.get("trackid")) {
         hasStartedTracking.current = true;
         setTrackingButton(false);
-        return;
+        
       }
       const res = await storeTrackedPath(nearestLat, nearestLng, index);
       if (res && res.ok) {
