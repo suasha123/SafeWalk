@@ -124,6 +124,7 @@ export const SafeWalk = () => {
       const trackingid = searchParams.get("trackid");
       if (trackingid !== null) {
         await fetchTrackedPathFrombackend(trackingid);
+        handleTracking();
         setTrackingStatus("tracking");
         setLoading(false);
         return;
@@ -170,11 +171,6 @@ export const SafeWalk = () => {
       clearInterval(interval), clearTimeout(intervaltwo);
     };
   }, [searchParams]);
-  useEffect(() => {
-    if (trackingStatus === "tracking" && !trackingIntervalRef.current) {
-      handleTracking();
-    }
-  }, [trackingStatus]);
 
   useEffect(() => {
     if (pos) setLoading(false);
@@ -368,6 +364,7 @@ export const SafeWalk = () => {
     }
   };
   const handleTracking = async () => {
+    console.log("called");
     if (!routePolyline || routePolyline.length === 0) {
       enqueueSnackbar("Route not loaded yet", { variant: "warning" });
       return;
@@ -500,14 +497,6 @@ export const SafeWalk = () => {
       console.log(err);
     }
   };
-  const stopTracking = () => {
-    if (trackingIntervalRef.current) {
-      clearInterval(trackingIntervalRef.current);
-      trackingIntervalRef.current = null;
-      setTrackingStatus("idle");
-      hasStartedTracking.current = false;
-    }
-  };
 
   const exitWalk = async () => {
     try {
@@ -531,7 +520,12 @@ export const SafeWalk = () => {
         setDestLoc(null);
         setRoutePolyline(null);
         trackingIntervalRef.current = null;
-        navigate("/safe-walk");
+        setTrackingStatus("idle");
+        hasStartedTracking.current = false;
+        setTrackingButton(true);
+
+        // ✅ Navigate to /safe-walk WITHOUT query params to avoid reuse of old session
+        navigate("/safe-walk", { replace: true });
         fetchMyLoc();
         setLoading(false);
       } else {
@@ -674,8 +668,14 @@ export const SafeWalk = () => {
             {!loadingg && !showMapOverlay && (
               <div className="floating-buttons">
                 {trackingStatus === "idle" && (
-                  <button className="floating-btn" onClick={handleTracking}>
-                    <FaRoute size={"25px"} color="#ffffffff" />
+                  <button
+                    className="floating-btn"
+                    data-aos="fade-down"
+                    data-aos-duration="500"
+                    data-aos-easing="ease"
+                    onClick={handleTracking}
+                  >
+                    <FaRoute size={"25px"} color="#ffffff" />
                     Start Tracking
                   </button>
                 )}
@@ -687,9 +687,14 @@ export const SafeWalk = () => {
                 )}
 
                 {trackingStatus === "tracking" && (
-                  <button className="floating-btn stop" onClick={stopTracking}>
-                    <MdStopCircle fontSize={"25px"} />
-                    Stop Tracking
+                  <button
+                    data-aos="fade-down"
+                    data-aos-duration="500"
+                    data-aos-easing="ease"
+                    className="floating-btn"
+                    onClick={() => alert("Sending to Group & Chats")}
+                  >
+                    🚀 Send to Group & Chats
                   </button>
                 )}
 
