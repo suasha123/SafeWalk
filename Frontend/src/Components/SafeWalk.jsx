@@ -364,6 +364,7 @@ export const SafeWalk = () => {
 
     trackingIntervalRef.current = navigator.geolocation.watchPosition(
       (pos) => {
+        console.log(`new pod ${(pos.coords.latitude, pos.coords.longitude)}`);
         const { latitude, longitude } = pos.coords;
         updateTrackedPath([latitude, longitude]);
       },
@@ -371,7 +372,7 @@ export const SafeWalk = () => {
       {
         enableHighAccuracy: false,
         maximumAge: 1000,
-        timeout: 10000,
+        timeout: 20000,
       }
     );
   };
@@ -396,20 +397,27 @@ export const SafeWalk = () => {
     const nearestLat = snapped.geometry.coordinates[1];
     const nearestLng = snapped.geometry.coordinates[0];
     const index = snapped.properties.index;
-
+    console.log("Calling storeTrackedPath with:", {
+      nearestLat,
+      nearestLng,
+      index,
+      userId: user?.id,
+    });
     if (!hasStartedTracking.current) {
+      console.log("yha pe phuch");
       const res = await storeTrackedPath(nearestLat, nearestLng, index);
       if (res && res.ok) {
         const result = await res.json();
         const track = result.id;
         navigate(`/safe-walk?trackid=${track}`);
-        hasStartedTracking.current = true; 
-        setTrackingButton(false); 
+        hasStartedTracking.current = true;
+        setTrackingButton(false);
       } else {
         enqueueSnackbar("Unable to track", { variant: "warning" });
         return;
       }
     } else {
+      console.log("update being called");
       const response = await updateCurrPath(nearestLat, nearestLng, index);
       if (response.ok) {
         setLoc([nearestLat, nearestLng]);
@@ -451,6 +459,7 @@ export const SafeWalk = () => {
     }
   };
   const storeTrackedPath = async (nearestLat, nearestLng, index) => {
+    console.log("hi");
     if (!nearestLat || !nearestLng || !index) {
       enqueueSnackbar("Error Occured", { variant: "error" });
       return;
