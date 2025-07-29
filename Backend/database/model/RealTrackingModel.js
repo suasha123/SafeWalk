@@ -42,6 +42,12 @@ const liveTracker = new mongoose.Schema({
       ref: "User",
     },
   ],
+  totaldist :{
+    type:Number,
+  },
+  cdist :{
+    type:Number,
+  }
 });
 
 liveTracker.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

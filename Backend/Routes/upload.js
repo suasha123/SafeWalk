@@ -15,25 +15,28 @@ router.post("/trackedPath", async (req, res) => {
   }
   try {
     const curruserid = req.session.passport.user;
-    const { nearestLat, nearestLng, index} = req.body;
+    const { nearestLat, nearestLng, index } = req.body;
     const safeWalk = await Track.findOne({ userid: curruserid });
     if (!safeWalk) {
       return res.status(403).json({ msg: "No walk Found" });
     }
     const userid = safeWalk.userid;
-    console.log(userid);
-    if(userid.toString() !== curruserid){
-      return res.status(403).json({msg : "Unauthorized"});
+    if (userid.toString() !== curruserid) {
+      return res.status(403).json({ msg: "Unauthorized" });
     }
     const existing = await RealTrackingModel.findOne({
       userid: curruserid,
       status: "active",
     });
     if (existing) {
-      return res
-        .status(409)
-        .json({ msg: "Active session already exists", id: existing._id });
+      return res.status(409).json({ msg: "Active session already exists" });
     }
+    const storedpath = await Track.findOne({ userid: curruserid });
+    const pathPoints = storedpath.path;
+    const convertedPoints = pathPoints.map(([lat, lng]) => [lng, lat]);
+    const line = turf.lineString(convertedPoints);
+    const distanceKm = turf.length(line, { units: "kilometers" });
+    const distanceMeters = distanceKm * 1000;
     const doc = await RealTrackingModel.create({
       nearestlat: nearestLat,
       nearestLong: nearestLng,
@@ -41,6 +44,7 @@ router.post("/trackedPath", async (req, res) => {
       userid: curruserid,
       trackingid: safeWalk._id,
       status: "active",
+      totaldist: distanceMeters,
     });
     return res.status(200).json({ id: doc._id });
   } catch (err) {

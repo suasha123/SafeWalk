@@ -23,7 +23,6 @@ router.post("/updatePath", async (req, res) => {
   try {
     const { nearestLat, nearestLng, index, userid } = req.body;
     const curruserId = req.session.passport.user;
-
     if (curruserId !== userid) {
       return res.status(403).json({ msg: "Unauthorized" });
     }
@@ -37,6 +36,17 @@ router.post("/updatePath", async (req, res) => {
       );
     };
     const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
+    let coveredMeters = 0;
+    if (index > 0) {
+      const coveredPoints = point.slice(0, index + 1); 
+      const converted = coveredPoints.map(([lat, lng]) => [lng, lat]);
+      const line = turf.lineString(converted);
+      const km = turf.length(line, { units: "kilometers" });
+      coveredMeters = km * 1000;
+    }
+    const doc = await RealTrack.findOne({userid :curruserId});
+    const totalDistance = doc.totaldist;
+    const remainingMeters = Math.max(totalDistance - coveredMeters, 0);
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
       {
@@ -45,6 +55,7 @@ router.post("/updatePath", async (req, res) => {
           nearestLong: nearestLng,
           lastindex: index,
           status: isCompleted ? "completed" : "active",
+          cdist : remainingMeters
         },
       },
       { new: true }
@@ -57,6 +68,8 @@ router.post("/updatePath", async (req, res) => {
     return res.status(200).json({
       msg: "Tracking data updated",
       walkdone: isCompleted,
+      r : remainingMeters,
+      t :updated.totaldist
     });
   } catch (error) {
     console.error("UpdatePath Error:", error);
