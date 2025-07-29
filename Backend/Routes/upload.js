@@ -16,6 +16,8 @@ router.post("/trackedPath", async (req, res) => {
   try {
     const curruserid = req.session.passport.user;
     const { nearestLat, nearestLng, index, userid } = req.body;
+    console.log(curruserid);
+    console.log(userid);
     if (curruserid !== userid) {
       return res.status(403).json({ msg: "Unauthorized" });
     }
