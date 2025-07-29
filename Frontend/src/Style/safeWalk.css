@@ -306,7 +306,7 @@
     flex-direction: column;
     position: absolute;
     bottom: 30px;
-    gap : 13px;
+    gap: 13px;
     width: 100%;
   }
 
@@ -318,11 +318,13 @@
     padding: 0.5rem;
   }
 }
-.grp{
+
+.grp {
   height: 43px;
   position: relative;
-  top : 3px;
+  top: 3px;
 }
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -474,6 +476,7 @@
   position: relative;
   top: 5px;
 }
+
 .spinner-circle.small {
   width: 16px;
   height: 16px;
@@ -482,9 +485,56 @@
   position: relative;
   top: 4px;
 }
+
 .floating-btn.processing {
   background-color: #666;
   pointer-events: none;
   justify-content: center;
   align-items: center;
+}
+
+.tracking-header {
+  background-color: #18141c;
+  padding: 10px 20px;
+  border-radius: 12px;
+  position: absolute;
+  width: max-content;
+  top: 20px;
+  left: 50%;
+  right: 0;
+  z-index: 1000;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  transform: translateX(-50%);
+  border: 1px solid #00ff88;
+  box-shadow: 0 0 10px #3bea98;
+  box-shadow: 0 0 10px #00ff88;
+}
+
+.tracking-subtitle {
+  font-size: 14px;
+  color: white;
+}
+
+.refresh-icon {
+
+  font-size: 24px;
+  z-index: 1001;
+  transition: transform 0.3s linear;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

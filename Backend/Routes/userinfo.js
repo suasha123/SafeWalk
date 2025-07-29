@@ -27,15 +27,34 @@ router.post("/updatePath", async (req, res) => {
       return res.status(403).json({ msg: "Unauthorized" });
     }
 
+    const track = await Track.findOne({ userid: curruserId });
+    if (!track || !track.path || track.path.length === 0) {
+      return res.status(404).json({ msg: "No route path found" });
+    }
+
+    const lastPoint = track.path[track.path.length - 1]; // [lat, lng]
+    const isNearer = (point, lat, lng, threshold = 0.0003) => {
+      return (
+        Math.abs(point[0] - lat) < threshold &&
+        Math.abs(point[1] - lng) < threshold
+      );
+    };
+
+    const walkCompleted = isNearer(lastPoint, nearestLat, nearestLng);
+
+    const updateData = {
+      nearestlat: nearestLat,
+      nearestLong: nearestLng,
+      lastindex: index,
+    };
+
+    if (walkCompleted) {
+      updateData.status = "completed";
+    }
+
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
-      {
-        $set: {
-          nearestlat: nearestLat,
-          nearestLong: nearestLng,
-          lastindex: index,
-        },
-      },
+      { $set: updateData },
       { new: true }
     );
 
@@ -43,7 +62,10 @@ router.post("/updatePath", async (req, res) => {
       return res.status(404).json({ msg: "Tracking session not found" });
     }
 
-    return res.status(200).json({ msg: "Tracking data updated" });
+    return res.status(200).json({
+      msg: "Tracking data updated",
+      walkCompleted,
+    });
   } catch (error) {
     console.error("UpdatePath Error:", error);
     return res.status(500).json({ msg: "Server error" });
@@ -61,7 +83,7 @@ router.get("/exitWalk", async (req, res) => {
   }
   try {
     await Track.deleteOne({ userid: userId });
-    await RealTrackingModel.findOneAndDelete({userid : userId});
+    await RealTrackingModel.findOneAndDelete({ userid: userId });
     return res.status(200).json({ msg: "Success" });
   } catch (err) {
     console.log(err);
