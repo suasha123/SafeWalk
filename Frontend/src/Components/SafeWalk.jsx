@@ -92,6 +92,8 @@ export const SafeWalk = () => {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeWalkId, setActiveSessionId] = useState(null);
   const [destinationQuery, setDestinationQuery] = useState("");
+  const [tdist , setTdist] = useState(0);
+  const [rdist ,  setRdist] = useState(0);
   //const [sourceResults, setSourceResults] = useState([]);
   const [updatingLoc, setUpdatingLoc] = useState(false);
   const [destinationResults, setDestinationResults] = useState([]);
@@ -337,6 +339,7 @@ export const SafeWalk = () => {
           [data.lat, data.long],
         ];
         setTrackedPath(covered);
+        setTdist(data.totaldis);
         setShowMapOverlay(false);
       } else {
         enqueueSnackbar(data.msg || "Something went wrong", {
@@ -483,6 +486,7 @@ export const SafeWalk = () => {
         ];
         setTrackedPath(covered);
         const result = await response.json();
+        setRdist(result.r);
         if (result.walkdone) {
           if (trackingIntervalRef.current) {
             navigator.geolocation.clearWatch(trackingIntervalRef.current);
@@ -913,7 +917,7 @@ export const SafeWalk = () => {
           </div>
         </div>
       )}
-      <WalkReport />
+      <WalkReport tdist={tdist} rdist ={rdist}/>
     </>
   );
 };

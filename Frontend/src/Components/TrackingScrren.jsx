@@ -22,7 +22,6 @@ import { useAuth } from "./AuthContext";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { SplashScreen } from "./SplashScreen";
 import { Backgroundcover } from "./bgcover";
-import { WalkReport } from "./WalkrEPORT.JSX";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -42,6 +41,8 @@ export const TrackScreen = () => {
   const [searchParams] = useSearchParams();
   const { loading, isLoggedIn } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+  const [rdistt, setRdistt] = useState(0);
+  const [tdistt, setTdistt] = useState(0);
   const navigate = useNavigate();
   const [isSpinning, setSpinning] = useState(false);
   const [trackId, setTrackId] = useState(null);
@@ -89,7 +90,8 @@ export const TrackScreen = () => {
           setDesMarker(data.dest);
           setRoutePolyline(data.path);
           setLoc([data.lat, data.long]);
-
+          setTdistt(data.totaldis);
+          setRdistt(data.remainingdis);
           const covered = [
             ...data.path.slice(0, data.index + 1),
             [data.lat, data.long],
@@ -176,7 +178,7 @@ export const TrackScreen = () => {
           )}
         </MapContainer>
       </div>
-      <WalkReport />
+      <WalkReport rdistt={rdistt} tdistt={tdistt} />
     </>
   );
 };
