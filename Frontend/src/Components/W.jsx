@@ -23,14 +23,14 @@ export const WalkReport = ({rdist , tdist , rdistt , tdistt , walk , walkk}) => 
       icon: <FaWalking className={`${styles.icons} ${styles.heartbeat}`} />,
     },
     {
-      h1: "Total Distance",
-      p: `${tdistt||tdist} m`,
-      icon: <GiPathDistance className={`${styles.icons}`} />,
-    },
-     {
       h1: "Remaining Distance ",
       p: `${rdistt || rdist} m`,
       icon: <PiPath className={`${styles.icons} ${styles.heartbeat}`} />,
+    },
+    {
+      h1: "Total Distance",
+      p: `${tdistt||tdist} m`,
+      icon: <GiPathDistance className={`${styles.icons}`} />,
     },
     {
       h1: "Community Reports",
