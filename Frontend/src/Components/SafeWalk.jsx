@@ -472,7 +472,6 @@ export const SafeWalk = () => {
         return;
       }
     } else {
-      console.log("update being called");
       const response = await updateCurrPath(nearestLat, nearestLng, index);
       if (response.ok) {
         setLoc([nearestLat, nearestLng]);
@@ -482,9 +481,13 @@ export const SafeWalk = () => {
         ];
         setTrackedPath(covered);
         const result = await response.json();
-        if(result.walkdone){
-          enqueueSnackbar("Walk Completed" , {variant : "success"});
-          exitWalk()
+        if (result.walkdone) {
+          if (trackingIntervalRef.current) {
+            navigator.geolocation.clearWatch(trackingIntervalRef.current);
+            trackingIntervalRef.current = null;
+          }
+          enqueueSnackbar("Walk Completed", { variant: "success" });
+          exitWalk();
         }
       } else {
         const result = await response.json();
@@ -734,7 +737,7 @@ export const SafeWalk = () => {
                     className="floating-btn grp"
                     onClick={() => alert("Sending to Group & Chats")}
                   >
-                    <FaUserGroup  size={"20px"}/> Send to Group & Chats
+                    <FaUserGroup size={"20px"} /> Send to Group & Chats
                   </button>
                 )}
 
