@@ -50,7 +50,9 @@ export const TrackScreen = () => {
   const [destMarker, setDesMarker] = useState(null);
   const [routePolyline, setRoutePolyline] = useState([]);
   const [trackedPath, setTrackedPath] = useState([]);
-  const [walkk , setWalk] = useState("not Active");
+  const [tdd, setTd] = useState(0);
+  const [cdd, setCd] = useState(0);
+  const [walkk, setWalk] = useState("not Active");
   // Extract tracking ID
   useEffect(() => {
     const id = searchParams.get("trackid");
@@ -89,6 +91,9 @@ export const TrackScreen = () => {
           setDesMarker(data.dest);
           setRoutePolyline(data.path);
           setLoc([data.lat, data.long]);
+          setCd(data.cdist);
+          setTd(data.tdist);
+          setWalk(data.completed);
           const covered = [
             ...data.path.slice(0, data.index + 1),
             [data.lat, data.long],
@@ -175,7 +180,7 @@ export const TrackScreen = () => {
           )}
         </MapContainer>
       </div>
-      <WalkReport />
+      <WalkReport tdd={tdd} cdd={cdd} walkk={walkk} />
     </>
   );
 };

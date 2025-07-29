@@ -88,6 +88,9 @@ export const SafeWalk = () => {
   const hasStartedTracking = useRef(false);
   const [startWalkButton, setWalkButton] = useState(false);
   const [trackingButton, setTrackingButton] = useState(true);
+  const [td, setTd] = useState(0);
+  const [cd, setCd] = useState(0);
+  const [walk, setWalk] = useState("not Active");
   //const [sourceQuery, setSourceQuery] = useState("");
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeWalkId, setActiveSessionId] = useState(null);
@@ -494,6 +497,9 @@ export const SafeWalk = () => {
         ];
         setTrackedPath(covered);
         const result = await response.json();
+        setTd(result.t);
+        setCd(result.r);
+        setWalk(result.walkdone===false?"active" :"Completed");
         if (result.walkdone) {
           if (trackingIntervalRef.current) {
             navigator.geolocation.clearWatch(trackingIntervalRef.current);
@@ -532,7 +538,7 @@ export const SafeWalk = () => {
   };
   const storeTrackedPath = async (nearestLat, nearestLng, index) => {
     console.log("hi");
-    const payload = { nearestLat, nearestLng, index};
+    const payload = { nearestLat, nearestLng, index };
     console.log("payload hai " + payload);
     try {
       const response = await fetch(
@@ -924,7 +930,7 @@ export const SafeWalk = () => {
           </div>
         </div>
       )}
-      <WalkReport />
+      <WalkReport  td={td} cd={cd} walk={walk}/>
     </>
   );
 };
