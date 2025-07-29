@@ -475,8 +475,8 @@ useEffect(() => {
         const result = await res.json();
         const track = result.id;
         ///////////////////////////////////////////////////////////////
-       // navigate(`/safe-walk?trackid=${track}`);
-       setTrackIdReady(track);
+        navigate(`/safe-walk?trackid=${track}`);
+        setTrackIdReady(track);
         hasStartedTracking.current = true;
         setTrackingButton(false);
       } else {
