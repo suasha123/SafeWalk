@@ -481,7 +481,10 @@ export const SafeWalk = () => {
         return;
       }
     } else {
-      const response = await updateCurrPath(nearestLat, nearestLng, index);
+      let response;
+      setTimeout(async () => {
+        response = await updateCurrPath(nearestLat, nearestLng, index);
+      }, 400);
       if (response.ok) {
         setLoc([nearestLat, nearestLng]);
         const covered = [
