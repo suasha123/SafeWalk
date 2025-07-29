@@ -8,6 +8,7 @@ const chatmodel = require("../database/model/ChatModel");
 const GroupModal = require("../database/model/groupmodel");
 const { nanoid } = require("nanoid");
 const mongoose = require("mongoose");
+const turf = require("@turf/turf");
 const GroupChatModel = require("../database/model/GroupChatModel");
 const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
@@ -29,13 +30,21 @@ router.post("/updatePath", async (req, res) => {
     const path = await Track.findOne({ userid });
     const point = path.path;
     const lastpoint = point[point.length - 1];
-     const isNearer = (point, lat, lng, threshold = 0.0003) => {
+    const isNearer = (point, lat, lng, threshold = 0.0003) => {
       return (
         Math.abs(point[0] - lat) < threshold &&
         Math.abs(point[1] - lng) < threshold
       );
     };
     const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
+    const remainingPoints = point.slice(index);
+    const currentToEnd = [
+      [nearestLat, nearestLng],
+      ...remainingPoints.map(([lat, lng]) => [lng, lat]),
+    ];
+    const remainingDistance = turf.length(turf.lineString(currentToEnd), {
+      units: "meters",
+    });
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
       {
@@ -44,6 +53,7 @@ router.post("/updatePath", async (req, res) => {
           nearestLong: nearestLng,
           lastindex: index,
           status: isCompleted ? "completed" : "active",
+          remainingDist: remainingDistance.toFixed(2),
         },
       },
       { new: true }
@@ -55,7 +65,11 @@ router.post("/updatePath", async (req, res) => {
 
     return res
       .status(200)
-      .json({ msg: "Tracking data updated", walkdone: isCompleted });
+      .json({
+        msg: "Tracking data updated",
+        walkdone: isCompleted,
+        r: remainingDistance.toFixed(2),
+      });
   } catch (error) {
     console.error("UpdatePath Error:", error);
     return res.status(500).json({ msg: "Server error" });
