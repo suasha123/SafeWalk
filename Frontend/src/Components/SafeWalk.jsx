@@ -266,6 +266,13 @@ export const SafeWalk = () => {
     };
   }, [sourceQuery]);*/
   }
+const [trackIdReady, setTrackIdReady] = useState(null);
+
+useEffect(() => {
+  if (searchParams.get("trackid") && trackIdReady) {
+    fetchTrackedPathFrombackend(searchParams.get("trackid"));
+  }
+}, [searchParams, trackIdReady]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -467,7 +474,9 @@ export const SafeWalk = () => {
       if (res && res.ok) {
         const result = await res.json();
         const track = result.id;
-        navigate(`/safe-walk?trackid=${track}`);
+        ///////////////////////////////////////////////////////////////
+       // navigate(`/safe-walk?trackid=${track}`);
+       setTrackIdReady(track);
         hasStartedTracking.current = true;
         setTrackingButton(false);
       } else {
