@@ -399,6 +399,7 @@ export const SafeWalk = () => {
     }
   };
   const handleTracking = async () => {
+     if (trackingIntervalRef.current) return; // Prevent mu
     if (!searchParams.get("walkid") && !searchParams.get("trackid")) {
       enqueueSnackbar("Start SafeWalk", { variant: "warning" });
       return;
@@ -463,7 +464,7 @@ export const SafeWalk = () => {
       if (res && res.ok) {
         const result = await res.json();
         const track = result.id;
-          navigate(`/safe-walk?trackid=${track}`);
+        navigate(`/safe-walk?trackid=${track}`);
 
         hasStartedTracking.current = true;
         setTrackingButton(false);
