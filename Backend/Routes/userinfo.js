@@ -39,7 +39,7 @@ router.post("/updatePath", async (req, res) => {
     const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
     const remainingPoints = point.slice(index);
     const currentToEnd = [
-      [nearestLat, nearestLng],
+      [nearestLng , nearestLat],
       ...remainingPoints.map(([lat, lng]) => [lng, lat]),
     ];
     const remainingDistance = turf.length(turf.lineString(currentToEnd), {

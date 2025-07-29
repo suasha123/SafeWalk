@@ -7,6 +7,7 @@ const GroupModal = require("../database/model/groupmodel");
 const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
+const turf = require("@turf/turf");
 const parser = multer({ storage });
 router.post("/trackedPath", async (req, res) => {
   if (!req.isAuthenticated()) {
