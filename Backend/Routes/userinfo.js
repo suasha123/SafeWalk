@@ -26,7 +26,16 @@ router.post("/updatePath", async (req, res) => {
     if (curruserId !== userid) {
       return res.status(403).json({ msg: "Unauthorized" });
     }
-
+    const path = await Track.findOne({ userid });
+    const point = path.path;
+    const lastpoint = point[point.length - 1];
+    const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
+    const isNearer = (point, lat, lng, threshold = 0.0003) => {
+      return (
+        Math.abs(point[0] - lat) < threshold &&
+        Math.abs(point[1] - lng) < threshold
+      );
+    };
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
       {
@@ -34,6 +43,7 @@ router.post("/updatePath", async (req, res) => {
           nearestlat: nearestLat,
           nearestLong: nearestLng,
           lastindex: index,
+          status: isCompleted ? "completed" : "active",
         },
       },
       { new: true }
@@ -43,7 +53,9 @@ router.post("/updatePath", async (req, res) => {
       return res.status(404).json({ msg: "Tracking session not found" });
     }
 
-    return res.status(200).json({ msg: "Tracking data updated" });
+    return res
+      .status(200)
+      .json({ msg: "Tracking data updated", walkdone: isCompleted });
   } catch (error) {
     console.error("UpdatePath Error:", error);
     return res.status(500).json({ msg: "Server error" });
@@ -61,7 +73,7 @@ router.get("/exitWalk", async (req, res) => {
   }
   try {
     await Track.deleteOne({ userid: userId });
-    await RealTrackingModel.findOneAndDelete({userid : userId});
+    await RealTrackingModel.findOneAndDelete({ userid: userId });
     return res.status(200).json({ msg: "Success" });
   } catch (err) {
     console.log(err);
