@@ -93,6 +93,9 @@ export const TrackScreen = () => {
             [data.lat, data.long],
           ];
           setTrackedPath(covered);
+          if(data.completed==="completed"){
+            window.location.href="/safe-walk";
+          }
         } else {
           enqueueSnackbar(data.msg || "Something went wrong", {
             variant: "error",

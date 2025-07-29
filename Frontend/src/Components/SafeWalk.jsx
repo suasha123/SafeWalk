@@ -481,6 +481,11 @@ export const SafeWalk = () => {
           [nearestLat, nearestLng],
         ];
         setTrackedPath(covered);
+        const result = await response.json();
+        if(result.walkdone){
+          enqueueSnackbar("Walk Completed" , {variant : "success"});
+          exitWalk()
+        }
       } else {
         const result = await response.json();
         const ms = result.msg;
