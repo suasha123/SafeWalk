@@ -43,7 +43,7 @@ router.post("/updatePath", async (req, res) => {
           nearestlat: nearestLat,
           nearestLong: nearestLng,
           lastindex: index,
-          status: isCompleted ? "completed" : "active",
+          status: isCompleted ? "completed" : "completed",
         },
       },
       { new: true }
