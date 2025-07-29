@@ -399,35 +399,58 @@ export const SafeWalk = () => {
     }
   };
   const handleTracking = async () => {
-     if (trackingIntervalRef.current) return; // Prevent mu
     if (!searchParams.get("walkid") && !searchParams.get("trackid")) {
       enqueueSnackbar("Start SafeWalk", { variant: "warning" });
       return;
     }
-    console.log("called");
-    setTrackingStatus("processing");
-    if (trackingIntervalRef.current) return;
-    trackingIntervalRef.current = navigator.geolocation.watchPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        console.log(latitude);
-        console.log(longitude);
-        await updateTrackedPath([latitude, longitude]);
-        if (!hasStartedTracking.current) {
-          setTrackingStatus("tracking");
+    if (!hasStartedTracking.current && !searchParams.get("trackid")) {
+      const routeLine = lineString(
+        routePolyline.map(([lat, lng]) => [lng, lat])
+      );
+      const userPoint = point([sourceLoc[1], sourceLoc[0]]);
+      const snapped = nearestPointOnLine(routeLine, userPoint);
+      const nearestLat = snapped.geometry.coordinates[1];
+      const nearestLng = snapped.geometry.coordinates[0];
+      const index = snapped.properties.index;
+      setTrackingStatus("processing");
+      const res = await storeTrackedPath(nearestLat, nearestLng, index);
+      if (res && res.ok) {
+        const result = await res.json();
+        const track = result.id;
+        navigate(`/safe-walk?trackid=${track}`);
+        setTrackingStatus("tracking");
+        hasStartedTracking.current = true;
+        setTrackingButton(false);
+      } else {
+        if (res.status === 409) {
+          return;
         }
-      },
-      (err) => {
-        console.error("Polling error:", err);
-        enqueueSnackbar("Location fetch failed", { variant: "error" });
-        setTrackingStatus("idle");
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
+        enqueueSnackbar("Unable to track", { variant: "warning" });
+        return;
       }
-    );
+    } else {
+      trackingIntervalRef.current = navigator.geolocation.watchPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          console.log(latitude);
+          console.log(longitude);
+          await updateTrackedPath([latitude, longitude]);
+          if (!hasStartedTracking.current) {
+            setTrackingStatus("tracking");
+          }
+        },
+        (err) => {
+          console.error("Polling error:", err);
+          enqueueSnackbar("Location fetch failed", { variant: "error" });
+          setTrackingStatus("idle");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    }
   };
 
   const updateTrackedPath = async (currentPos) => {
@@ -460,23 +483,8 @@ export const SafeWalk = () => {
         hasStartedTracking.current = true;
         setTrackingButton(false);
       }
-      const res = await storeTrackedPath(nearestLat, nearestLng, index);
-      if (res && res.ok) {
-        const result = await res.json();
-        const track = result.id;
-        navigate(`/safe-walk?trackid=${track}`);
-
-        hasStartedTracking.current = true;
-        setTrackingButton(false);
-      } else {
-        if (res.status === 409) {
-          return;
-        }
-        enqueueSnackbar("Unable to track", { variant: "warning" });
-        return;
-      }
     } else {
-    const response = await updateCurrPath(nearestLat, nearestLng, index);
+      const response = await updateCurrPath(nearestLat, nearestLng, index);
 
       if (response.ok) {
         setLoc([nearestLat, nearestLng]);
