@@ -37,14 +37,18 @@ router.post("/updatePath", async (req, res) => {
       );
     };
     const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
-    const remainingPoints = point.slice(index);
-    const currentToEnd = [
-      [nearestLng , nearestLat],
-      ...remainingPoints.map(([lat, lng]) => [lng, lat]),
-    ];
-    const remainingDistance = turf.length(turf.lineString(currentToEnd), {
+    const coveredPoints = point
+      .slice(0, index + 1)
+      .map(([lat, lng]) => [lng, lat]);
+    const coveredDistance = turf.length(turf.lineString(coveredPoints), {
       units: "meters",
     });
+    const docrealtrack = await RealTrack.findOne({userid : curruserId});
+    if(!docrealtrack){
+      return res.status(404).json({msg : "No Trackig Session"});
+    }
+    const totalDistance = docrealtrack.totalDist;
+    const remainingDistance = totalDistance - coveredDistance;
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
       {
@@ -63,13 +67,11 @@ router.post("/updatePath", async (req, res) => {
       return res.status(404).json({ msg: "Tracking session not found" });
     }
 
-    return res
-      .status(200)
-      .json({
-        msg: "Tracking data updated",
-        walkdone: isCompleted,
-        r: remainingDistance.toFixed(2),
-      });
+    return res.status(200).json({
+      msg: "Tracking data updated",
+      walkdone: isCompleted,
+      r: remainingDistance.toFixed(2),
+    });
   } catch (error) {
     console.error("UpdatePath Error:", error);
     return res.status(500).json({ msg: "Server error" });
