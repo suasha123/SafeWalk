@@ -37,6 +37,7 @@ import { enqueueSnackbar } from "notistack";
 import { Backgroundcover } from "./bgcover";
 import { useLocation } from "react-router-dom";
 import { FaUserGroup } from "react-icons/fa6";
+import { WalkReport } from "./WalkrEPORT.JSX";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -289,6 +290,7 @@ export const SafeWalk = () => {
       controller.abort();
     };
   }, [destinationQuery]);
+
   const fetchStoredPathFromBackend = async (id) => {
     try {
       const response = await fetch(
@@ -911,6 +913,7 @@ export const SafeWalk = () => {
           </div>
         </div>
       )}
+      <WalkReport />
     </>
   );
 };

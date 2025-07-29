@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [userdeatils, setDetails] = useState({ email: "", password: "" });
   const [socket, setSocket] = useState(null);
-
   useEffect(() => {
     const newsocket = io("https://safewalk-xbkj.onrender.com", {
       withCredentials: true,
@@ -21,9 +20,12 @@ export const AuthProvider = ({ children }) => {
     setSocket(newsocket);
     const checklogin = async () => {
       try {
-        const response = await fetch("https://safewalk-xbkj.onrender.com/auth/check", {
-          credentials: "include",
-        });
+        const response = await fetch(
+          "https://safewalk-xbkj.onrender.com/auth/check",
+          {
+            credentials: "include",
+          }
+        );
         if (response) {
           setTimeout(() => {
             setLoading(false);
@@ -67,7 +69,7 @@ export const AuthProvider = ({ children }) => {
         profile,
         showOverlay,
         setShowOverlay,
-        socket
+        socket,
       }}
     >
       {children}

@@ -5,6 +5,7 @@ import {
   Popup,
   Polyline,
 } from "react-leaflet";
+import * as turf from "@turf/turf";
 import "leaflet/dist/leaflet.css";
 import { useState, useEffect } from "react";
 import L from "leaflet";
@@ -21,6 +22,7 @@ import { useAuth } from "./AuthContext";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { SplashScreen } from "./SplashScreen";
 import { Backgroundcover } from "./bgcover";
+import { WalkReport } from "./WalkrEPORT.JSX";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -93,8 +95,8 @@ export const TrackScreen = () => {
             [data.lat, data.long],
           ];
           setTrackedPath(covered);
-          if(data.completed==="completed"){
-            window.location.href="/safe-walk";
+          if (data.completed === "completed") {
+            window.location.href = "/safe-walk";
           }
         } else {
           enqueueSnackbar(data.msg || "Something went wrong", {
@@ -103,6 +105,7 @@ export const TrackScreen = () => {
           navigate("/");
         }
       } catch (err) {
+        console.log(err);
         enqueueSnackbar("Error in Tracing", { variant: "error" });
         navigate("/");
       } finally {
@@ -173,6 +176,7 @@ export const TrackScreen = () => {
           )}
         </MapContainer>
       </div>
+      <WalkReport />
     </>
   );
 };

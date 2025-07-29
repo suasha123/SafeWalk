@@ -52,6 +52,7 @@ router.get("/cpath/:id", async (req, res) => {
       dest: Fpath.dest,
       completed : Trackingexist.status,
       path: fullPath,
+      totaldis : Trackingexist.totalDist,
     });
   } catch (err) {
     res.status(500).json({ msg: "Error occured" });

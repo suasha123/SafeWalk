@@ -15,6 +15,13 @@
     color: #9d4bce;
     margin-bottom: 2rem;
 }
+
+.headding{
+font-size : 38px;
+font-family: Inter;
+color: #9d4bce;
+margin-bottom: 2rem;
+}
 .secondcontainer{
     width: 90%;
     height: max-content;

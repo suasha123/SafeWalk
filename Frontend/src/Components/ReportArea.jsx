@@ -275,7 +275,7 @@ export const Report = () => {
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover  />;
   return (
-    <>
+    <div style={{height : "100vh" ,  backgroundColor : "#1e1e2f"}}>
       <NavBar />
 
       {/* Floating Search Input */}
@@ -637,6 +637,6 @@ export const Report = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
