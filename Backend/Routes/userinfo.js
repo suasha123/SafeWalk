@@ -29,13 +29,13 @@ router.post("/updatePath", async (req, res) => {
     const path = await Track.findOne({ userid });
     const point = path.path;
     const lastpoint = point[point.length - 1];
-    const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
-    const isNearer = (point, lat, lng, threshold = 0.0003) => {
+     const isNearer = (point, lat, lng, threshold = 0.0003) => {
       return (
         Math.abs(point[0] - lat) < threshold &&
         Math.abs(point[1] - lng) < threshold
       );
     };
+    const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
       {
