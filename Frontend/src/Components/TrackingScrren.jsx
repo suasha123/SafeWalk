@@ -42,8 +42,6 @@ export const TrackScreen = () => {
   const [searchParams] = useSearchParams();
   const { loading, isLoggedIn } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
-  const [rdistt, setRdistt] = useState(0);
-  const [tdistt, setTdistt] = useState(0);
   const navigate = useNavigate();
   const [isSpinning, setSpinning] = useState(false);
   const [trackId, setTrackId] = useState(null);
@@ -91,9 +89,6 @@ export const TrackScreen = () => {
           setDesMarker(data.dest);
           setRoutePolyline(data.path);
           setLoc([data.lat, data.long]);
-          setTdistt(data.totaldis);
-          setWalk(data.completed);
-          setRdistt(data.remainingdis);
           const covered = [
             ...data.path.slice(0, data.index + 1),
             [data.lat, data.long],
@@ -180,7 +175,7 @@ export const TrackScreen = () => {
           )}
         </MapContainer>
       </div>
-      <WalkReport rdistt={rdistt} tdistt={tdistt} walkk={walkk}/>
+      <WalkReport />
     </>
   );
 };

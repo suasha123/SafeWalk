@@ -37,21 +37,6 @@ router.post("/updatePath", async (req, res) => {
       );
     };
     const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
-    const coveredPoints = point
-      .slice(0, index + 1)
-      .map(([lat, lng]) => [lng, lat]);
-    let coveredDistance = 0;
-    if (coveredPoints.length >= 2) {
-      coveredDistance = turf.length(turf.lineString(coveredPoints), {
-        units: "meters",
-      });
-    }
-    const docrealtrack = await RealTrack.findOne({ userid: curruserId });
-    if (!docrealtrack) {
-      return res.status(404).json({ msg: "No Trackig Session" });
-    }
-    const totalDistance = docrealtrack.totalDist;
-    const remainingDistance = totalDistance - coveredDistance;
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
       {
@@ -60,7 +45,6 @@ router.post("/updatePath", async (req, res) => {
           nearestLong: nearestLng,
           lastindex: index,
           status: isCompleted ? "completed" : "active",
-          remainingDist: remainingDistance.toFixed(2),
         },
       },
       { new: true }

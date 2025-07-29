@@ -92,8 +92,6 @@ export const SafeWalk = () => {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeWalkId, setActiveSessionId] = useState(null);
   const [destinationQuery, setDestinationQuery] = useState("");
-  const [tdist, setTdist] = useState(0);
-  const [rdist, setRdist] = useState(0);
   //const [sourceResults, setSourceResults] = useState([]);
   const [updatingLoc, setUpdatingLoc] = useState(false);
   const [destinationResults, setDestinationResults] = useState([]);
@@ -103,7 +101,6 @@ export const SafeWalk = () => {
   const [destLoc, setDestLoc] = useState(null);
   const [sourceMarker, setSourceMarker] = useState(null);
   const [desMarker, setDesMarker] = useState(null);
-  const [walk, setWalk] = useState("Not Active");
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
   const [searchParams] = useSearchParams();
@@ -340,7 +337,6 @@ export const SafeWalk = () => {
           [data.lat, data.long],
         ];
         setTrackedPath(covered);
-        setTdist(data.totaldis);
         setShowMapOverlay(false);
       } else {
         enqueueSnackbar(data.msg || "Something went wrong", {
@@ -467,9 +463,7 @@ export const SafeWalk = () => {
       if (res && res.ok) {
         const result = await res.json();
         const track = result.id;
-        setTimeout(() => {
           navigate(`/safe-walk?trackid=${track}`);
-        }, 300);
 
         hasStartedTracking.current = true;
         setTrackingButton(false);
@@ -481,8 +475,7 @@ export const SafeWalk = () => {
         return;
       }
     } else {
-      let response;
-      response = await updateCurrPath(nearestLat, nearestLng, index);
+    const response = await updateCurrPath(nearestLat, nearestLng, index);
 
       if (response.ok) {
         setLoc([nearestLat, nearestLng]);
@@ -492,8 +485,6 @@ export const SafeWalk = () => {
         ];
         setTrackedPath(covered);
         const result = await response.json();
-        setRdist(result.r);
-        setWalk(result.walkdone === false ? "active" : "complete");
         if (result.walkdone) {
           if (trackingIntervalRef.current) {
             navigator.geolocation.clearWatch(trackingIntervalRef.current);
@@ -924,7 +915,7 @@ export const SafeWalk = () => {
           </div>
         </div>
       )}
-      <WalkReport tdist={tdist} rdist={rdist} walk={walk} />
+      <WalkReport />
     </>
   );
 };

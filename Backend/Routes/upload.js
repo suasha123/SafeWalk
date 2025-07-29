@@ -23,11 +23,6 @@ router.post("/trackedPath", async (req, res) => {
     if (!safeWalk) {
       return res.status(403).json({ msg: "No walk Found" });
     }
-    const point = safeWalk.path;
-    const totalDistance = turf.length(
-      turf.lineString(point.map(([lng, lat]) => [lng, lat])),
-      { units: "meters" }
-    );
     const existing = await RealTrackingModel.findOne({
       userid: curruserid,
       status: "active",
@@ -43,7 +38,6 @@ router.post("/trackedPath", async (req, res) => {
       lastindex: index,
       userid: curruserid,
       trackingid: safeWalk._id,
-      totalDist : totalDistance.toFixed(2),
       status: "active",
     });
     return res.status(200).json({ id: doc._id });

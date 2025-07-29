@@ -44,6 +44,7 @@ router.get("/cpath/:id", async (req, res) => {
     }
     const Fpath = await Track.findOne({ userid: userId });
     const fullPath = Fpath.path;
+    console.log(Trackingexist);
     return res.status(200).json({
       index: Trackingexist.lastindex,
       lat: Trackingexist.nearestlat,
@@ -52,8 +53,6 @@ router.get("/cpath/:id", async (req, res) => {
       dest: Fpath.dest,
       completed : Trackingexist.status,
       path: fullPath,
-      totaldis : Trackingexist.totalDist,
-      remainingdis : Trackingexist.remainingDist,
     });
   } catch (err) {
     res.status(500).json({ msg: "Error occured" });
