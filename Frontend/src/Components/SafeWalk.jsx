@@ -532,7 +532,7 @@ export const SafeWalk = () => {
   };
   const storeTrackedPath = async (nearestLat, nearestLng, index) => {
     console.log("hi");
-    const payload = { nearestLat, nearestLng, index, userid: user.id };
+    const payload = { nearestLat, nearestLng, index};
     console.log("payload hai " + payload);
     try {
       const response = await fetch(

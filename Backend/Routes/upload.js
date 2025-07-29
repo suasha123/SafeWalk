@@ -15,15 +15,14 @@ router.post("/trackedPath", async (req, res) => {
   }
   try {
     const curruserid = req.session.passport.user;
-    const { nearestLat, nearestLng, index, userid } = req.body;
-    console.log(curruserid);
-    console.log(userid);
-    if (curruserid !== userid) {
-      return res.status(403).json({ msg: "Unauthorized" });
-    }
+    const { nearestLat, nearestLng, index} = req.body;
     const safeWalk = await Track.findOne({ userid: curruserid });
     if (!safeWalk) {
       return res.status(403).json({ msg: "No walk Found" });
+    }
+    const userid = safeWalk.userid;
+    if(userid !== curruserid){
+      return res.status(403).json({msg : "Unauthorized"});
     }
     const existing = await RealTrackingModel.findOne({
       userid: curruserid,
