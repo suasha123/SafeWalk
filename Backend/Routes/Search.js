@@ -50,6 +50,7 @@ router.get("/cpath/:id", async (req, res) => {
       long: Trackingexist.nearestLong,
       src: Fpath.src,
       dest: Fpath.dest,
+      isWalkCompleted : Trackingexist.status,
       path: fullPath,
     });
   } catch (err) {
