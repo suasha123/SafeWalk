@@ -92,8 +92,8 @@ export const SafeWalk = () => {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeWalkId, setActiveSessionId] = useState(null);
   const [destinationQuery, setDestinationQuery] = useState("");
-  const [tdist , setTdist] = useState(0);
-  const [rdist ,  setRdist] = useState(0);
+  const [tdist, setTdist] = useState(0);
+  const [rdist, setRdist] = useState(0);
   //const [sourceResults, setSourceResults] = useState([]);
   const [updatingLoc, setUpdatingLoc] = useState(false);
   const [destinationResults, setDestinationResults] = useState([]);
@@ -103,7 +103,7 @@ export const SafeWalk = () => {
   const [destLoc, setDestLoc] = useState(null);
   const [sourceMarker, setSourceMarker] = useState(null);
   const [desMarker, setDesMarker] = useState(null);
-  const [walk , setWalk] = useState("Not Active");
+  const [walk, setWalk] = useState("Not Active");
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
   const [searchParams] = useSearchParams();
@@ -266,13 +266,6 @@ export const SafeWalk = () => {
     };
   }, [sourceQuery]);*/
   }
-const [trackIdReady, setTrackIdReady] = useState(null);
-
-useEffect(() => {
-  if (searchParams.get("trackid") && trackIdReady) {
-    fetchTrackedPathFrombackend(searchParams.get("trackid"));
-  }
-}, [searchParams, trackIdReady]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -474,9 +467,10 @@ useEffect(() => {
       if (res && res.ok) {
         const result = await res.json();
         const track = result.id;
-        ///////////////////////////////////////////////////////////////
-        navigate(`/safe-walk?trackid=${track}`);
-        setTrackIdReady(track);
+        setTimeout(() => {
+          navigate(`/safe-walk?trackid=${track}`);
+        }, 300);
+
         hasStartedTracking.current = true;
         setTrackingButton(false);
       } else {
@@ -497,7 +491,7 @@ useEffect(() => {
         setTrackedPath(covered);
         const result = await response.json();
         setRdist(result.r);
-        setWalk(result.walkdone===false ? "active" : "complete");
+        setWalk(result.walkdone === false ? "active" : "complete");
         if (result.walkdone) {
           if (trackingIntervalRef.current) {
             navigator.geolocation.clearWatch(trackingIntervalRef.current);
@@ -928,7 +922,7 @@ useEffect(() => {
           </div>
         </div>
       )}
-      <WalkReport tdist={tdist} rdist ={rdist} walk={walk}/>
+      <WalkReport tdist={tdist} rdist={rdist} walk={walk} />
     </>
   );
 };
