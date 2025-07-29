@@ -21,7 +21,8 @@ router.post("/trackedPath", async (req, res) => {
       return res.status(403).json({ msg: "No walk Found" });
     }
     const userid = safeWalk.userid;
-    if(userid !== curruserid){
+    console.log(userid);
+    if(userid.toString() !== curruserid){
       return res.status(403).json({msg : "Unauthorized"});
     }
     const existing = await RealTrackingModel.findOne({
