@@ -10,8 +10,7 @@ import { FaWalking } from "react-icons/fa";
 import { useEffect } from "react";
 import { GiPathDistance } from "react-icons/gi";
 import { PiPath } from "react-icons/pi";
-import { useAuth } from "./AuthContext";
-export const WalkReport = ({rdist , tdist , rdistt , tdistt , walk , walkk}) => {
+export const WalkReport = ({tdd , cdd , walkk , walk , tdd , cd}) => {
   console.log(rdist , tdist , rdistt , tdistt);
   useEffect(() => {
     Aos.init({ once: true });
@@ -24,12 +23,12 @@ export const WalkReport = ({rdist , tdist , rdistt , tdistt , walk , walkk}) => 
     },
     {
       h1: "Remaining Distance ",
-      p: `${rdistt || rdist} m`,
+      p: `${(cd || cdd).toFixed(2)} m`,
       icon: <PiPath className={`${styles.icons} ${styles.heartbeat}`} />,
     },
     {
       h1: "Total Distance",
-      p: `${tdistt||tdist} m`,
+      p: `${(td||tdd).toFixed(2)} m`,
       icon: <GiPathDistance className={`${styles.icons}`} />,
     },
     {
