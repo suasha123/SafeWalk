@@ -22,6 +22,7 @@ import { useAuth } from "./AuthContext";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { SplashScreen } from "./SplashScreen";
 import { Backgroundcover } from "./bgcover";
+import { WalkReport } from "./W";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -51,7 +52,7 @@ export const TrackScreen = () => {
   const [destMarker, setDesMarker] = useState(null);
   const [routePolyline, setRoutePolyline] = useState([]);
   const [trackedPath, setTrackedPath] = useState([]);
-
+  const [walkk , setWalk] = useState("not Active");
   // Extract tracking ID
   useEffect(() => {
     const id = searchParams.get("trackid");
@@ -91,6 +92,7 @@ export const TrackScreen = () => {
           setRoutePolyline(data.path);
           setLoc([data.lat, data.long]);
           setTdistt(data.totaldis);
+          setWalk(data.completed);
           setRdistt(data.remainingdis);
           const covered = [
             ...data.path.slice(0, data.index + 1),
@@ -178,7 +180,7 @@ export const TrackScreen = () => {
           )}
         </MapContainer>
       </div>
-      <WalkReport rdistt={rdistt} tdistt={tdistt} />
+      <WalkReport rdistt={rdistt} tdistt={tdistt} walkk={walkk}/>
     </>
   );
 };

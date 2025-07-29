@@ -37,7 +37,7 @@ import { enqueueSnackbar } from "notistack";
 import { Backgroundcover } from "./bgcover";
 import { useLocation } from "react-router-dom";
 import { FaUserGroup } from "react-icons/fa6";
-import { WalkReport } from "./WalkrEPORT.JSX";
+import { WalkReport } from "./W.jsx";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -103,6 +103,7 @@ export const SafeWalk = () => {
   const [destLoc, setDestLoc] = useState(null);
   const [sourceMarker, setSourceMarker] = useState(null);
   const [desMarker, setDesMarker] = useState(null);
+  const [walk , setWalk] = useState("Not Active");
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
   const [searchParams] = useSearchParams();
@@ -487,6 +488,7 @@ export const SafeWalk = () => {
         setTrackedPath(covered);
         const result = await response.json();
         setRdist(result.r);
+        setWalk(result.walkdone===false ? "active" : "complete");
         if (result.walkdone) {
           if (trackingIntervalRef.current) {
             navigator.geolocation.clearWatch(trackingIntervalRef.current);
@@ -917,7 +919,7 @@ export const SafeWalk = () => {
           </div>
         </div>
       )}
-      <WalkReport tdist={tdist} rdist ={rdist}/>
+      <WalkReport tdist={tdist} rdist ={rdist} walk={walk}/>
     </>
   );
 };

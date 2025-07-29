@@ -8,7 +8,7 @@ import ChatLayout from './Components/ChatLayout';
 import { Report } from './Components/ReportArea';
 import { SafeWalk } from './Components/SafeWalk';
 import { TrackScreen } from './Components/TrackingScrren';
-import { WalkReport } from './Components/WalkrEPORT.JSX';
+import { WalkReport } from './Components/W.jsx';
 function App() {
   return (
     <Router>
