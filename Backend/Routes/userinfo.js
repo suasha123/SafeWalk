@@ -40,12 +40,15 @@ router.post("/updatePath", async (req, res) => {
     const coveredPoints = point
       .slice(0, index + 1)
       .map(([lat, lng]) => [lng, lat]);
-    const coveredDistance = turf.length(turf.lineString(coveredPoints), {
-      units: "meters",
-    });
-    const docrealtrack = await RealTrack.findOne({userid : curruserId});
-    if(!docrealtrack){
-      return res.status(404).json({msg : "No Trackig Session"});
+    let coveredDistance = 0;
+    if (coveredPoints.length >= 2) {
+      coveredDistance = turf.length(turf.lineString(coveredPoints), {
+        units: "meters",
+      });
+    }
+    const docrealtrack = await RealTrack.findOne({ userid: curruserId });
+    if (!docrealtrack) {
+      return res.status(404).json({ msg: "No Trackig Session" });
     }
     const totalDistance = docrealtrack.totalDist;
     const remainingDistance = totalDistance - coveredDistance;
