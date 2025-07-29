@@ -57,7 +57,6 @@ router.post("/updatePath", async (req, res) => {
     return res.status(200).json({
       msg: "Tracking data updated",
       walkdone: isCompleted,
-      r: remainingDistance.toFixed(2),
     });
   } catch (error) {
     console.error("UpdatePath Error:", error);
