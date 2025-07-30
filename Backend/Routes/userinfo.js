@@ -132,8 +132,11 @@ router.get("/exitWalk", async (req, res) => {
     return res.status(404).json({ msg: "User Not found" });
   }
   try {
-    await Track.deleteOne({ userid: userId });
+    const trackid = await Track.findOne({userid : userId});
+    const tid = trackid._id;
+    await trackid.deleteOne({ userid: userId });
     await RealTrackingModel.findOneAndDelete({ userid: userId });
+    await Danger.findOneAndDelete({trackid : tid}) 
     return res.status(200).json({ msg: "Success" });
   } catch (err) {
     console.log(err);
