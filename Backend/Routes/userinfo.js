@@ -27,7 +27,7 @@ router.get("/markzone", async (req, res) => {
     }
     const pathpoints = path.path;
     const every10thPoint = [];
-    for (let i = 0; i < pathpoints.length; i += 10) {
+    for (let i = 0; i < pathpoints.length; i += 5) {
       every10thPoint.push(pathpoints[i]);
     }
     let minLat = Infinity,
@@ -37,10 +37,10 @@ router.get("/markzone", async (req, res) => {
     console.log(every10thPoint);
     for (const point of every10thPoint) {
       const delta = 0.0045;
-      minLat = Math.min(minLat, point.lat - delta);
-      maxLat = Math.max(maxLat, point.lat + delta);
-      minLng = Math.min(minLng, point.lng - delta);
-      maxLng = Math.max(maxLng, point.lng + delta);
+      minLat = Math.min(minLat, point[0] - delta);
+      maxLat = Math.max(maxLat, point[0] + delta);
+      minLng = Math.min(minLng, point[1] - delta);
+      maxLng = Math.max(maxLng, point[1] + delta);
     }
     console.log(minLat);
     console.log(maxLat);
