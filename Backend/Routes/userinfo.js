@@ -54,7 +54,7 @@ router.get("/markzone", async (req, res) => {
       long: { $gte: minLng, $lte: maxLng },
     }).select("lat long -_id");
     console.log(dangerReports);*/}
-    res.status(200).json(dangerReports.locations);
+    res.status(200).json(dangerReports);
   } catch (err) {
     console.log(err);
   }
