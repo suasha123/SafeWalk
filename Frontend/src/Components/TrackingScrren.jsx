@@ -7,7 +7,7 @@ import {
 } from "react-leaflet";
 import * as turf from "@turf/turf";
 import "leaflet/dist/leaflet.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import L from "leaflet";
 import "../Style/reportarea.css";
 import "../Style/safeWalk.css";
@@ -40,6 +40,7 @@ const destMarkerIcon = new L.Icon({
 });
 export const TrackScreen = () => {
   const [searchParams] = useSearchParams();
+  const [showModal, setShowModal] = useState(true);
   const { loading, isLoggedIn } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ export const TrackScreen = () => {
   const [sourceMarker, setSourceMarker] = useState(null);
   const [destMarker, setDesMarker] = useState(null);
   const [routePolyline, setRoutePolyline] = useState([]);
+  const alertref = useRef(false);
   const [trackedPath, setTrackedPath] = useState([]);
   const [tdd, setTd] = useState(0);
   const [cdd, setCd] = useState(0);
@@ -102,6 +104,15 @@ export const TrackScreen = () => {
           if (data.completed === "completed") {
             window.location.href = "/safe-walk";
           }
+          if (data.isNearD===true && alertref.current === false) {
+            enqueueSnackbar("IN Danger Zone", { variant: "error" });
+            const audio = new Audio("/dangeralert.mp3");
+            audio.play();
+            alertref.current = true;
+            setTimeout(() => {
+              alertref.current = false;
+            }, 5000);
+          }
         } else {
           enqueueSnackbar(data.msg || "Something went wrong", {
             variant: "error",
@@ -117,10 +128,10 @@ export const TrackScreen = () => {
       }
     };
 
-    fetchTrackedPath(); // initial
+    fetchTrackedPath(); 
     const interval = setInterval(fetchTrackedPath, 3000);
 
-    return () => clearInterval(interval); // cleanup
+    return () => clearInterval(interval); 
   }, [trackId, enqueueSnackbar, navigate]);
 
   if (loading) return <SplashScreen />;
@@ -130,6 +141,21 @@ export const TrackScreen = () => {
   return (
     <>
       <NavBar />
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Welcome to SafeWalk</h2>
+            <p>Click below to see tracking screen.</p>
+            <button
+              onClick={() => {
+                setShowModal(false);
+              }}
+            >
+              Start Tracking
+            </button>
+          </div>
+        </div>
+      )}
       <div className="maincontainer">
         <MapContainer
           center={pos || [0, 0]}

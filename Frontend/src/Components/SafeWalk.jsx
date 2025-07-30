@@ -81,7 +81,7 @@ const FitMapToRoute = ({ polylineCoords }) => {
 export const SafeWalk = () => {
   const [trackingStatus, setTrackingStatus] = useState("idle");
   // "idle" | "processing" | "tracking"
-
+  const alertRef = useRef(false);
   const [routePolyline, setRoutePolyline] = useState(null);
   const { loading, isLoggedIn, user } = useAuth();
   const [showMapOverlay, setShowMapOverlay] = useState(true);
@@ -515,6 +515,16 @@ export const SafeWalk = () => {
         setTd(result.t);
         setCd(result.r);
         setWalk(result.walkdone === false ? "active" : "Completed");
+        if (result.isNearD === true && alertRef.current === false) {
+          enqueueSnackbar("IN Danger Zone", { variant: "error" });
+          const audio = new Audio("/dangeralert.mp3"); 
+              audio.play();
+          alertRef.current = true;
+          setTimeout(() => {
+            alertRef.current = false;
+          }, 5000);
+        }
+
         if (result.walkdone) {
           if (trackingIntervalRef.current) {
             navigator.geolocation.clearWatch(trackingIntervalRef.current);

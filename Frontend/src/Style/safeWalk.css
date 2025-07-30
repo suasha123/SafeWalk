@@ -590,3 +590,53 @@
     opacity: 0.7;
   }
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65); /* Transparent dark bg */
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: #181818; /* Dark modal box */
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(128, 44, 244, 0.5);
+  max-width: 320px;
+  border: 1px solid #802cf4;
+}
+
+.modal h2 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.modal p {
+  color: #cccccc;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal button {
+  background: linear-gradient(to right, #a855f7, #7e22ce);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.modal button:hover {
+  background: linear-gradient(to right, #c084fc, #9333ea);
+}
