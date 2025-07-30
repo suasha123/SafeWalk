@@ -26,8 +26,9 @@ router.get("/markzone", async (req, res) => {
     if (!path) {
       res.status(400).json({ msg: "No path found" });
     }
-    const dangerReports = await Danger.find({trackid : path._id});
-    {/*const pathpoints = path.path;
+    const dangerReports = await Danger.find({ trackid: path._id });
+    {
+      /*const pathpoints = path.path;
     const every10thPoint = [];
     for (let i = 0; i < pathpoints.length; i += 5) {
       every10thPoint.push(pathpoints[i]);
@@ -53,8 +54,9 @@ router.get("/markzone", async (req, res) => {
       lat: { $gte: minLat, $lte: maxLat },
       long: { $gte: minLng, $lte: maxLng },
     }).select("lat long -_id");
-    console.log(dangerReports);*/}
-    const allLocations = dangerReports.flatMap(report => report.locations);
+    console.log(dangerReports);*/
+    }
+    const allLocations = dangerReports.flatMap((report) => report.locations);
     res.status(200).json(allLocations);
   } catch (err) {
     console.log(err);
@@ -72,6 +74,7 @@ router.post("/updatePath", async (req, res) => {
       return res.status(403).json({ msg: "Unauthorized" });
     }
     const path = await Track.findOne({ userid });
+    const tid = path._id;
     const point = path.path;
     const lastpoint = point[point.length - 1];
     const isNearer = (point, lat, lng, threshold = 0.0003) => {
@@ -92,6 +95,29 @@ router.post("/updatePath", async (req, res) => {
     const doc = await RealTrack.findOne({ userid: curruserId });
     const totalDistance = doc.totaldist;
     const remainingMeters = Math.max(totalDistance - coveredMeters, 0);
+    const findIfisindanger = async (lat, long) => {
+      const distance = 50;
+      const deltaLat = distance / 111000;
+      const deltaLng = distance / (111000 * Math.cos((lat * Math.PI) / 180));
+      const minLat = lat - deltaLat;
+      const maxLat = lat + deltaLat;
+      const minLng = long - deltaLng;
+      const maxLng = long + deltaLng;
+      const zone = await Danger.findOne({
+        trackid : tid,
+        locations: {
+          $elemMatch: {
+            lat: { $gte: minLat, $lte: maxLat },
+            long: { $gte: minLng, $lte: maxLng },
+          },
+        },
+      });
+      if(zone){
+        return true;
+      }
+      return false;
+    };
+    const isIndanger = await findIfisindanger(nearestLat, nearestLng);
     const updated = await RealTrack.findOneAndUpdate(
       { userid: curruserId },
       {
@@ -101,6 +127,7 @@ router.post("/updatePath", async (req, res) => {
           lastindex: index,
           status: isCompleted ? "completed" : "active",
           cdist: remainingMeters,
+          isIndanger : isIndanger
         },
       },
       { new: true }
@@ -115,6 +142,7 @@ router.post("/updatePath", async (req, res) => {
       walkdone: isCompleted,
       r: remainingMeters,
       t: updated.totaldist,
+      isNearD : isIndanger
     });
   } catch (error) {
     console.error("UpdatePath Error:", error);
@@ -132,11 +160,11 @@ router.get("/exitWalk", async (req, res) => {
     return res.status(404).json({ msg: "User Not found" });
   }
   try {
-    const trackid = await Track.findOne({userid : userId});
+    const trackid = await Track.findOne({ userid: userId });
     const tid = trackid._id;
     await trackid.deleteOne({ userid: userId });
     await RealTrackingModel.findOneAndDelete({ userid: userId });
-    await Danger.findOneAndDelete({trackid : tid}) 
+    await Danger.findOneAndDelete({ trackid: tid });
     return res.status(200).json({ msg: "Success" });
   } catch (err) {
     console.log(err);

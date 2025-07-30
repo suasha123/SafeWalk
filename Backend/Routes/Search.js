@@ -55,6 +55,7 @@ router.get("/cpath/:id", async (req, res) => {
       path: fullPath,
       cdist : Trackingexist.cdist,
       tdist:Trackingexist.totaldist,
+      isNearD : Trackingexist.isIndanger,
     });
   } catch (err) {
     res.status(500).json({ msg: "Error occured" });

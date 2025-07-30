@@ -29,6 +29,7 @@ import { TbMessageReport } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import { FaRoute, FaS } from "react-icons/fa6";
 import { GiDeathZone } from "react-icons/gi";
+import { MdAltRoute } from "react-icons/md";
 import { MdStopCircle } from "react-icons/md";
 import * as turf from "@turf/turf";
 import { RxExit } from "react-icons/rx";
@@ -115,7 +116,11 @@ export const SafeWalk = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const [dangerZones, setDangerZones] = useState([]);
-
+  const [mode, setMode] = useState({
+    showD: true,
+    showP: false,
+    showAlt: false,
+  });
   useEffect(() => {
     return () => {
       if (trackingIntervalRef.current) {
@@ -616,6 +621,7 @@ export const SafeWalk = () => {
       enqueueSnackbar("Start SafeWalk", { variant: "warning" });
       return;
     }
+    setMode({ showD: false, showP: true, showAlt: false });
     try {
       const response = await fetch(
         "https://safewalk-xbkj.onrender.com/api/markzone",
@@ -626,6 +632,7 @@ export const SafeWalk = () => {
       if (response.ok) {
         const data = await response.json();
         setDangerZones(data);
+        setMode({ showD: false, showP: false, showAlt: true });
       }
     } catch (err) {
       console.log(err);
@@ -797,24 +804,44 @@ export const SafeWalk = () => {
                   </button>
                 )}
 
-                <button
-                  data-aos="fade-down"
-                  data-aos-duration="500"
-                  data-aos-easing="ease"
-                  className="floating-btn danger"
-                  onClick={() => {
-                    if (routePolyline) {
-                      showdangerzone();
-                    } else {
-                      enqueueSnackbar("Route Not set yet", {
-                        variant: "warning",
-                      });
-                      return;
-                    }
-                  }}
-                >
-                  <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
-                </button>
+                {mode && mode.showD && (
+                  <button
+                    data-aos="fade-down"
+                    data-aos-duration="500"
+                    data-aos-easing="ease"
+                    className="floating-btn danger"
+                    onClick={() => {
+                      if (routePolyline) {
+                        showdangerzone();
+                      } else {
+                        enqueueSnackbar("Route Not set yet", {
+                          variant: "warning",
+                        });
+                        return;
+                      }
+                    }}
+                  >
+                    <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
+                  </button>
+                )}
+                {mode && mode.showP && (
+                  <button className="floating-btn processing" disabled>
+                    <div className="spinner-circle small" /> Processing...
+                  </button>
+                )}
+
+                {mode && mode.showAlt && (
+                  <button
+                    className="alt-route"
+                    onClick={() => {
+                      setDangerZones([]);
+                      setMode({ showD: true, showP: false, showAlt: false });
+                    }}
+                  >
+                    <MdAltRoute size={"25px"} color="white" /> Show Alternate
+                    Route
+                  </button>
+                )}
               </div>
             )}
           </Fragment>

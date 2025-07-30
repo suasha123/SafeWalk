@@ -47,6 +47,10 @@ const liveTracker = new mongoose.Schema({
   },
   cdist :{
     type:Number,
+  },
+  isIndanger : {
+    type : Boolean,
+    default : false,
   }
 });
 
