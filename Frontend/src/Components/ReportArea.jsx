@@ -520,7 +520,7 @@ export const Report = () => {
                 ))
               ) : (
                 <p className="no-reports">
-                  🔍 No reports found for this area yet.
+                 "No reports found for this area yet."
                 </p>
               )}
             </>
@@ -560,12 +560,15 @@ export const Report = () => {
                 ))
               ) : (
                 <p className="no-reports">
-                  📭 You haven't submitted any reports yet.
+                  "You haven't submitted any reports yet."
                 </p>
               )}
             </>
           )}
         </div>
+      </div>
+      <div style={{height : "90px" , backgroundColor : "#1e1e2f"}}>
+
       </div>
 
       {/* Bottom Sheet Modal for Report */}
