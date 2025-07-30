@@ -56,6 +56,12 @@ const destMarkerIcon = new L.Icon({
 });
 
 const TEXTS = ["Loading Map", "Fetching Location"];
+const pulsingIcon = L.divIcon({
+  className: "pulse-marker",
+  iconSize: [20, 20],
+  html: `<div class="pulse-ring"></div>`,
+});
+
 const FitMapToRoute = ({ polylineCoords }) => {
   const map = useMap();
   const hasFlown = useRef(false);
@@ -108,6 +114,7 @@ export const SafeWalk = () => {
   const [loadingR, setLoadingR] = useState(false);
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const [dangerZones, setDangerZones] = useState([]);
 
   useEffect(() => {
     return () => {
@@ -617,7 +624,8 @@ export const SafeWalk = () => {
         }
       );
       if (response.ok) {
-        console.log(response);
+        const data = await response.json();
+        setDangerZones(data);
       }
     } catch (err) {
       console.log(err);
@@ -746,6 +754,15 @@ export const SafeWalk = () => {
               {trackedPath && trackedPath.length > 1 && (
                 <Polyline positions={trackedPath} color="#802cf4" weight={5} />
               )}
+              {dangerZones.map((zone, index) => (
+                <Marker
+                  key={index}
+                  position={[parseFloat(zone.lat), parseFloat(zone.long)]}
+                  icon={pulsingIcon}
+                >
+                  <Popup>Danger Zone</Popup>
+                </Marker>
+              ))}
             </MapContainer>
             {!loadingg && !showMapOverlay && (
               <div className="floating-buttons">
