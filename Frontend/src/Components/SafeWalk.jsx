@@ -605,7 +605,7 @@ export const SafeWalk = () => {
   }, [loading, isLoggedIn, navigate]);
 
   const showdangerzone = async () => {
-    if (!searchParams.get("walkid") || !searchParams.get("track")) {
+    if (!searchParams.get("trackid")) {
       enqueueSnackbar("Start SafeWalk", { variant: "warning" });
       return;
     }
