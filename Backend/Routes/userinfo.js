@@ -34,19 +34,23 @@ router.get("/markzone", async (req, res) => {
       maxLat = -Infinity;
     let minLng = Infinity,
       maxLng = -Infinity;
-
+    console.log(every10thPoint);
     for (const point of every10thPoint) {
       const delta = 0.0045;
-
       minLat = Math.min(minLat, point.lat - delta);
       maxLat = Math.max(maxLat, point.lat + delta);
       minLng = Math.min(minLng, point.lng - delta);
       maxLng = Math.max(maxLng, point.lng + delta);
     }
+    console.log(minLat);
+    console.log(maxLat);
+    console.log(minLng);
+    console.log(maxLng);
     const dangerReports = await ReportModel.find({
       lat: { $gte: minLat, $lte: maxLat },
-      long : { $gte: minLng, $lte: maxLng }
+      long: { $gte: minLng, $lte: maxLng },
     }).select("lat long");
+    console.log(dangerReports);
     res.status(200).json(dangerReports);
   } catch (err) {
     console.log(err);
