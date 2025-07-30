@@ -410,7 +410,16 @@ export const SafeWalk = () => {
       const routeLine = lineString(
         routePolyline.map(([lat, lng]) => [lng, lat])
       );
-      const userPoint = point([sourceLoc[1], sourceLoc[0]]);
+      if (!sourceLoc) {
+        enqueueSnackbar("starting track from Current Location", {
+          variant: "success",
+        });
+        console.log(pos);
+      }
+      const userPoint = point([
+        sourceLoc?.[1] !== undefined ? sourceLoc[1] : pos?.[1],
+        sourceLoc?.[0] !== undefined ? sourceLoc[0] : pos?.[0],
+      ]);
       const snapped = nearestPointOnLine(routeLine, userPoint);
       const nearestLat = snapped.geometry.coordinates[1];
       const nearestLng = snapped.geometry.coordinates[0];
@@ -475,12 +484,6 @@ export const SafeWalk = () => {
     const nearestLat = snapped.geometry.coordinates[1];
     const nearestLng = snapped.geometry.coordinates[0];
     const index = snapped.properties.index;
-    console.log("Calling storeTrackedPath with:", {
-      nearestLat,
-      nearestLng,
-      index,
-      userId: user?.id,
-    });
     if (!hasStartedTracking.current) {
       if (searchParams.get("trackid")) {
         hasStartedTracking.current = true;
@@ -499,7 +502,7 @@ export const SafeWalk = () => {
         const result = await response.json();
         setTd(result.t);
         setCd(result.r);
-        setWalk(result.walkdone===false?"active" :"Completed");
+        setWalk(result.walkdone === false ? "active" : "Completed");
         if (result.walkdone) {
           if (trackingIntervalRef.current) {
             navigator.geolocation.clearWatch(trackingIntervalRef.current);
@@ -518,7 +521,6 @@ export const SafeWalk = () => {
 
   const updateCurrPath = async (nearestLat, nearestLng, index) => {
     const payload = { nearestLat, nearestLng, index, userid: user.id };
-    console.log(payload);
     try {
       const response = await fetch(
         "https://safewalk-xbkj.onrender.com/api/updatePath",
@@ -537,9 +539,7 @@ export const SafeWalk = () => {
     }
   };
   const storeTrackedPath = async (nearestLat, nearestLng, index) => {
-    console.log("hi");
     const payload = { nearestLat, nearestLng, index };
-    console.log("payload hai " + payload);
     try {
       const response = await fetch(
         "https://safewalk-xbkj.onrender.com/upload/trackedPath",
@@ -930,7 +930,7 @@ export const SafeWalk = () => {
           </div>
         </div>
       )}
-      <WalkReport  td={td} cd={cd} walk={walk}/>
+      <WalkReport td={td} cd={cd} walk={walk} />
     </>
   );
 };
