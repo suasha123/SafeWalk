@@ -15,6 +15,43 @@ const Track = require("../database/model/TrackingModel");
 const RealTrack = require("../database/model/RealTrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
 const parser = multer({ storage });
+router.get("/markzone", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log in again" });
+  }
+  const user = req.session.passport.user;
+  try {
+    const path = await Track.findOne({ userid: user });
+    if (!path) {
+      res.status(400).json({ msg: "No path found" });
+    }
+    const pathpoints = path.path;
+    const every10thPoint = [];
+    for (let i = 0; i < pathpoints.length; i += 10) {
+      every10thPoint.push(path[i]);
+    }
+    let minLat = Infinity,
+      maxLat = -Infinity;
+    let minLng = Infinity,
+      maxLng = -Infinity;
+
+    for (const point of every10thPoint) {
+      const delta = 0.0009;
+
+      minLat = Math.min(minLat, point.lat - delta);
+      maxLat = Math.max(maxLat, point.lat + delta);
+      minLng = Math.min(minLng, point.lng - delta);
+      maxLng = Math.max(maxLng, point.lng + delta);
+    }
+    const dangerReports = await ReportModel.find({
+      lat: { $gte: minLat, $lte: maxLat },
+      long : { $gte: minLng, $lte: maxLng }
+    }).select("lat long");
+    res.status(200).json(dangerReports);
+  } catch (err) {
+    console.log(err);
+  }
+});
 router.post("/updatePath", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(403).json({ msg: "Log in again" });
@@ -38,13 +75,13 @@ router.post("/updatePath", async (req, res) => {
     const isCompleted = isNearer(lastpoint, nearestLat, nearestLng);
     let coveredMeters = 0;
     if (index > 0) {
-      const coveredPoints = point.slice(0, index + 1); 
+      const coveredPoints = point.slice(0, index + 1);
       const converted = coveredPoints.map(([lat, lng]) => [lng, lat]);
       const line = turf.lineString(converted);
       const km = turf.length(line, { units: "kilometers" });
       coveredMeters = km * 1000;
     }
-    const doc = await RealTrack.findOne({userid :curruserId});
+    const doc = await RealTrack.findOne({ userid: curruserId });
     const totalDistance = doc.totaldist;
     const remainingMeters = Math.max(totalDistance - coveredMeters, 0);
     const updated = await RealTrack.findOneAndUpdate(
@@ -55,7 +92,7 @@ router.post("/updatePath", async (req, res) => {
           nearestLong: nearestLng,
           lastindex: index,
           status: isCompleted ? "completed" : "active",
-          cdist : remainingMeters
+          cdist: remainingMeters,
         },
       },
       { new: true }
@@ -68,8 +105,8 @@ router.post("/updatePath", async (req, res) => {
     return res.status(200).json({
       msg: "Tracking data updated",
       walkdone: isCompleted,
-      r : remainingMeters,
-      t :updated.totaldist
+      r: remainingMeters,
+      t: updated.totaldist,
     });
   } catch (error) {
     console.error("UpdatePath Error:", error);

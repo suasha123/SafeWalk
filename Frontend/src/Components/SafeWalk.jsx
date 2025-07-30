@@ -603,6 +603,26 @@ export const SafeWalk = () => {
       navigate("/");
     }
   }, [loading, isLoggedIn, navigate]);
+
+  const showdangerzone = async () => {
+    if (!searchParams.get("walkid") || !searchParams.get("track")) {
+      enqueueSnackbar("Start SafeWalk", { variant: "warning" });
+      return;
+    }
+    try {
+      const response = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/markzone",
+        {
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        console.log(response);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
 
@@ -766,7 +786,14 @@ export const SafeWalk = () => {
                   data-aos-easing="ease"
                   className="floating-btn danger"
                   onClick={() => {
-                    alert("Toggled Danger Zones");
+                    if (routePolyline) {
+                      showdangerzone();
+                    } else {
+                      enqueueSnackbar("Route Not set yet", {
+                        variant: "warning",
+                      });
+                      return;
+                    }
                   }}
                 >
                   <GiDeathZone size={"25px"} color="red" /> Show Danger Zones
