@@ -36,11 +36,12 @@ router.get("/markzone", async (req, res) => {
       maxLng = -Infinity;
     console.log(every10thPoint);
     for (const point of every10thPoint) {
-      const delta = 0.0018;
-      minLat = Math.min(minLat, point[0] - delta);
-      maxLat = Math.max(maxLat, point[0] + delta);
-      minLng = Math.min(minLng, point[1] - delta);
-      maxLng = Math.max(maxLng, point[1] + delta);
+      const deltaLat = 200 / 111000;
+      const deltaLng = 200 / (111000 * Math.cos((point[0] * Math.PI) / 180));
+      minLat = Math.min(minLat, point[0] - deltaLat);
+      maxLat = Math.max(maxLat, point[0] + deltaLat);
+      minLng = Math.min(minLng, point[1] - deltaLng);
+      maxLng = Math.max(maxLng, point[1] + deltaLng);
     }
     console.log(minLat);
     console.log(maxLat);
