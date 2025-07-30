@@ -7,6 +7,7 @@ const GroupModal = require("../database/model/groupmodel");
 const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
+const Danger = require("../database/model/DangerZone");
 const turf = require("@turf/turf");
 const parser = multer({ storage });
 router.post("/trackedPath", async (req, res) => {
@@ -70,7 +71,40 @@ router.post("/fetchedpath", async (req, res) => {
       path: payload.path,
       status: "pending",
     });
-    return res.status(200).json({ id: doc._id });
+    if (doc) {
+      const pathpoints = doc.path;
+      const tid = doc._id;
+      const every10thPoint = [];
+      for (let i = 0; i < pathpoints.length; i += 5) {
+        every10thPoint.push(pathpoints[i]);
+      }
+      let minLat = Infinity,
+        maxLat = -Infinity;
+      let minLng = Infinity,
+        maxLng = -Infinity;
+      console.log(every10thPoint);
+      for (const point of every10thPoint) {
+        const deltaLat = 200 / 111000;
+        const deltaLng = 200 / (111000 * Math.cos((point[0] * Math.PI) / 180));
+        minLat = Math.min(minLat, point[0] - deltaLat);
+        maxLat = Math.max(maxLat, point[0] + deltaLat);
+        minLng = Math.min(minLng, point[1] - deltaLng);
+        maxLng = Math.max(maxLng, point[1] + deltaLng);
+      }
+      console.log(minLat);
+      console.log(maxLat);
+      console.log(minLng);
+      console.log(maxLng);
+      const dangerReports = await ReportModel.find({
+        lat: { $gte: minLat, $lte: maxLat },
+        long: { $gte: minLng, $lte: maxLng },
+      });
+      await Danger.create({
+        trackid : tid,
+        locations: dangerReports.map((r) => ({ lat: r.lat, long: r.long })),
+      });
+      return res.status(200).json({ id: doc._id });
+    }
   } catch (err) {
     return res.status(500).json({ msg: "Server Error" });
   }

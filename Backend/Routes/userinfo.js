@@ -14,6 +14,7 @@ const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
 const RealTrack = require("../database/model/RealTrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
+const Danger = require("../database/model/DangerZone");
 const parser = multer({ storage });
 router.get("/markzone", async (req, res) => {
   if (!req.isAuthenticated()) {
@@ -25,7 +26,9 @@ router.get("/markzone", async (req, res) => {
     if (!path) {
       res.status(400).json({ msg: "No path found" });
     }
-    const pathpoints = path.path;
+    const dangerReports = await Danger.find({trackid : path._id});
+    
+    {/*const pathpoints = path.path;
     const every10thPoint = [];
     for (let i = 0; i < pathpoints.length; i += 5) {
       every10thPoint.push(pathpoints[i]);
@@ -51,7 +54,7 @@ router.get("/markzone", async (req, res) => {
       lat: { $gte: minLat, $lte: maxLat },
       long: { $gte: minLng, $lte: maxLng },
     }).select("lat long -_id");
-    console.log(dangerReports);
+    console.log(dangerReports);*/}
     res.status(200).json(dangerReports);
   } catch (err) {
     console.log(err);
