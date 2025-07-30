@@ -143,9 +143,18 @@ router.get("/getReportsByLocation", async (req, res) => {
     return res.status(400).json({ msg: "Missing location data" });
   }
 
+  const latNum = parseFloat(lat);
+  const longNum = parseFloat(long);
+
+  const meters = 100;
+  const earthRadius = 111000;
+
+  const deltaLat = meters / earthRadius;
+  const deltaLong = meters / (earthRadius * Math.cos((latNum * Math.PI) / 180));
+
   const query = {
-    lat: { $regex: new RegExp(`^${lat.slice(0, 5)}`) },
-    long: { $regex: new RegExp(`^${long.slice(0, 5)}`) },
+    lat: { $gte: latNum - deltaLat, $lte: latNum + deltaLat },
+    long: { $gte: longNum - deltaLong, $lte: longNum + deltaLong },
   };
 
   try {
@@ -159,8 +168,8 @@ router.get("/getReportsByLocation", async (req, res) => {
       description: report.desc,
       datetime: report.timeofReport,
       type: report.incidenttype,
-      long: report.long,
-      lat: report.lat,
+      long: report.long.toFixed(3),
+      lat: report.lat.toFixed(3),
     }));
 
     res.json(formattedReports);
@@ -169,6 +178,7 @@ router.get("/getReportsByLocation", async (req, res) => {
     res.status(500).json({ msg: "Error fetching reports" });
   }
 });
+
 router.get("/getReportsByUser", async (req, res) => {
   const userId = req.session.passport?.user;
 
@@ -185,8 +195,8 @@ router.get("/getReportsByUser", async (req, res) => {
       description: report.desc,
       type: report.incidenttype,
       datetime: report.timeofReport,
-      long: report.long,
-      lat: report.lat,
+      long: report.long.toFixed(3),
+      lat: report.lat.toFixed(3),
     }));
 
     res.json(formattedReports);
@@ -210,12 +220,19 @@ router.get("/getCount", async (req, res) => {
         .json({ msg: "Latitude and longitude are required" });
     }
 
-    const latPrefix = lat.slice(0, 5);
-    const longPrefix = long.slice(0, 5);
+    const latNum = parseFloat(lat);
+    const longNum = parseFloat(long);
+
+    const meters = 100;
+    const earthRadius = 111000;
+
+    const deltaLat = meters / earthRadius;
+    const deltaLong =
+      meters / (earthRadius * Math.cos((latNum * Math.PI) / 180));
 
     const count = await ReportModel.countDocuments({
-      lat: { $regex: `^${latPrefix}` },
-      long: { $regex: `^${longPrefix}` },
+      lat: { $gte: latNum - deltaLat, $lte: latNum + deltaLat },
+      long: { $gte: longNum - deltaLong, $lte: longNum + deltaLong },
     });
 
     return res.status(200).json({ count });

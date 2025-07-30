@@ -77,7 +77,6 @@ router.post("/fetchedpath", async (req, res) => {
 });
 router.post("/report", async (req, res) => {
   const payload = req.body;
-
   if (!payload) {
     return res.status(403).json({ msg: "Invalid Request" });
   }

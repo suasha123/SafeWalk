@@ -195,13 +195,10 @@ export const Report = () => {
       if (!Location || Location.length !== 2) return;
 
       const [lat, long] = Location;
-      const Latitude = parseFloat(lat.toFixed(3));
-      const Longitude = parseFloat(long.toFixed(3));
-
       setuserCount(null);
       try {
         const response = await fetch(
-          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${Latitude}&long=${Longitude}`,
+          `https://safewalk-xbkj.onrender.com/api/getCount?lat=${lat}&long=${long}`,
           {
             credentials: "include",
           }
@@ -225,8 +222,8 @@ export const Report = () => {
         if (!loc || loc.length !== 2) return;
         const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
         if (lastFetchedLoc === key) return;
-              const lat = parseFloat(loc[0].toFixed(3));
-      const long = parseFloat(loc[1].toFixed(3));
+      const lat = loc[0];
+      const long = loc[1];
         setTabLoading(true);
         try {
           const res = await fetch(

@@ -7,11 +7,11 @@ const ReportSchema = new mongoose.Schema(
       required: true,
     },
     lat: {
-      type: String,
+      type: Number,
       required: true,
     },
     long: {
-      type: String,
+      type: Number,
       required: true,
     },
     desc: {
