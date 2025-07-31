@@ -316,7 +316,7 @@ export const SafeWalk = () => {
         }
       );
       const data = await response.json();
-
+      //////////////////////////////////////////////
       if (response.ok) {
         setSourceMarker(data.src);
         setDesMarker(data.dest);
@@ -375,6 +375,7 @@ export const SafeWalk = () => {
         )}&dest=${destLoc.join(",")}`
       );
       const data = await res.json();
+      console.log(data);
       const decoded = polyline.decode(data.routes[0].geometry);
       const result = await storepathinBackend(decoded);
       const m = await result.json();
