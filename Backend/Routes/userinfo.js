@@ -15,7 +15,29 @@ const Track = require("../database/model/TrackingModel");
 const RealTrack = require("../database/model/RealTrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
 const Danger = require("../database/model/DangerZone");
+const AllPathmodel = require("../database/model/AllPathmodel");
 const parser = multer({ storage });
+router.get("/altRoute", async (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log in again" });
+  }
+  try {
+    const uid = req.session.passport.user;
+    const pathid = await Track.findOne({ userid: uid });
+    if (!pathid) {
+      return res.status(403).json({ msg: "No Walk found" });
+    }
+    const tid = pathid._id;
+    const allpath = await AllPathmodel.findOne({ trackid: tid });
+    const currindex = allpath.index;
+    const allroutes = allpath.routes;
+    const nxtroute = allroutes[((currindex + 1) % allroutes.length)];
+    return res.status(200).json({ nextr: nxtroute });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: "Server  error" });
+  }
+});
 router.get("/markzone", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(403).json({ msg: "Log in again" });
@@ -104,7 +126,7 @@ router.post("/updatePath", async (req, res) => {
       const minLng = long - deltaLng;
       const maxLng = long + deltaLng;
       const zone = await Danger.findOne({
-        trackid : tid,
+        trackid: tid,
         locations: {
           $elemMatch: {
             lat: { $gte: minLat, $lte: maxLat },
@@ -112,7 +134,7 @@ router.post("/updatePath", async (req, res) => {
           },
         },
       });
-      if(zone){
+      if (zone) {
         return true;
       }
       return false;
@@ -127,7 +149,7 @@ router.post("/updatePath", async (req, res) => {
           lastindex: index,
           status: isCompleted ? "completed" : "active",
           cdist: remainingMeters,
-          isIndanger : isIndanger
+          isIndanger: isIndanger,
         },
       },
       { new: true }
@@ -142,7 +164,7 @@ router.post("/updatePath", async (req, res) => {
       walkdone: isCompleted,
       r: remainingMeters,
       t: updated.totaldist,
-      isNearD : isIndanger
+      isNearD: isIndanger,
     });
   } catch (error) {
     console.error("UpdatePath Error:", error);

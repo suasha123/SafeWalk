@@ -8,6 +8,7 @@ const ReportModel = require("../database/model/ReportModel");
 const Track = require("../database/model/TrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
 const Danger = require("../database/model/DangerZone");
+const AllPath = require("../database/model/AllPathmodel");
 const turf = require("@turf/turf");
 const parser = multer({ storage });
 router.post("/trackedPath", async (req, res) => {
@@ -59,6 +60,8 @@ router.post("/fetchedpath", async (req, res) => {
   }
   const payload = req.body;
   const userid = req.session.passport.user;
+  const allpath = payload.allpath;
+  console.log(allpath);
   if (!payload) {
     console.log("Payload not recieved");
     return res.status(400).json({ msg: "No payload" });
@@ -100,9 +103,13 @@ router.post("/fetchedpath", async (req, res) => {
         long: { $gte: minLng, $lte: maxLng },
       });
       await Danger.create({
-        trackid : tid,
+        trackid: tid,
         locations: dangerReports.map((r) => ({ lat: r.lat, long: r.long })),
       });
+      await AllPath.create({
+        routes : allpath,
+        trackid : tid,
+      })
       return res.status(200).json({ id: doc._id });
     }
   } catch (err) {

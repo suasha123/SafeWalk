@@ -375,9 +375,9 @@ export const SafeWalk = () => {
         )}&dest=${destLoc.join(",")}`
       );
       const data = await res.json();
-      console.log(data);
+      const allRoutes = data.routes.map((route) => route.geometry);
       const decoded = polyline.decode(data.routes[0].geometry);
-      const result = await storepathinBackend(decoded);
+      const result = await storepathinBackend(decoded, allRoutes);
       const m = await result.json();
       if (result.ok) {
         navigate(`/safe-walk?walkid=${m.id}`);
@@ -392,12 +392,12 @@ export const SafeWalk = () => {
     }
   };
 
-  const storepathinBackend = async (path) => {
+  const storepathinBackend = async (path, allRoutes) => {
     if (!path) {
       return;
     }
     try {
-      const payload = { src: sourceLoc, des: destLoc, path };
+      const payload = { src: sourceLoc, des: destLoc, path, allRoutes };
       const response = await fetch(
         `https://safewalk-xbkj.onrender.com/upload/fetchedpath`,
         {
@@ -518,8 +518,8 @@ export const SafeWalk = () => {
         setWalk(result.walkdone === false ? "active" : "Completed");
         if (result.isNearD === true && alertRef.current === false) {
           enqueueSnackbar("IN Danger Zone", { variant: "error" });
-          const audio = new Audio("/dangeralert.mp3"); 
-              audio.play();
+          const audio = new Audio("/dangeralert.mp3");
+          audio.play();
           alertRef.current = true;
           setTimeout(() => {
             alertRef.current = false;
@@ -626,27 +626,48 @@ export const SafeWalk = () => {
       navigate("/");
     }
   }, [loading, isLoggedIn, navigate]);
-
-  const showdangerzone = async () => {
-    if (!searchParams.get("trackid")) {
-      enqueueSnackbar("Start SafeWalk", { variant: "warning" });
+  const showAltRoute = async () => {
+    if (searchParams.get("trackid")) {
+      enqueueSnackbar("Tracking already started", { variant: "warning" });
       return;
     }
-    setMode({ showD: false, showP: true, showAlt: false });
+    if (!routePolyline) {
+      enqueueSnackbar("Route Not set yet", { variant: "warning" });
+      return;
+    }
     try {
       const response = await fetch(
-        "https://safewalk-xbkj.onrender.com/api/markzone",
+        "https://safewalk-xbkj.onrender.com/api/altRoute",
         {
           credentials: "include",
         }
       );
-      if (response.ok) {
-        const data = await response.json();
-        setDangerZones(data);
-        setMode({ showD: false, showP: false, showAlt: true });
-      }
+      console.log(response);
     } catch (err) {
       console.log(err);
+    }
+  };
+  const showdangerzone = async () => {
+    if (searchParams.get("trackid") || searchParams.get("walkid")) {
+      setMode({ showD: false, showP: true, showAlt: false });
+      try {
+        const response = await fetch(
+          "https://safewalk-xbkj.onrender.com/api/markzone",
+          {
+            credentials: "include",
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setDangerZones(data);
+          setMode({ showD: false, showP: false, showAlt: true });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      enqueueSnackbar("Start SafeWalk", { variant: "warning" });
+      return;
     }
   };
   if (loading) return <SplashScreen />;
@@ -736,7 +757,16 @@ export const SafeWalk = () => {
                 </div>
               </div>
             )}
-
+            {searchParams.get("walkid") && (
+              <button
+                className="alt-route"
+                onClick={() => {
+                  showAltRoute();
+                }}
+              >
+                <MdAltRoute size={"25px"} color="white" /> Show Alternate Route
+              </button>
+            )}
             <MapContainer
               center={pos}
               zoom={13}
@@ -843,7 +873,19 @@ export const SafeWalk = () => {
 
                 {mode && mode.showAlt && (
                   <button
+                    className="floating-btn danger"
+                    onClick={() => {
+                      setDangerZones([]);
+                      setMode({ showD: true, showP: false, showAlt: false });
+                    }}
+                  >
+                    Stop Showing Danger Zone
+                  </button>
+                )}
+
+                {/* <button
                     className="alt-route"
+                    disabled={true}
                     onClick={() => {
                       setDangerZones([]);
                       setMode({ showD: true, showP: false, showAlt: false });
@@ -851,8 +893,7 @@ export const SafeWalk = () => {
                   >
                     <MdAltRoute size={"25px"} color="white" /> Show Alternate
                     Route
-                  </button>
-                )}
+                  </button> */}
               </div>
             )}
           </Fragment>
