@@ -59,6 +59,8 @@ router.post("/fetchedpath", async (req, res) => {
     return res.status(403).json({ msg: "Unauthorized" });
   }
   const payload = req.body;
+  console.log("apyload hai");
+  console.log(payload);
   const userid = req.session.passport.user;
   const allpath = payload.allpath;
   console.log(allpath);

@@ -376,6 +376,7 @@ export const SafeWalk = () => {
       );
       const data = await res.json();
       const allRoutes = data.routes.map((route) => route.geometry);
+      console.log(allRoutes);
       const decoded = polyline.decode(data.routes[0].geometry);
       const result = await storepathinBackend(decoded, allRoutes);
       const m = await result.json();
@@ -397,7 +398,7 @@ export const SafeWalk = () => {
       return;
     }
     try {
-      const payload = { src: sourceLoc, des: destLoc, path, allRoutes };
+      const payload = { src: sourceLoc, des: destLoc, path, allpath : allRoutes };
       const response = await fetch(
         `https://safewalk-xbkj.onrender.com/upload/fetchedpath`,
         {

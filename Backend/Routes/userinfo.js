@@ -18,7 +18,7 @@ const Danger = require("../database/model/DangerZone");
 const AllPathmodel = require("../database/model/AllPathmodel");
 const parser = multer({ storage });
 router.get("/altRoute", async (req, res) => {
-  if (req.isAuthenticated()) {
+  if (!req.isAuthenticated()) {
     return res.status(403).json({ msg: "Log in again" });
   }
   try {
@@ -31,7 +31,7 @@ router.get("/altRoute", async (req, res) => {
     const allpath = await AllPathmodel.findOne({ trackid: tid });
     const currindex = allpath.index;
     const allroutes = allpath.routes;
-    const nxtroute = allroutes[((currindex + 1) % allroutes.length)];
+    const nxtroute = allroutes[(currindex + 1) % allroutes.length];
     return res.status(200).json({ nextr: nxtroute });
   } catch (err) {
     console.log(err);
@@ -187,6 +187,7 @@ router.get("/exitWalk", async (req, res) => {
     await trackid.deleteOne({ userid: userId });
     await RealTrackingModel.findOneAndDelete({ userid: userId });
     await Danger.findOneAndDelete({ trackid: tid });
+    await AllPathmodel.findOneAndDelete({ trackid: tid });
     return res.status(200).json({ msg: "Success" });
   } catch (err) {
     console.log(err);
