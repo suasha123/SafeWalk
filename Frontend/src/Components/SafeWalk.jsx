@@ -398,7 +398,12 @@ export const SafeWalk = () => {
       return;
     }
     try {
-      const payload = { src: sourceLoc, des: destLoc, path, allpath : allRoutes };
+      const payload = {
+        src: sourceLoc,
+        des: destLoc,
+        path,
+        allpath: allRoutes,
+      };
       const response = await fetch(
         `https://safewalk-xbkj.onrender.com/upload/fetchedpath`,
         {
@@ -643,8 +648,20 @@ export const SafeWalk = () => {
           credentials: "include",
         }
       );
-      console.log(response);
+      const result = await response.json();
+      if (response.ok) {
+        setShowMapOverlay(true);
+        setRoutePolyline(result.nextr);
+        if (data.explored) {
+          enqueueSnackbar("All path explored", { variant: "warning" });
+        }
+        setShowMapOverlay(false);
+      }
+      else{
+        enqueueSnackbar(result.msg, { variant: "warning" });
+      }
     } catch (err) {
+      enqueueSnackbar("Error occured", { variant: "error" });
       console.log(err);
     }
   };

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+import polyline from "@mapbox/polyline";
 const { storage } = require("../config/cloudinaryconfig");
 const usermodel = require("../database/model/usermodel");
 const chatAddModel = require("../database/model/addtochatmodel");
@@ -32,7 +33,15 @@ router.get("/altRoute", async (req, res) => {
     const currindex = allpath.index;
     const allroutes = allpath.routes;
     const nxtroute = allroutes[(currindex + 1) % allroutes.length];
-    return res.status(200).json({ nextr: nxtroute });
+    const nxtpath = polyline.decode(nxtroute)
+    await pathid.updateOne({path : nxtpath});
+    const nextIndex = (currindex + 1) % allroutes.length;
+    const explored = nextIndex === 0;
+    await allpath.updateOne({ index: nextIndex });
+    return res.status(200).json({
+      nextr: nxtroute,
+      explored: explored,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ msg: "Server  error" });
