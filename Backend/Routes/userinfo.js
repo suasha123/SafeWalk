@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-import polyline from "@mapbox/polyline";
+const polyline = require("@mapbox/polyline");
 const { storage } = require("../config/cloudinaryconfig");
 const usermodel = require("../database/model/usermodel");
 const chatAddModel = require("../database/model/addtochatmodel");
