@@ -51,11 +51,11 @@ router.get("/cpath/:id", async (req, res) => {
       long: Trackingexist.nearestLong,
       src: Fpath.src,
       dest: Fpath.dest,
-      completed : Trackingexist.status,
+      completed: Trackingexist.status,
       path: fullPath,
-      cdist : Trackingexist.cdist,
-      tdist:Trackingexist.totaldist,
-      isNearD : Trackingexist.isIndanger,
+      cdist: Trackingexist.cdist,
+      tdist: Trackingexist.totaldist,
+      isNearD: Trackingexist.isIndanger,
     });
   } catch (err) {
     res.status(500).json({ msg: "Error occured" });
@@ -67,11 +67,11 @@ router.get("/path/:id", async (req, res) => {
   }
   try {
     const userId = req.session.passport.user;
-    const doc = await Track.findOne({userid:userId});
-    if(!doc){
-        return res.status(404).json({ msg: "Walk not found" });
+    const doc = await Track.findOne({ userid: userId });
+    if (!doc) {
+      return res.status(404).json({ msg: "Walk not found" });
     }
-    if(doc._id.toString()!==req.params.id){
+    if (doc._id.toString() !== req.params.id) {
       return res.status(404).json({ msg: "Walk not found" });
     }
     const walk = await Track.findById(req.params.id);
@@ -122,6 +122,11 @@ router.get("/findPath", async (req, res) => {
         [srcCoords[1], srcCoords[0]],
         [destCoords[1], destCoords[0]],
       ],
+      alternative_routes: {
+        target_count: 3,
+        share_factor: 0.6,
+        weight_factor: 1.4,
+      },
     };
 
     const response = await fetch(
