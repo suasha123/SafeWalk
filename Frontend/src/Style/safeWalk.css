@@ -282,12 +282,12 @@
 
 .alt-route {
   position: absolute;
-  top: 30px;
+  top: 35px;
   background-color: #0f172a;
   border-radius: 5px;
   border: 2px solid #2563eb;
   width: max-content;
-  padding: 5px;
+  padding: 9px;
   display: flex;
   align-items: center;
   gap: 3px;
@@ -302,6 +302,12 @@
     background-color: #2e2e49;
   }
   cursor: pointer;
+}
+.alt-route.disabled-alt {
+  background-color: gray !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: scale(0.98);
 }
 
 .stop {
@@ -329,7 +335,7 @@
     display: flex;
     flex-direction: column;
     position: absolute;
-    bottom: 30px;
+    bottom: 40px;
     gap: 13px;
     width: 100%;
   }

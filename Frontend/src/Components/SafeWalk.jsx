@@ -103,6 +103,7 @@ export const SafeWalk = () => {
   const [resumeWalkId, setActiveSessionId] = useState(null);
   const [destinationQuery, setDestinationQuery] = useState("");
   //const [sourceResults, setSourceResults] = useState([]);
+  const [isLoadingAlt, setIsLoadingAlt] = useState(false);
   const [updatingLoc, setUpdatingLoc] = useState(false);
   const [destinationResults, setDestinationResults] = useState([]);
   const [source, setSource] = useState("");
@@ -444,6 +445,7 @@ export const SafeWalk = () => {
       const nearestLng = snapped.geometry.coordinates[0];
       const index = snapped.properties.index;
       setTrackingStatus("processing");
+      setIsLoadingAlt(true);
       const res = await storeTrackedPath(nearestLat, nearestLng, index);
       if (res && res.ok) {
         const result = await res.json();
@@ -641,6 +643,8 @@ export const SafeWalk = () => {
       enqueueSnackbar("Route Not set yet", { variant: "warning" });
       return;
     }
+    setIsLoadingAlt(true);
+    setShowMapOverlay(true);
     try {
       const response = await fetch(
         "https://safewalk-xbkj.onrender.com/api/altRoute",
@@ -650,19 +654,21 @@ export const SafeWalk = () => {
       );
       const result = await response.json();
       if (response.ok) {
-        setShowMapOverlay(true);
-        setRoutePolyline(result.nextr);
-        if (data.explored) {
+        const decoded = polyline.decode(result.nextr);
+        const latlngs = decoded.map(([lat, lng]) => [lat, lng]);
+        setRoutePolyline(latlngs);
+        if (result.explored) {
           enqueueSnackbar("All path explored", { variant: "warning" });
         }
-        setShowMapOverlay(false);
-      }
-      else{
+      } else {
         enqueueSnackbar(result.msg, { variant: "warning" });
       }
     } catch (err) {
       enqueueSnackbar("Error occured", { variant: "error" });
       console.log(err);
+    } finally {
+      setShowMapOverlay(false);
+      setIsLoadingAlt(false);
     }
   };
   const showdangerzone = async () => {
@@ -777,12 +783,14 @@ export const SafeWalk = () => {
             )}
             {searchParams.get("walkid") && (
               <button
-                className="alt-route"
+                className={`alt-route ${isLoadingAlt ? "disabled-alt" : ""}`}
+                disabled={isLoadingAlt}
                 onClick={() => {
                   showAltRoute();
                 }}
               >
-                <MdAltRoute size={"25px"} color="white" /> Show Alternate Route
+                <MdAltRoute size={"25px"} color="white" />{" "}
+                {isLoadingAlt ? "Loading..." : "Show Alternate Route"}
               </button>
             )}
             <MapContainer
