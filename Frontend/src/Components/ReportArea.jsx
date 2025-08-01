@@ -38,7 +38,7 @@ export const Report = () => {
   const [selectedLoc, setSelectedLoc] = useState(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [overlayExit, setOverlayExit] = useState(false);
-  const { loading, isLoggedIn} = useAuth();
+  const { loading, isLoggedIn } = useAuth();
   const [pos, setLoc] = useState(null);
   const waapiRef = useRef();
   const [loadingg, setLoading] = useState(true);
@@ -85,7 +85,7 @@ export const Report = () => {
     const interval = setInterval(() => setIndex((index) => index + 1), 2000);
     return () => clearTimeout(interval);
   }, []);
- 
+
   useEffect(() => {
     if (pos) {
       setLoading(false);
@@ -103,6 +103,18 @@ export const Report = () => {
     }, 10000);
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    if (showOverlay || showReportModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showOverlay, showReportModal]);
 
   useEffect(() => {
     if (loading) return;
@@ -223,8 +235,8 @@ export const Report = () => {
         if (!loc || loc.length !== 2) return;
         const key = `${loc[0].toFixed(5)}-${loc[1].toFixed(5)}`;
         if (lastFetchedLoc === key) return;
-      const lat = loc[0];
-      const long = loc[1];
+        const lat = loc[0];
+        const long = loc[1];
         setTabLoading(true);
         try {
           const res = await fetch(
@@ -271,9 +283,9 @@ export const Report = () => {
     return null;
   };
   if (loading) return <SplashScreen />;
-  if (!isLoggedIn) return <Backgroundcover  />;
+  if (!isLoggedIn) return <Backgroundcover />;
   return (
-    <div style={{height : "100vh" ,  backgroundColor : "#1e1e2f"}}>
+    <div style={{ height: "100vh", backgroundColor: "#1e1e2f" }}>
       <NavBar />
 
       {/* Floating Search Input */}
@@ -521,7 +533,7 @@ export const Report = () => {
                 ))
               ) : (
                 <p className="no-reports">
-                 "No reports found for this area yet."
+                  "No reports found for this area yet."
                 </p>
               )}
             </>
@@ -568,9 +580,7 @@ export const Report = () => {
           )}
         </div>
       </div>
-      <div style={{height : "90px" , backgroundColor : "#1e1e2f"}}>
-
-      </div>
+      <div style={{ height: "90px", backgroundColor: "#1e1e2f" }}></div>
 
       {/* Bottom Sheet Modal for Report */}
       {showReportModal && (

@@ -168,7 +168,7 @@ export const TrackScreen = () => {
   if (!access) return <Backgroundcover />;
 
   return (
-    <>
+    <div style={{ height: "100vh", backgroundColor: "#141122" }}>
       <NavBar />
       <div className="tracking-outer-banner">
         {access===false ? (
@@ -252,6 +252,6 @@ export const TrackScreen = () => {
         )}
       </div>
       <WalkReport tdd={tdd} cdd={cdd} walkk={walkk} />
-    </>
+    </div>
   );
 };

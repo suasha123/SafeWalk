@@ -705,21 +705,21 @@ export const SafeWalk = () => {
     setShowModal(true);
   };
   useEffect(() => {
-  if (showModal) {
-    document.body.style.overflow = "hidden";  // ✅ Prevent scroll
-  } else {
-    document.body.style.overflow = "auto";    // ✅ Re-enable scroll
-  }
+    if (showModal || showResumeModal || showSafeWalkModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
 
-  return () => {
-    document.body.style.overflow = "auto";    // ✅ Cleanup on unmount
-  };
-}, [showModal]);
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showModal, showResumeModal, showSafeWalkModal]);
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
 
   return (
-    <>
+    <div style={{ height: "100vh", backgroundColor: "#141122" }}>
       <NavBar />
 
       <div className="startButtonDiv">
@@ -1104,6 +1104,6 @@ export const SafeWalk = () => {
         </div>
       )}
       <WalkReport td={td} cd={cd} walk={walk} />
-    </>
+    </div>
   );
 };

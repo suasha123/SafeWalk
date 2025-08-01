@@ -40,8 +40,6 @@ export const HeroSection = () => {
     };
   }, []);
 
-
-
   const options = useMemo(
     () => ({
       fullScreen: {
@@ -147,9 +145,23 @@ export const HeroSection = () => {
           data-aos-easing="ease"
           className={styles.buttondiv}
         >
-          <button onClick={()=>{navigate("/safe-walk")}} className={styles.buttons}>
-           Start Safe Walk </button>
-          <button onClick={()=>{navigate("/report-area")}} className={styles.buttontwo}> Report Area </button>
+          <button
+            onClick={() => {
+              navigate("/safe-walk");
+            }}
+            className={styles.buttons}
+          >
+            Start Safe Walk{" "}
+          </button>
+          <button
+            onClick={() => {
+              navigate("/report-area");
+            }}
+            className={styles.buttontwo}
+          >
+            {" "}
+            Report Area{" "}
+          </button>
         </div>
       </div>
       <div
