@@ -53,15 +53,12 @@ router.get("/cpath/:id", async (req, res) => {
     return res.status(404).json({ msg: "Not Found" });
   }
   try {
-    const userId = req.session.passport.user;
-    const Trackingexist = await RealTrackingModel.findOne({ userid: userId });
+    const Trackingexist = await RealTrackingModel.findById(trackid);
     if (!Trackingexist) {
       return res.status(404).json({ msg: "No Tracking Found" });
     }
-    if (Trackingexist._id.toString() !== trackid) {
-      return res.status(403).json({ msg: "Unauthorized" });
-    }
-    const Fpath = await Track.findOne({ userid: userId });
+    const tid =  Trackingexist.trackingid;
+    const Fpath = await Track.findById(tid);
     const fullPath = Fpath.path;
     console.log(Trackingexist);
     return res.status(200).json({
