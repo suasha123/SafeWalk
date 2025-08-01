@@ -100,7 +100,7 @@ export const TrackScreen = () => {
 
   // Poll tracking info every 3 seconds
   useEffect(() => {
-    if (!trackId && !user) return;
+    if (!trackId && !username) return;
     if (!access) return;
     const fetchTrackedPath = async () => {
       setSpinning(true); // Start spinner
