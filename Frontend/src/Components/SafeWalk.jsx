@@ -717,10 +717,16 @@ export const SafeWalk = () => {
     };
   }, [showModal, showResumeModal, showSafeWalkModal]);
   useEffect(() => {
-    if (scrollref.current) {
-      scrollref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    setTimeout(() => {
+      if (scrollref.current) {
+        scrollref.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 300); 
   }, []);
+
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
 
@@ -786,7 +792,7 @@ export const SafeWalk = () => {
         )}
       </div>
 
-      <div  className="maincontainer">
+      <div className="maincontainer">
         {loadingg ? (
           <div className="loading-container">
             <div className="spinner" />
