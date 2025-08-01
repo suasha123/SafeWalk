@@ -184,54 +184,57 @@ export const TrackScreen = () => {
         </div>
       )}
       <div className="maincontainer">
-        <MapContainer
-          center={sourceMarker || destMarker || pos}
-          zoom={13}
-          scrollWheelZoom={true}
-          zoomControl={false}
-          className="map"
-        >
-          <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <div className="tracking-header">
-            <div className="tracking-subtitle">
-              Automatic Refresh at every 3 sec
+        {(sourceMarker || destMarker || pos) && (
+          <MapContainer
+            center={sourceMarker || destMarker || pos}
+            zoom={13}
+            scrollWheelZoom={true}
+            zoomControl={false}
+            className="map"
+          >
+            <TileLayer
+              attribution="&copy; OpenStreetMap contributors"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <div className="tracking-header">
+              <div className="tracking-subtitle">
+                Automatic Refresh at every 3 sec
+              </div>
+              <div>
+                <HiOutlineRefresh
+                  className={`refresh-icon ${isSpinning ? "spin" : ""}`}
+                  color="#ffff"
+                />
+              </div>
             </div>
-            <div>
-              <HiOutlineRefresh
-                className={`refresh-icon ${isSpinning ? "spin" : ""}`}
-                color="#ffff"
-              />
-            </div>
-          </div>
-          {pos && (
-            <Marker position={pos}>
-              <Popup>Last Known Position</Popup>
-            </Marker>
-          )}
 
-          {sourceMarker && (
-            <Marker position={sourceMarker}>
-              <Popup>Source</Popup>
-            </Marker>
-          )}
+            {pos && (
+              <Marker position={pos}>
+                <Popup>Last Known Position</Popup>
+              </Marker>
+            )}
 
-          {destMarker && (
-            <Marker position={destMarker} icon={destMarkerIcon}>
-              <Popup>Destination</Popup>
-            </Marker>
-          )}
+            {sourceMarker && (
+              <Marker position={sourceMarker}>
+                <Popup>Source</Popup>
+              </Marker>
+            )}
 
-          {routePolyline.length > 0 && (
-            <Polyline positions={routePolyline} color="blue" weight={4} />
-          )}
+            {destMarker && (
+              <Marker position={destMarker} icon={destMarkerIcon}>
+                <Popup>Destination</Popup>
+              </Marker>
+            )}
 
-          {trackedPath.length > 0 && (
-            <Polyline positions={trackedPath} color="#802cf4" weight={5} />
-          )}
-        </MapContainer>
+            {routePolyline.length > 0 && (
+              <Polyline positions={routePolyline} color="blue" weight={4} />
+            )}
+
+            {trackedPath.length > 0 && (
+              <Polyline positions={trackedPath} color="#802cf4" weight={5} />
+            )}
+          </MapContainer>
+        )}
       </div>
       <WalkReport tdd={tdd} cdd={cdd} walkk={walkk} />
     </>
