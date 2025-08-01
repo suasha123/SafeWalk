@@ -115,9 +115,12 @@ io.on("connection", (socket) => {
     const trackLinkPattern =
       /^https:\/\/safee-walk\.vercel\.app\/trackscreen\?trackid=([\w\d]+)&user=([\w\d]+)$/;
     const match = msg.match(trackLinkPattern);
+    console.log(match);
+    console.log(`msg hai ${msg}`);
     if (match) {
       const trackId = match[1];
       const isAdded = await addAccessDM(to, trackId);
+      console.log(`add hua ${isAdded}`);
       if (!isAdded) {
         ack && ack({ ok: false });
         return;
