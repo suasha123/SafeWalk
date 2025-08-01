@@ -3,12 +3,14 @@ const router = express.Router();
 require("dotenv").config();
 const Track = require("../database/model/TrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
-router.get("/checkaccess", async (req, res) => {
+router.get("/checkaccess/:id", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(403).json({ msg: "Log In again" });
   }
   try {
+    console.log("track id hai");
     const trackid = req.params.id;
+      console.log(trackid);
     const userId = req.session.passport.user;
     const findacess = await RealTrackingModel.findById(trackid);
     if (findacess.access.includes(userId)) {
