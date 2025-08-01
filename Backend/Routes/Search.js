@@ -3,6 +3,23 @@ const router = express.Router();
 require("dotenv").config();
 const Track = require("../database/model/TrackingModel");
 const RealTrackingModel = require("../database/model/RealTrackingModel");
+router.get("/checkaccess", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(403).json({ msg: "Log In again" });
+  }
+  try {
+    const trackid = req.params.id;
+    const userId = req.session.passport.user;
+    const findacess = await RealTrackingModel.findById(trackid);
+    if (findacess.access.includes(userId)) {
+      return res.status(200).json({ msg: "Access granted" });
+    }
+    return res.status(403).json({ msg: "No access" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: "Server Error" });
+  }
+});
 router.get("/activesession", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(403).json({ msg: "Log In again" });

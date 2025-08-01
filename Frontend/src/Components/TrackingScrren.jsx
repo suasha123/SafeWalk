@@ -41,8 +41,9 @@ const destMarkerIcon = new L.Icon({
 export const TrackScreen = () => {
   const [searchParams] = useSearchParams();
   const [showModal, setShowModal] = useState(true);
-  const { loading, isLoggedIn , live } = useAuth();
+  const { loading, isLoggedIn } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+  const [access, setAccess] = useState(false);
   const navigate = useNavigate();
   const [isSpinning, setSpinning] = useState(false);
   const [trackId, setTrackId] = useState(null);
@@ -54,16 +55,41 @@ export const TrackScreen = () => {
   const [trackedPath, setTrackedPath] = useState([]);
   const [tdd, setTd] = useState(0);
   const [cdd, setCd] = useState(0);
+  const [username, setUserParams] = useState(null);
   const [walkk, setWalk] = useState("not Active");
   // Extract tracking ID
   useEffect(() => {
     const id = searchParams.get("trackid");
-    if (!id) {
+    const username = searchParams.get("user");
+    if (!id && !username) {
       navigate("/");
       return;
     }
     setTrackId(id);
+    setUserParams(username);
   }, [searchParams, navigate]);
+
+  useEffect(() => {
+    if (username && trackId) {
+      const checkacess = async () => {
+        try {
+          const response = await fetch(
+            `https://safewalk-xbkj.onrender.com/search/checkaccess/${trackId}`,
+            {
+              credentials: "include",
+            }
+          );
+          if (response.ok) {
+            setAccess(true);
+          }
+        } catch (err) {
+          console.log(err);
+          navigate("/");
+        }
+      };
+      checkacess();
+    }
+  }, [username, trackId, navigate]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -71,12 +97,11 @@ export const TrackScreen = () => {
       navigate("/");
     }
   }, [loading, isLoggedIn, navigate]);
- 
 
   // Poll tracking info every 3 seconds
   useEffect(() => {
-    if (!trackId) return;
-
+    if (!trackId && !user) return;
+    if (!access) return;
     const fetchTrackedPath = async () => {
       setSpinning(true); // Start spinner
       try {
@@ -105,7 +130,7 @@ export const TrackScreen = () => {
           if (data.completed === "completed") {
             window.location.href = "/safe-walk";
           }
-          if (data.isNearD===true && alertref.current === false) {
+          if (data.isNearD === true && alertref.current === false) {
             enqueueSnackbar("IN Danger Zone", { variant: "error" });
             const audio = new Audio("/dangeralert.mp3");
             audio.play();
@@ -127,17 +152,18 @@ export const TrackScreen = () => {
       } finally {
         setTimeout(() => setSpinning(false), 600);
       }
-    };
 
-    fetchTrackedPath(); 
+      fetchTrackedPath();
+    };
     const interval = setInterval(fetchTrackedPath, 3000);
 
-    return () => clearInterval(interval); 
-  }, [trackId, enqueueSnackbar, navigate]);
+    return () => clearInterval(interval);
+  }, [trackId, enqueueSnackbar, navigate, access]);
 
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
-  if (!trackId) return null;
+  if (!trackId && !username) return null;
+
 
   return (
     <>
