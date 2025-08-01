@@ -118,6 +118,7 @@ export const SafeWalk = () => {
   const [showSafeWalkModal, setShowSafeWalkModal] = useState(false);
   const [loadingR, setLoadingR] = useState(false);
   const [searchParams] = useSearchParams();
+  const scrollref = useRef(null);
   const location = useLocation();
   const [dangerZones, setDangerZones] = useState([]);
   const [mode, setMode] = useState({
@@ -715,6 +716,11 @@ export const SafeWalk = () => {
       document.body.style.overflow = "auto";
     };
   }, [showModal, showResumeModal, showSafeWalkModal]);
+  useEffect(() => {
+    if (scrollref.current) {
+      scrollref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
 
@@ -780,7 +786,7 @@ export const SafeWalk = () => {
         )}
       </div>
 
-      <div className="maincontainer">
+      <div ref={scrollref} className="maincontainer">
         {loadingg ? (
           <div className="loading-container">
             <div className="spinner" />
