@@ -9,8 +9,9 @@ import { SplashScreen } from "./SplashScreen";
 import { AddToChatButton } from "./AddtoChatButton";
 import { FaPlus } from "react-icons/fa";
 import { GroupOverlayModal } from "./Addgroupoverlay";
+import { TbMessageReport } from "react-icons/tb";
 import { enqueueSnackbar } from "notistack";
-
+import { FaWalking } from "react-icons/fa";
 const ChatLayout = () => {
   const { isLoggedIn, loading, socket } = useAuth();
   const navigate = useNavigate();
@@ -121,12 +122,15 @@ const ChatLayout = () => {
     setSearching(true);
     setSearchResults(null);
     try {
-      const res = await fetch("https://safewalk-xbkj.onrender.com/api/getusers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username: searchTerm }),
-      });
+      const res = await fetch(
+        "https://safewalk-xbkj.onrender.com/api/getusers",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username: searchTerm }),
+        }
+      );
       const result = await res.json();
       if (res.ok) setSearchResults([result]);
       else setSearchResults([]);
@@ -166,9 +170,26 @@ const ChatLayout = () => {
   return (
     <>
       <NavBar />
+      <div className="startButtonDiv">
+        <div className="startButton" onClick={() => navigate("/safe-walk")}>
+          <FaWalking style={{ fontSize: "25px" }} />
+          <p>safeWalk</p>
+        </div>
+        <div
+          className="startButton buttontwo"
+          onClick={() => navigate("/report-area")}
+        >
+          <TbMessageReport style={{ fontSize: "25px", marginRight: "3px" }} />
+          <p>Report Area</p>
+        </div>
+      </div>
       <div className="full-center-wrapper">
         <div ref={chatref} className="main-chat-layout">
-          <div className={`sidebar ${isMobile && currentChat ? "hidden-on-mobile" : ""}`}>
+          <div
+            className={`sidebar ${
+              isMobile && currentChat ? "hidden-on-mobile" : ""
+            }`}
+          >
             <div className="sidebar-header">
               <button
                 className={`tab-btn ${selectedTab === "chats" ? "active" : ""}`}
@@ -181,7 +202,9 @@ const ChatLayout = () => {
                 Chats
               </button>
               <button
-                className={`tab-btn ${selectedTab === "groups" ? "active" : ""}`}
+                className={`tab-btn ${
+                  selectedTab === "groups" ? "active" : ""
+                }`}
                 onClick={() => {
                   setSelectedTab("groups");
                   clearSearch();
@@ -255,10 +278,17 @@ const ChatLayout = () => {
                     <div
                       key={item._id || item.id}
                       className={`contact ${
-                        currentChat?._id === item._id || currentChat?.id === item.id ? "active" : ""
+                        currentChat?._id === item._id ||
+                        currentChat?.id === item.id
+                          ? "active"
+                          : ""
                       }`}
                       onClick={() => {
-                        if (isSearching && !isAdded && selectedTab === "chats") {
+                        if (
+                          isSearching &&
+                          !isAdded &&
+                          selectedTab === "chats"
+                        ) {
                           enqueueSnackbar("Please add to chat first", {
                             variant: "warning",
                           });
@@ -277,14 +307,23 @@ const ChatLayout = () => {
                           />
                         ) : (
                           <div className="avatar-fallback">
-                            {(item.name?.charAt(0) || item.username?.charAt(0) || "?").toUpperCase()}
+                            {(
+                              item.name?.charAt(0) ||
+                              item.username?.charAt(0) ||
+                              "?"
+                            ).toUpperCase()}
                           </div>
                         )}
                       </div>
                       <div className="contact-info-wrapper">
-                        <div className="contact-name">{item.name || item.username}</div>
+                        <div className="contact-name">
+                          {item.name || item.username}
+                        </div>
                         {isSearching && !isAdded && selectedTab === "chats" && (
-                          <AddToChatButton contact={item} onAdded={loadContacts} />
+                          <AddToChatButton
+                            contact={item}
+                            onAdded={loadContacts}
+                          />
                         )}
                       </div>
                     </div>
@@ -294,13 +333,20 @@ const ChatLayout = () => {
             </div>
 
             {selectedTab === "groups" && (
-              <button className="create-group-fab" onClick={() => setShowGroupModal(true)}>
+              <button
+                className="create-group-fab"
+                onClick={() => setShowGroupModal(true)}
+              >
                 <FaPlus />
               </button>
             )}
           </div>
 
-          <div className={`chat-area ${isMobile && !currentChat ? "hidden-on-mobile" : ""}`}>
+          <div
+            className={`chat-area ${
+              isMobile && !currentChat ? "hidden-on-mobile" : ""
+            }`}
+          >
             {currentChat ? (
               <ChatWindow
                 selectedUser={currentChat}
@@ -309,7 +355,9 @@ const ChatLayout = () => {
               />
             ) : (
               <div className="placeholder">
-                <p className="placeholder-text">Select a chat to start messaging</p>
+                <p className="placeholder-text">
+                  Select a chat to start messaging
+                </p>
               </div>
             )}
           </div>

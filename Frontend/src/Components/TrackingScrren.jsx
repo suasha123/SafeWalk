@@ -81,6 +81,8 @@ export const TrackScreen = () => {
           );
           if (response.ok) {
             setAccess(true);
+          } else {
+            navigate("/");
           }
         } catch (err) {
           console.log(err);
@@ -168,6 +170,19 @@ export const TrackScreen = () => {
   return (
     <>
       <NavBar />
+      <div className="tracking-outer-banner">
+        {access===false ? (
+          <div className="center-spinner">
+            <div className="spinner"></div>
+          </div>
+        ) : (
+          access && (
+            <div className="tracking-pill">
+              Tracking: <span className="username">{username}</span>
+            </div>
+          )
+        )}
+      </div>
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">

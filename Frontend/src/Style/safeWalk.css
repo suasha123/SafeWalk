@@ -648,3 +648,53 @@
 .modal button:hover {
   background: linear-gradient(to right, #c084fc, #9333ea);
 }
+
+
+/* Outer banner styling */
+.tracking-outer-banner {
+  width: 100%;
+  background-color: #1f1f2e; /* Match image */
+  padding: 14px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Spinner centered */
+.center-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Green pill info box */
+.tracking-pill {
+  background: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.tracking-pill .username {
+  font-weight: 700;
+  margin-left: 4px;
+}
