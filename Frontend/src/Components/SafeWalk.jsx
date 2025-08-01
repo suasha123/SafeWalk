@@ -11,7 +11,7 @@ import polyline, { encode } from "@mapbox/polyline";
 import ModalOverlay from "./SharingModel.jsx";
 import "leaflet/dist/leaflet.css";
 import { Fragment, useEffect, useRef, useState } from "react";
-import L from "leaflet";
+import L, { map } from "leaflet";
 import TextTransition, { presets } from "react-text-transition";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -717,10 +717,10 @@ export const SafeWalk = () => {
     };
   }, [showModal, showResumeModal, showSafeWalkModal]);
   useEffect(() => {
-    if (scrollref.current) {
+    if (scrollref.current && map) {
       scrollref.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, []);
+  }, [map]);
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
 
