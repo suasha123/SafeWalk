@@ -51,6 +51,8 @@ export const AuthProvider = ({ children }) => {
     checklogin();
     return () => newsocket.disconnect();
   }, []);
+
+ 
   return (
     <AuthContext.Provider
       value={{

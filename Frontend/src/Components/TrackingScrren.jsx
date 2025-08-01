@@ -41,7 +41,7 @@ const destMarkerIcon = new L.Icon({
 export const TrackScreen = () => {
   const [searchParams] = useSearchParams();
   const [showModal, setShowModal] = useState(true);
-  const { loading, isLoggedIn } = useAuth();
+  const { loading, isLoggedIn , live } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [isSpinning, setSpinning] = useState(false);
@@ -71,6 +71,7 @@ export const TrackScreen = () => {
       navigate("/");
     }
   }, [loading, isLoggedIn, navigate]);
+ 
 
   // Poll tracking info every 3 seconds
   useEffect(() => {

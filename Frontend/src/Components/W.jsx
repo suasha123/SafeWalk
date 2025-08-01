@@ -1,4 +1,4 @@
-import styles from "../Style/Features.module.css";
+import "../Style/W.css";
 import Aos from "aos";
 import "aos/dist/aos.css";
 import { CiRoute } from "react-icons/ci";
@@ -10,42 +10,54 @@ import { FaWalking } from "react-icons/fa";
 import { useEffect } from "react";
 import { GiPathDistance } from "react-icons/gi";
 import { PiPath } from "react-icons/pi";
-export const WalkReport = ({tdd , cdd , walkk , walk , td , cd}) => {
+export const WalkReport = ({ tdd, cdd, walkk, walk, td, cd}) => {
   useEffect(() => {
     Aos.init({ once: true });
   }, []);
   const Features = [
     {
       h1: "Walk Status",
-      p: walk||walkk,
-      icon: <FaWalking className={`${styles.icons} ${styles.heartbeat}`} />,
+      id: 0,
+      p: walk || walkk,
+      icon: (
+        <FaWalking
+          className={`icons heartbeat ${
+            (walk || walkk) === "not Active" ? "iconred" : "icongreen"
+          }`}
+        />
+      ),
     },
     {
       h1: "Remaining Distance ",
+      id: 1,
       p: `${(cd ?? cdd).toFixed(2)} m`,
-      icon: <PiPath className={`${styles.icons} ${styles.heartbeat}`} />,
+      style: walk || walkk === "not Active" ? "red" : "green",
+      icon: <PiPath className={`icons heartbeat`} />,
     },
     {
       h1: "Total Distance",
+      id: 2,
       p: `${(td ?? tdd).toFixed(2)} m`,
-      icon: <GiPathDistance className={`${styles.icons}`} />,
+      style: walk || walkk === "not Active" ? "red" : "green",
+      icon: <GiPathDistance className={`icons`} />,
     },
     {
       h1: "Community Reports",
-     // p: "Submit and view safety reports from nearby users.",
-      icon: <VscReport className={`${styles.icons}`} />,
+      id: 3,
+      // p: "Submit and view safety reports from nearby users.",
+      icon: <VscReport className={`icons`} />,
     },
   ];
 
   return (
-    <div className={styles.maindiv}>
-      <div className={styles.container}>
+    <div className="maindiv">
+      <div className="container">
         <h1
           data-aos="zoom-in-right"
           data-aos-duration="1000"
           data-aos-easing="ease"
           data-aos-offset="10"
-          className={styles.headding}
+          className="headding"
         >
           Walk Report :
         </h1>
@@ -55,16 +67,23 @@ export const WalkReport = ({tdd , cdd , walkk , walk , td , cd}) => {
         data-aos-duration="1000"
         data-aos-easing="ease"
         data-aos-offset="10"
-        className={styles.secondcontainer}
+        className="secondcontainer"
       >
         {Features.map((ele, index) => (
-          <div key={index} className={styles.innercontainer}>
-            <div className={`${styles.iconcontainer} ${styles.heartbeat}`}>
-              {ele.icon}
-            </div>
-            <div className={styles.secondc}>
-              <div className={styles.heading}>{ele.h1}</div>
-              <p className={styles.p} style={{ fontSize: "18px" }}>
+          <div
+            key={index}
+            className={`innercontainer ${
+              index === 0 && (walk || walkk) === "not Active"
+                ? "red"
+                : index === 0
+                ? "green"
+                : ""
+            }`}
+          >
+            <div className={` iconcontainer heartbeat `}>{ele.icon}</div>
+            <div className="secondc">
+              <div className="heading">{ele.h1}</div>
+              <p className="p" style={{ fontSize: "18px" }}>
                 {ele.p}
               </p>
             </div>

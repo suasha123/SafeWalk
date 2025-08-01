@@ -8,6 +8,7 @@ import {
   useMapEvent,
 } from "react-leaflet";
 import polyline, { encode } from "@mapbox/polyline";
+import ModalOverlay from "./SharingModel.jsx";
 import "leaflet/dist/leaflet.css";
 import { Fragment, useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -98,6 +99,8 @@ export const SafeWalk = () => {
   const [td, setTd] = useState(0);
   const [cd, setCd] = useState(0);
   const [walk, setWalk] = useState("not Active");
+  const [showModal, setShowModal] = useState(false);
+  const [link, setLink] = useState("");
   //const [sourceQuery, setSourceQuery] = useState("");
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeWalkId, setActiveSessionId] = useState(null);
@@ -694,6 +697,24 @@ export const SafeWalk = () => {
       return;
     }
   };
+  const sendlink = () => {
+    const link = `https://safee-walk.vercel.app/trackscreen?trackid=${searchParams.get(
+      "trackid"
+    )}&user=${user.username}`;
+    setLink(link);
+    setShowModal(true);
+  };
+  useEffect(() => {
+  if (showModal) {
+    document.body.style.overflow = "hidden";  // ✅ Prevent scroll
+  } else {
+    document.body.style.overflow = "auto";    // ✅ Re-enable scroll
+  }
+
+  return () => {
+    document.body.style.overflow = "auto";    // ✅ Cleanup on unmount
+  };
+}, [showModal]);
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
 
@@ -781,6 +802,9 @@ export const SafeWalk = () => {
                 </div>
               </div>
             )}
+            {showModal && (
+              <ModalOverlay link={link} onClose={() => setShowModal(false)} />
+            )}
             {searchParams.get("walkid") && (
               <button
                 className={`alt-route ${isLoadingAlt ? "disabled-alt" : ""}`}
@@ -865,7 +889,7 @@ export const SafeWalk = () => {
                     data-aos-duration="500"
                     data-aos-easing="ease"
                     className="floating-btn grp"
-                    onClick={() => alert("Sending to Group & Chats")}
+                    onClick={sendlink}
                   >
                     <FaUserGroup size={"20px"} /> Send to Group & Chats
                   </button>

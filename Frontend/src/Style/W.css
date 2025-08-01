@@ -1,0 +1,139 @@
+.maindiv{
+    background-color: #141122;
+    width: 100%;
+    height: max-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+.headingg{
+    font-family: Inter;
+    font-size: 3rem;
+    color: #9d4bce;
+    margin-bottom: 2rem;
+}
+
+.headding{
+font-size : 38px;
+font-family: Inter;
+color: #9d4bce;
+margin-bottom: 2rem;
+}
+.secondcontainer{
+    width: 90%;
+    height: max-content;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.innercontainer{
+    width: 40%;
+    min-width:230px;
+    height: 200px;
+    margin: 9px;
+    background-color: #23232f;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    border-radius: 10px;
+     border: 2px solid #2563eb;
+      box-shadow:
+    0 0 10px rgba(37, 99, 235, 0.3),
+    0 0 20px rgba(37, 99, 235, 0.2);
+}
+.icons{
+    fill: #2563eb;
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 8px #2563eb);
+}
+.iconcontainer{
+    background-color: #14141b;
+    padding: 8px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.secondc{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 8px;
+}
+  
+.heading{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+}
+
+.p{
+    font-family: Inter;
+    font-size: 13px;
+    color: #9ca3af;
+    word-wrap: break-word;
+}
+/* Pulse animation */
+@keyframes heartbeat {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1); /* Grow to 120% size */
+    }
+    100% {
+      transform: scale(1); /* Return to original size */
+    }
+  }
+  
+  /* Apply the heartbeat effect to the icons */
+  .heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+  
+@media(max-width :768px){
+    .secondcontainer{
+        width: 100%;
+    }
+    .innercontainer{
+        width: 90%;
+    }
+    
+}
+.red{
+    border: 2px solid #ef4444;
+      box-shadow:
+    0 0 10px rgba(255, 72, 0, 0.3),
+    0 0 20px rgba(255, 0, 25, 0.2);
+}
+.green {
+    border: 2px solid rgba(0,255,136,255);
+      box-shadow:
+    0 0 10px rgba(55, 246, 26, 0.3),
+    0 0 20px rgba(17, 255, 0, 0.2);
+}
+
+.icongreen{
+    fill: #10ff20c7;
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 8px #00ff88);
+}
+.iconred{
+      fill: #ff1010;
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 8px #ff1010);
+}

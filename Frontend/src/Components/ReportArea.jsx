@@ -38,7 +38,7 @@ export const Report = () => {
   const [selectedLoc, setSelectedLoc] = useState(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [overlayExit, setOverlayExit] = useState(false);
-  const { loading, isLoggedIn } = useAuth();
+  const { loading, isLoggedIn} = useAuth();
   const [pos, setLoc] = useState(null);
   const waapiRef = useRef();
   const [loadingg, setLoading] = useState(true);
@@ -85,6 +85,7 @@ export const Report = () => {
     const interval = setInterval(() => setIndex((index) => index + 1), 2000);
     return () => clearTimeout(interval);
   }, []);
+ 
   useEffect(() => {
     if (pos) {
       setLoading(false);
