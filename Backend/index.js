@@ -11,11 +11,12 @@ const { Server } = require("socket.io");
 const sharedSession = require("express-socket.io-session");
 const addchat = require("./Controllers/addchat");
 const addGroupChat = require("./Controllers/addGroupChat");
-const { group } = require("console");
 require("dotenv").config();
 const UserModel = require("./database/model/usermodel");
 const AddChatModel = require("./database/model/addtochatmodel");
 const addtochatmodel = require("./database/model/addtochatmodel");
+const addAccessDM = require("./Controllers/addAccessDm");
+const addAccessGrp = require("./Controllers/addAccessgrp");
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [];
@@ -81,6 +82,17 @@ io.on("connection", (socket) => {
   socket.on("sendmsg", async (msgObj, ack) => {
     const { msg, to, groupId } = msgObj;
     if (groupId) {
+      const trackLinkPattern =
+        /^https:\/\/safee-walk\.vercel\.app\/trackscreen\?trackid=([\w\d]+)&user=([\w\d]+)$/;
+      const match = msg.match(trackLinkPattern);
+      if (match) {
+        const trackId = match[1];
+        const isAddedtogrp = await addAccessGrp(groupId, trackId);
+        if (!isAddedtogrp) {
+          ack && ack({ ok: false });
+          return;
+        }
+      }
       const res = await addGroupChat(userId, groupId, msg);
       const sender = await UserModel.findById(userId).select("name profile");
       if (res && sender) {
@@ -100,6 +112,17 @@ io.on("connection", (socket) => {
     }
 
     const newmsobj = { msg, to, from: userId };
+    const trackLinkPattern =
+      /^https:\/\/safee-walk\.vercel\.app\/trackscreen\?trackid=([\w\d]+)&user=([\w\d]+)$/;
+    const match = msg.match(trackLinkPattern);
+    if (match) {
+      const trackId = match[1];
+      const isAdded = await addAccessDM(to, trackId);
+      if (!isAdded) {
+        ack && ack({ ok: false });
+        return;
+      }
+    }
     const res = await addchat(newmsobj);
     const doc = await addtochatmodel.findOne({ addedby: to });
     const hasAdded = doc?.added?.some((id) => id.toString() === userId);
@@ -139,7 +162,7 @@ io.on("connection", (socket) => {
 app.use("/upload", require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
 app.use("/api", require("./Routes/userinfo"));
-app.use("/search",require("./Routes/Search"));
+app.use("/search", require("./Routes/Search"));
 app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
