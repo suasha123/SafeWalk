@@ -163,7 +163,7 @@ export const TrackScreen = () => {
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
   if (!trackId && !username) return null;
-  if(!access) return <Backgroundcover />;
+  if (!access) return <Backgroundcover />;
 
   return (
     <>
@@ -185,7 +185,7 @@ export const TrackScreen = () => {
       )}
       <div className="maincontainer">
         <MapContainer
-          center={pos || [0, 0]}
+          center={sourceMarker || destMarker || pos}
           zoom={13}
           scrollWheelZoom={true}
           zoomControl={false}
