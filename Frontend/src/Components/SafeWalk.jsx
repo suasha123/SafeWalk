@@ -717,10 +717,10 @@ export const SafeWalk = () => {
     };
   }, [showModal, showResumeModal, showSafeWalkModal]);
   useEffect(() => {
-    if (scrollref.current && map) {
+    if (scrollref.current) {
       scrollref.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [map]);
+  }, []);
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
 
@@ -728,7 +728,7 @@ export const SafeWalk = () => {
     <div style={{ height: "100vh", backgroundColor: "#141122" }}>
       <NavBar />
 
-      <div className="startButtonDiv">
+      <div ref={scrollref} className="startButtonDiv">
         {showMapOverlay ? (
           <div className="spinner-container">
             <div className="spinner-circle loadd" />
@@ -786,7 +786,7 @@ export const SafeWalk = () => {
         )}
       </div>
 
-      <div ref={scrollref} className="maincontainer">
+      <div  className="maincontainer">
         {loadingg ? (
           <div className="loading-container">
             <div className="spinner" />
