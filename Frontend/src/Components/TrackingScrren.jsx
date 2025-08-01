@@ -163,7 +163,7 @@ export const TrackScreen = () => {
   if (loading) return <SplashScreen />;
   if (!isLoggedIn) return <Backgroundcover />;
   if (!trackId && !username) return null;
-
+  if(!access) return <Backgroundcover />;
 
   return (
     <>
