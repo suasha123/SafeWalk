@@ -8,9 +8,7 @@ router.get("/checkaccess/:id", async (req, res) => {
     return res.status(403).json({ msg: "Log In again" });
   }
   try {
-    console.log("track id hai");
     const trackid = req.params.id;
-      console.log(trackid);
     const userId = req.session.passport.user;
     const findacess = await RealTrackingModel.findById(trackid);
     if (findacess.access.includes(userId)) {
@@ -60,7 +58,6 @@ router.get("/cpath/:id", async (req, res) => {
     const tid =  Trackingexist.trackingid;
     const Fpath = await Track.findById(tid);
     const fullPath = Fpath.path;
-    console.log(Trackingexist);
     return res.status(200).json({
       index: Trackingexist.lastindex,
       lat: Trackingexist.nearestlat,
@@ -125,7 +122,6 @@ router.get("/searchPlace", async (req, res) => {
 router.get("/findPath", async (req, res) => {
   try {
     const { src, dest } = req.query;
-    console.log(src, dest);
     if (!src || !dest) {
       return res.status(400).json({ msg: "src and dest required" });
     }
