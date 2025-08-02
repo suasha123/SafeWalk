@@ -9,8 +9,6 @@ const otpmodel = require("../database/model/otpmodel");
 const usermodel = require("../database/model/usermodel");
 require("dotenv").config();
 router.get("/check-username", async (req, res) => {
-   console.log(req);
-   console.log(req.query.username)
   try {
     const username = req.query.username;
     const user = await usermodel.findOne({ username });

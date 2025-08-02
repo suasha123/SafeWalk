@@ -59,11 +59,8 @@ router.post("/fetchedpath", async (req, res) => {
     return res.status(403).json({ msg: "Unauthorized" });
   }
   const payload = req.body;
-  console.log("apyload hai");
-  console.log(payload);
   const userid = req.session.passport.user;
   const allpath = payload.allpath;
-  console.log(allpath);
   if (!payload) {
     console.log("Payload not recieved");
     return res.status(400).json({ msg: "No payload" });
@@ -96,10 +93,6 @@ router.post("/fetchedpath", async (req, res) => {
         minLng = Math.min(minLng, point[1] - deltaLng);
         maxLng = Math.max(maxLng, point[1] + deltaLng);
       }
-      console.log(minLat);
-      console.log(maxLat);
-      console.log(minLng);
-      console.log(maxLng);
       const dangerReports = await ReportModel.find({
         lat: { $gte: minLat, $lte: maxLat },
         long: { $gte: minLng, $lte: maxLng },

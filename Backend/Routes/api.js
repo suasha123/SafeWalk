@@ -312,7 +312,6 @@ router.get("/getCount", async (req, res) => {
 router.post("/leavegroup", async (req, res) => {
   try {
     const { groupid } = req.body;
-    console.log(groupid);
     if (!req.isAuthenticated()) {
       return res.status(403).json({ msg: "Log in Again" });
     }

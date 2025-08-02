@@ -20,7 +20,7 @@ const addAccessGrp = require("./Controllers/addAccessgrp");
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [];
-//DEFINE sessionMiddleware FIRST
+
 const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -38,11 +38,9 @@ const sessionMiddleware = session({
   },
 });
 
-//Then use it with express
-app.set("trust proxy", 1); //  Required for secure cookies on Render
+app.set("trust proxy", 1); 
 app.use(sessionMiddleware);
 
-//Then set up CORS and body parser
 app.use(
   cors({
     origin: allowedOrigins,
@@ -55,7 +53,6 @@ require("./passport-config")(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Create HTTP server and set up socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -65,14 +62,13 @@ const io = new Server(server, {
   },
 });
 
-// Attach session to socket
 io.use(
   sharedSession(sessionMiddleware, {
     autoSave: true,
   })
 );
 
-//Socket logic
+//Socket 
 io.on("connection", (socket) => {
   const userId = socket.handshake.session?.passport?.user;
   socket.join(userId);
@@ -115,12 +111,9 @@ io.on("connection", (socket) => {
     const trackLinkPattern =
       /^https:\/\/safee-walk\.vercel\.app\/trackscreen\?trackid=([\w\d]+)&user=([\w\d]+)$/;
     const match = msg.match(trackLinkPattern);
-    console.log(match);
-    console.log(`msg hai ${msg}`);
     if (match) {
       const trackId = match[1];
       const isAdded = await addAccessDM(to, trackId);
-      console.log(`add hua ${isAdded}`);
       if (!isAdded) {
         ack && ack({ ok: false });
         return;
@@ -157,20 +150,20 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    console.log("User disconnected");
   });
 });
 
 //Routes
 app.use("/upload", require("./Routes/upload"));
 app.use("/auth", require("./Routes/auth"));
-app.use("/api", require("./Routes/userinfo"));
+app.use("/api", require("./Routes/api"));
 app.use("/search", require("./Routes/Search"));
 app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
 });
-//Start server
+// server
 server.listen(3000, () => {
   connectdb();
   console.log("Server started on http://localhost:3000");
