@@ -131,7 +131,6 @@ export const SafeWalk = () => {
       if (trackingIntervalRef.current) {
         navigator.geolocation.clearWatch(trackingIntervalRef.current);
         trackingIntervalRef.current = null;
-        console.log("✅ Cleared geolocation tracking on route change");
       }
     };
   }, [location.pathname]);
@@ -635,7 +634,7 @@ export const SafeWalk = () => {
   };
   useEffect(() => {
     if (!loading && !isLoggedIn) {
-      navigate("/");
+      navigate("/signin");
     }
   }, [loading, isLoggedIn, navigate]);
   const showAltRoute = async () => {

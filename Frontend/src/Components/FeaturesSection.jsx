@@ -15,22 +15,22 @@ export const Features = () => {
   const Features = [
     {
       h1: "Live Location Tracking",
-      p: "Share your real-time location with trusted contacts.",
+      p: "Share your real-time location with trusted chats and groups.",
       icon: <CiLocationOn className={`${styles.icons} ${styles.heartbeat}`} />,
     },
     {
       h1: "Danger Zone Alerts ",
-      p: "Get notified when entering high-risk areas.",
+      p: "Get notified when entering reported areas.",
       icon: <MdOutlineDangerous className={`${styles.icons} ${styles.heartbeat}`} />,
     },
     {
       h1: "Alternate Route",
-      p: "Get an alternate safe route.",
+      p: "Get an alternate route once you set walk.",
       icon: <CiRoute className={`${styles.icons}`} />,
     },
     {
       h1: "Community Reports",
-      p: "Submit and view safety reports from nearby users.",
+      p: "Submit and view reports on any tapped location.",
       icon: <VscReport className={`${styles.icons}`} />,
     },
     {
@@ -40,7 +40,7 @@ export const Features = () => {
     },
     {
       h1: "Alert System",
-      p: "Group members will get notified when you enter the unsafe zone",
+      p: "Person on Tracking Screen will get notified when you enter the reported zone",
       icon: <AiFillAlert className={`${styles.icons}`} />,
     },
   ];
