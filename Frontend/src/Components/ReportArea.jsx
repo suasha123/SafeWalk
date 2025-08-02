@@ -93,7 +93,7 @@ export const Report = () => {
   }, [pos]);
   useEffect(() => {
     if (!loading && !isLoggedIn) {
-      navigate("/");
+      navigate("/signin");
     }
   }, [loading, isLoggedIn, navigate]);
   useEffect(() => {
@@ -287,8 +287,6 @@ export const Report = () => {
   return (
     <div style={{ height: "100vh", backgroundColor: "#1e1e2f" }}>
       <NavBar />
-
-      {/* Floating Search Input */}
       <div className="search-bar-container">
         <input
           type="text"
@@ -389,7 +387,6 @@ export const Report = () => {
                 </Marker>
               )}
             </MapContainer>
-            {/* Floating Map Controls */}
             <div className="map-action-buttons">
               <button
                 className="map-button loc-btn"
@@ -581,12 +578,10 @@ export const Report = () => {
         </div>
       </div>
       <div style={{ height: "90px", backgroundColor: "#1e1e2f" }}></div>
-
-      {/* Bottom Sheet Modal for Report */}
       {showReportModal && (
         <div className="report-modal">
           <div className="report-header">
-            <h3>📍 Report Incident</h3>
+            <h3>Report Incident</h3>
             <button
               className="report-close"
               onClick={() => setShowReportModal(false)}

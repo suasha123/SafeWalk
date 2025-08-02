@@ -14,7 +14,6 @@ import "../Style/safeWalk.css";
 import { NavBar } from "./Navbar";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
-// Setup leaflet marker icons
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -57,7 +56,6 @@ export const TrackScreen = () => {
   const [cdd, setCd] = useState(0);
   const [username, setUserParams] = useState(null);
   const [walkk, setWalk] = useState("not Active");
-  // Extract tracking ID
   useEffect(() => {
     const id = searchParams.get("trackid");
     const username = searchParams.get("user");
@@ -93,19 +91,17 @@ export const TrackScreen = () => {
     }
   }, [username, trackId, navigate]);
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!loading && !isLoggedIn) {
       navigate("/");
     }
   }, [loading, isLoggedIn, navigate]);
 
-  // Poll tracking info every 3 seconds
   useEffect(() => {
     if (!trackId && !username) return;
     if (!access) return;
     const fetchTrackedPath = async () => {
-      setSpinning(true); // Start spinner
+      setSpinning(true);
       try {
         const res = await fetch(
           `https://safewalk-xbkj.onrender.com/search/cpath/${trackId}`,
@@ -171,7 +167,7 @@ export const TrackScreen = () => {
     <div style={{ height: "100vh", backgroundColor: "#141122" }}>
       <NavBar />
       <div className="tracking-outer-banner">
-        {access===false ? (
+        {access === false ? (
           <div className="center-spinner">
             <div className="spinner"></div>
           </div>

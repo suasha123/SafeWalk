@@ -5,10 +5,11 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { enqueueSnackbar } from "notistack";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Backgroundcover } from "./bgcover";
 export const SignIn = () => {
   const navigate = useNavigate();
+  const [submitLoading, setSubmitLoading] = useState(false);
   const {
     setLoggedIn,
     isLoggedIn,
@@ -34,18 +35,22 @@ export const SignIn = () => {
     }
   }, [msg]);
   const handlelogin = async () => {
+    setSubmitLoading(true);
     try {
-      const response = await fetch("https://safewalk-xbkj.onrender.com/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          email: userdeatils.email,
-          password: userdeatils.password,
-        }),
-      });
+      const response = await fetch(
+        "https://safewalk-xbkj.onrender.com/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            email: userdeatils.email,
+            password: userdeatils.password,
+          }),
+        }
+      );
       setDetails({ email: "", password: "" });
       const res = await response.json();
       if (response.ok) {
@@ -60,6 +65,8 @@ export const SignIn = () => {
       }
     } catch (error) {
       enqueueSnackbar("Error occured", { variant: "error" });
+    } finally {
+      setSubmitLoading(false);
     }
   };
   return loading || isLoggedIn ? (
@@ -103,8 +110,14 @@ export const SignIn = () => {
               setDetails({ ...userdeatils, password: e.target.value })
             }
           />
-          <button className={styles.button} onClick={handlelogin}>
-            Submit
+          <button
+            className={`${styles.button} ${
+              submitLoading ? styles.buttonLoading : ""
+            }`}
+            onClick={handlelogin}
+            disabled={submitLoading}
+          >
+            {submitLoading ? <div className={styles.spinnerSmall} /> : "Submit"}
           </button>
         </div>
         <div style={{ marginTop: "35px", fontSize: "14px" }}>

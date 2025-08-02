@@ -9,6 +9,7 @@ import { enqueueSnackbar } from "notistack";
 import { Backgroundcover } from "./bgcover";
 export const Otp = () => {
   const navigate = useNavigate();
+  const [submitLoading, setSubmitLoading] = useState(false);
   const {
     userdeatils,
     visitedsignup,
@@ -22,29 +23,33 @@ export const Otp = () => {
   useEffect(() => {
     if (!visitedsignup) {
       navigate("/signup");
-      return ;
+      return;
     }
     if (!isLoggedIn || !loading) {
       enqueueSnackbar("OTP send successfully", { variant: "success" });
     }
   }, []);
-    useEffect(() => {
+  useEffect(() => {
     if (!loading && isLoggedIn) {
       navigate("/");
     }
   }, [loading, isLoggedIn, navigate]);
   const verifyotp = async () => {
+    setSubmitLoading(true);
     try {
-      const response = await fetch("https://safewalk-xbkj.onrender.com/auth/verifyuser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          otpcode: otpnumber,
-          email: userdeatils.email,
-          password: userdeatils.password,
-          username : userdeatils.username
-        }),
-      });
+      const response = await fetch(
+        "https://safewalk-xbkj.onrender.com/auth/verifyuser",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            otpcode: otpnumber,
+            email: userdeatils.email,
+            password: userdeatils.password,
+            username: userdeatils.username,
+          }),
+        }
+      );
       setotp("");
       const res = await response.json();
       if (response.ok) {
@@ -52,13 +57,16 @@ export const Otp = () => {
         setLoggedIn(true);
         navigate("/");
       } else {
-        setLoggedIn(false);
+        enqueueSnackbar(res.msg, { variant: "warning" });
       }
     } catch (err) {
+      enqueueSnackbar("Error Occured", { variant: "error" });
       console.log(err);
+    } finally {
+      setSubmitLoading(false);
     }
   };
-  return  loading || isLoggedIn ? (
+  return loading || isLoggedIn ? (
     <Backgroundcover />
   ) : (
     <div className={styles.maindiv}>
@@ -79,8 +87,13 @@ export const Otp = () => {
             placeholder="Enter the otp"
             onChange={(e) => setotp(e.target.value)}
           />
-          <button onClick={verifyotp} className={styles.button}>
-            Sumbit
+          <button
+            onClick={verifyotp}
+            className={`${styles.button} ${
+              submitLoading ? styles.buttonLoading : ""
+            }`}
+          >
+            {submitLoading ? <div className={styles.spinnerSmall} /> : "Submit"}
           </button>
         </div>
         <div style={{ marginTop: "35px", fontSize: "14px" }}>

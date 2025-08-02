@@ -10,6 +10,7 @@ import { Backgroundcover } from "./bgcover";
 
 export const SignUp = () => {
   const navigate = useNavigate();
+  const [submitLoading, setSubmitLoading] = useState(false);
   const { userdeatils, isLoggedIn, setDetails, msg, setvisited, loading } =
     useAuth();
 
@@ -66,8 +67,10 @@ export const SignUp = () => {
 
   const sendotp = async () => {
     setvisited(true);
+    setSubmitLoading(true);
     if (!userdeatils.email || !userdeatils.password || !usernameAvailable) {
       enqueueSnackbar("Missing or invalid credentials", { variant: "warning" });
+      setSubmitLoading(false);
       return;
     }
     try {
@@ -90,6 +93,8 @@ export const SignUp = () => {
       }
     } catch (err) {
       enqueueSnackbar("Error occurred", { variant: "error" });
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -109,7 +114,6 @@ export const SignUp = () => {
           </button>
           <div className={styles.line}>or</div>
 
-          {/* ✅ Username Field */}
           <label className={styles.label} htmlFor="username">
             Username :
           </label>
@@ -164,8 +168,14 @@ export const SignUp = () => {
           />
 
           {/* OTP Button */}
-          <button onClick={sendotp} className={styles.button}>
-            Verify OTP
+          <button
+            onClick={sendotp}
+            className={`${styles.button} ${
+              submitLoading ? styles.buttonLoading : ""
+            }`}
+            disabled={submitLoading}
+          >
+            {submitLoading ? <div className={styles.spinnerSmall} /> : "Veify Otp"}
           </button>
         </div>
 

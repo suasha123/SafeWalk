@@ -90,19 +90,6 @@
     box-sizing: border-box;
 }
 
-.spinner {
-    position: absolute;
-    right: 10px;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    width: 16px;
-    height: 16px;
-    border: 2px solid #ccc;
-    border-top: 2px solid black;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
 
 
 .line {
@@ -131,4 +118,21 @@
     100% {
         transform: rotate(360deg);
     }
+}
+
+
+.buttonLoading {
+  background: linear-gradient(to right, #4b50c8, #d9447b); /* slightly darker */
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.spinnerSmall {
+  width: 16px;
+  height: 16px;
+  border: 2px solid white;
+  border-top: 2px solid #f65aaa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: auto;
 }
