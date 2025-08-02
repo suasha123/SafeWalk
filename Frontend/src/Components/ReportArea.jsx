@@ -602,6 +602,7 @@ export const Report = () => {
               <option>Harassment</option>
               <option>Theft</option>
               <option>Suspicious Activity</option>
+              <option>Others</option>
             </select>
 
             <label>Description</label>
