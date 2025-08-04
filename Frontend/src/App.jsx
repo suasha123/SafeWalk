@@ -9,6 +9,7 @@ import { Report } from './Components/ReportArea';
 import { SafeWalk } from './Components/SafeWalk';
 import { TrackScreen } from './Components/TrackingScrren';
 import { WalkReport } from './Components/W.jsx';
+import { ErrorPage } from './Components/Error.jsx';
 function App() {
   return (
     <Router>
@@ -23,6 +24,8 @@ function App() {
         <Route path="/report-area" element={<Report/>} />
         <Route path="/safe-walk" element={<SafeWalk />} />
         <Route path='/trackscreen' element={<TrackScreen />} />
+        <Route path="*" element={<ErrorPage />} />
+
       </Routes>
     </Router>
   );

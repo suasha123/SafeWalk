@@ -1,0 +1,79 @@
+/* Base container */
+.error-container {
+  background-color: #0f0f1a;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Content styling */
+.error-content {
+  text-align: center;
+  position: relative;
+  padding: 2rem;
+}
+
+/* Main error number */
+.error-code {
+  font-size: 6rem;
+  color: #ff4fc3;
+  margin-bottom: 1rem;
+}
+
+/* Heading and description */
+.error-message {
+  font-size: 2rem;
+  color: #c084fc;
+  margin-bottom: 0.5rem;
+}
+
+.error-description {
+  color: #ccc;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+/* Button */
+.back-home-btn {
+  display: inline-block;
+  background-color: #7c3aed;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.back-home-btn:hover {
+  background-color: #5b21b6;
+}
+
+/* Decorative circle */
+.error-circle {
+  width: 80px;
+  height: 80px;
+  background-color: #ff4fc3;
+  border-radius: 50%;
+  margin: 2rem auto 0;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Simple pulse animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
