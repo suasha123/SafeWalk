@@ -55,7 +55,7 @@ export const Otp = () => {
       if (response.ok) {
         setuser(res);
         setLoggedIn(true);
-        navigate("/");
+        navigate("/signin");
       } else {
         enqueueSnackbar(res.msg, { variant: "warning" });
       }

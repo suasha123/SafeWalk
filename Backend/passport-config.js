@@ -45,6 +45,7 @@ module.exports = async function (passport) {
             name: profile.displayName,
             email: profile.emails[0].value,
             profile: profile.photos[0]?.value || null,
+            username : "hhbjbhjhbj"
           });
         } else {
           // Update profile photo if it wasn't stored before
