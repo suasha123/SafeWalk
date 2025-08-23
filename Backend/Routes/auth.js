@@ -86,8 +86,8 @@ router.post("/verifyuser", async (req, res) => {
       if (err) {
         return res.status(500).json({ msg: "Registration failed" });
       }
-      const { email } = req.user;
-      return res.status(200).json({ useremail: email, msg: "User Registered" , username });
+      const { email, profile, name, username } = req.user;
+      return res.status(200).json({ msg: "User Registered",useremail: email, profile, name,username });
     });
   } catch (err) {
     console.error(err);
