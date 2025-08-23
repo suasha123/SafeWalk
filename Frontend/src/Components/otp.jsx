@@ -53,7 +53,9 @@ export const Otp = () => {
       setotp("");
       const res = await response.json();
       if (response.ok) {
-        navigate("/signin");
+        setuser(res);
+        setLoggedIn(true);
+        navigate("/");
       } else {
         enqueueSnackbar(res.msg, { variant: "warning" });
       }
