@@ -58,49 +58,43 @@ router.post("/otp", async (req, res) => {
   }
 });
 
-router.post("/verifyuser", async (req, res, next) => {
+router.post("/verifyuser", async (req, res) => {
   try {
-    const { otpcode, email, password, username } = req.body;
+    const { otpcode, email, password , username } = req.body;
     const storedotp = await otpmodel.findOne({ email });
     if (!storedotp) {
       return res.status(404).json({ msg: "OTP not found" });
     }
-    const isvalid = await argon2.verify(storedotp.otp, otpcode.toString().trim());
-    if (!isvalid || storedotp.expire < Date.now()) {
+    const isvalid = await argon2.verify(
+      storedotp.otp,
+      otpcode.toString().trim()
+    );
+    if (!isvalid) {
       return res.status(403).json({ msg: "Invalid OTP" });
     }
-
+    if (storedotp.expire < Date.now()) {
+      return res.status(403).json({ msg: "Invalid OTP" });
+    }
     await otpmodel.deleteOne({ email });
-
     const hashedpassword = await argon2.hash(password);
     const newuser = await usermodel.create({
       email,
       password: hashedpassword,
-      username: username || ""
+      username : username || ""
     });
-
     req.logIn(newuser, (err) => {
       if (err) {
-        return next(err);
+        return res.status(500).json({ msg: "Registration failed" });
       }
-
-      req.session.save(() => {
-        const { email, profile, name, username } = req.user;
-        return res.status(200).json({
-          msg: "User Registered",
-          useremail: email,
-          profile,
-          name,
-          username
-        });
-      });
+      const { email, profile, name, username } = req.user;
+      return res.status(200).json({ msg: "User Registered",useremail: email, profile, name,username });
     });
+    
   } catch (err) {
     console.error(err);
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 });
-
 
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
