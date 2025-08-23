@@ -85,9 +85,9 @@ module.exports = async function (passport) {
           if (!iscorrect) {
             return done(null, false, { msg: "Wrong password" });
           }
-          /* await mongoose.connection.db.collection("sessions").deleteMany({
+           await mongoose.connection.db.collection("sessions").deleteMany({
             "session.passport.user": user._id.toString()
-          });*/
+          });
           return done(null, user);
         } catch (err) {
           return done(err);
